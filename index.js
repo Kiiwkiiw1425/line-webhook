@@ -7,7 +7,7 @@ app.use(bodyParser.json());
 
 const CHANNEL_ACCESS_TOKEN = 'yvWPTSHyhfRW+JI7hvSfcOiE7vxToQnbgGx55usPsQm2Mzp4csN0kmduznG/JW7Oop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cNKXD6p/2T10Fk4191reuPS5KYQSxfrdGd1oq6z7eN4CQdB04t89/1O/w1cDnyilFU='; // แก้ตรงนี้
 
-app.post('/webhook', async (req, res) => {
+app.post('/line-webhook', async (req, res) => {
   const events = req.body.events;
 
   for (let event of events) {
