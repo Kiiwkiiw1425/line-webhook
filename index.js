@@ -13,7 +13,8 @@ app.get('/', (req, res) => {
 });
 
 app.post('/line-webhook', async (req, res) => {
-  console.log('✅ ได้รับ Event จาก LINE:', JSON.stringify(req.body, null, 2));
+  console.log('🔔 webhook ถูกเรียกแล้ว');
+  /*console.log('✅ ได้รับ Event จาก LINE:', JSON.stringify(req.body, null, 2));*/
   const events = req.body.events;
 
   for (let event of events) {
