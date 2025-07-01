@@ -15,19 +15,25 @@ app.post('/line-webhook', async (req, res) => {
       const replyToken = event.replyToken;
       const userText = event.message.text.trim();
 
-      // สร้างข้อความตอบกลับ (Echo ข้อความกลับไป)
+      let replyText = '';
+
+      if (userText === 'การใช้งานระบบทั่วไป') {
+        replyText = 'นี่คือเมนูการใช้งานระบบทั่วไป: ...'; // ใส่ข้อความตอบกลับที่ต้องการ
+      } else {
+        replyText = `คุณพิมพ์ว่า: ${userText}`;
+      }
+
       const replyMessage = {
         replyToken: replyToken,
         messages: [
           {
             type: 'text',
-            text: `คุณพิมพ์ว่า: ${userText}`
+            text: replyText
           }
         ]
       };
 
       try {
-        // ส่ง reply message ไปยัง LINE Messaging API
         await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
           headers: {
             'Content-Type': 'application/json',
@@ -40,6 +46,5 @@ app.post('/line-webhook', async (req, res) => {
     }
   }
 
-  // ส่ง HTTP 200 OK กลับไปแจ้งว่า webhook รับข้อมูลเรียบร้อยแล้ว
   res.sendStatus(200);
 });
