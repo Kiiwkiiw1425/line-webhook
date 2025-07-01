@@ -15,176 +15,31 @@ app.post('/line-webhook', async (req, res) => {
       const replyToken = event.replyToken;
       const userText = event.message.text.trim();
 
-      let message;
+      // สร้างข้อความตอบกลับ (Echo ข้อความกลับไป)
+      const replyMessage = {
+        replyToken: replyToken,
+        messages: [
+          {
+            type: 'text',
+            text: `คุณพิมพ์ว่า: ${userText}`
+          }
+        ]
+      };
 
-      if (userText === 'การใช้งานระบบทั่วไป') {
-  message = {
-    type: 'flex',
-    altText: 'เมนู: การใช้งานระบบทั่วไป',
-    contents: {
-      type: 'carousel',
-      contents: [
-        {
-          type: 'bubble',
-          header: {
-            type: 'box',
-            layout: 'vertical',
-            contents: [
-              {
-                type: 'text',
-                text: 'เริ่มต้นใช้งาน',
-                weight: 'bold',
-                size: 'lg'
-              }
-            ]
-          },
-          body: {
-            type: 'box',
-            layout: 'vertical',
-            spacing: 'md',
-            contents: [
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'ลงทะเบียนใช้งานครั้งแรก',
-                  uri: 'https://example.com/register'
-                }
-              },
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'เปลี่ยนรหัส (จำรหัสได้)',
-                  uri: 'https://example.com/change-password'
-                }
-              }
-            ]
+      try {
+        // ส่ง reply message ไปยัง LINE Messaging API
+        await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
           }
-        },
-        {
-          type: 'bubble',
-          header: {
-            type: 'box',
-            layout: 'vertical',
-            contents: [
-              {
-                type: 'text',
-                text: 'เปลี่ยนรหัสผ่าน',
-                weight: 'bold',
-                size: 'lg'
-              }
-            ]
-          },
-          body: {
-            type: 'box',
-            layout: 'vertical',
-            spacing: 'md',
-            contents: [
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'ลืมรหัสผ่าน',
-                  uri: 'https://example.com/forgot-password'
-                }
-              },
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'ไม่มี OTP / ปิดหน้า',
-                  uri: 'https://example.com/no-otp'
-                }
-              }
-            ]
-          }
-        },
-        {
-          type: 'bubble',
-          header: {
-            type: 'box',
-            layout: 'vertical',
-            contents: [
-              {
-                type: 'text',
-                text: 'ปัญหาอีเมล',
-                weight: 'bold',
-                size: 'lg'
-              }
-            ]
-          },
-          body: {
-            type: 'box',
-            layout: 'vertical',
-            spacing: 'md',
-            contents: [
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'อีเมลเข้าไม่ได้',
-                  uri: 'https://example.com/email-issue'
-                }
-              },
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'แก้ไขโปรไฟล์/ดูประวัติ',
-                  uri: 'https://example.com/profile'
-                }
-              }
-            ]
-          }
-        },
-        {
-          type: 'bubble',
-          header: {
-            type: 'box',
-            layout: 'vertical',
-            contents: [
-              {
-                type: 'text',
-                text: 'การเข้าสู่ระบบ',
-                weight: 'bold',
-                size: 'lg'
-              }
-            ]
-          },
-          body: {
-            type: 'box',
-            layout: 'vertical',
-            spacing: 'md',
-            contents: [
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'เปลี่ยนบทบาทผู้ใช้งาน',
-                  uri: 'https://example.com/change-role'
-                }
-              },
-              {
-                type: 'button',
-                style: 'primary',
-                action: {
-                  type: 'uri',
-                  label: 'เข้าสู่ระบบด้วย THAID',
-                  uri: 'https://example.com/thaid-login'
-                }
-              }
-            ]
-          }
-        }
-      ]
+        });
+      } catch (error) {
+        console.error('Error sending reply:', error.response ? error.response.data : error.message);
+      }
     }
-  };
-}
+  }
+
+  // ส่ง HTTP 200 OK กลับไปแจ้งว่า webhook รับข้อมูลเรียบร้อยแล้ว
+  res.sendStatus(200);
+});
