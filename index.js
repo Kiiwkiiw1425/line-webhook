@@ -13,12 +13,51 @@ app.post('/webhook', async (req, res) => {
   for (let event of events) {
     if (event.type === 'message' && event.message.type === 'text') {
       const replyToken = event.replyToken;
-      const userText = event.message.text;
+      const userText = event.message.text.trim();
 
-      const message = {
-        type: 'text',
-        text: `คุณพิมพ์ว่า: ${userText}`
-      };
+      let message;
+
+      if (userText === 'การใช้งานระบบทั่วไป') {
+        message = {
+          type: 'flex',
+          altText: 'เมนูการใช้งานระบบทั่วไป',
+          contents: {
+            type: 'bubble',
+            header: {
+              type: 'box',
+              layout: 'vertical',
+              contents: [
+                {
+                  type: 'text',
+                  text: 'การใช้งานระบบทั่วไป',
+                  weight: 'bold',
+                  size: 'lg'
+                }
+              ]
+            },
+            body: {
+              type: 'box',
+              layout: 'vertical',
+              contents: [
+                {
+                  type: 'button',
+                  style: 'primary',
+                  action: {
+                    type: 'uri',
+                    label: 'เปิดคู่มือ',
+                    uri: 'https://example.com/manual'
+                  }
+                }
+              ]
+            }
+          }
+        };
+      } else {
+        message = {
+          type: 'text',
+          text: `คุณพิมพ์ว่า: ${userText}`
+        };
+      }
 
       await axios.post('https://api.line.me/v2/bot/message/reply', {
         replyToken: replyToken,
@@ -33,13 +72,4 @@ app.post('/webhook', async (req, res) => {
   }
 
   res.sendStatus(200);
-});
-
-app.get('/', (req, res) => {
-  res.send('Line Webhook Server is working!');
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on ${PORT}`);
 });
