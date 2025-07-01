@@ -13,8 +13,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/line-webhook', async (req, res) => {
-  console.log('🔔 webhook ถูกเรียกแล้ว');
-  /*console.log('✅ ได้รับ Event จาก LINE:', JSON.stringify(req.body, null, 2));*/
+  console.log('✅ ได้รับ Event จาก LINE:', JSON.stringify(req.body, null, 2));
   const events = req.body.events;
 
   for (let event of events) {
@@ -58,4 +57,8 @@ app.post('/line-webhook', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  
+    setInterval(() => {
+    console.log('⏰ Server is alive at', new Date().toLocaleTimeString());
+  }, 30000);
 });
