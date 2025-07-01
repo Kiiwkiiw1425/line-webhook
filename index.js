@@ -1,11 +1,11 @@
 const express = require('express');
 const axios = require('axios');
+const flexMessage = require('./flexMessage'); // ดึง flex message เข้ามา
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 10000;
-
 const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0dlWtv3wwe7tk2nop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cP5HhfarUGbsNymT7q9eu4GoXBv/hy3EO3iUl0jj2FsLwdB04t89/1O/w1cDnyilFU='; // แก้ตรงนี้
 
 app.get('/', (req, res) => {
@@ -21,33 +21,45 @@ app.post('/line-webhook', async (req, res) => {
       const replyToken = event.replyToken;
       const userText = event.message.text.trim();
 
-      let replyText = '';
+      // เงื่อนไขเรียกเมนูหมวดหมู่
+      if (userText === 'เมนูคู่มือ' || userText === 'menu') {
+        const replyMessage = {
+          replyToken,
+          messages: [flexMessage]
+        };
 
-      if (userText === 'การใช้งานระบบทั่วไป') {
-        replyText = 'นี่คือข้อมูลการใช้งานระบบทั่วไป:\n- ลงทะเบียนใช้งานครั้งแรก\n- เปลี่ยนรหัสผ่าน\n- ติดต่อฝ่ายสนับสนุน';
+        try {
+          await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`
+            }
+          });
+        } catch (error) {
+          console.error('❌ Error sending Flex reply:', error.response?.data || error.message);
+        }
       } else {
-        replyText = `คุณพิมพ์ว่า: ${userText}`;
-      }
+        // ตอบกลับข้อความทั่วไป
+        const replyMessage = {
+          replyToken,
+          messages: [
+            {
+              type: 'text',
+              text: `คุณพิมพ์ว่า: ${userText}`
+            }
+          ]
+        };
 
-      const replyMessage = {
-        replyToken,
-        messages: [
-          {
-            type: 'text',
-            text: replyText,
-          },
-        ],
-      };
-
-      try {
-        await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`,
-          },
-        });
-      } catch (error) {
-        console.error('Error sending reply:', error.response ? error.response.data : error.message);
+        try {
+          await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`
+            }
+          });
+        } catch (error) {
+          console.error('❌ Error sending text reply:', error.response?.data || error.message);
+        }
       }
     }
   }
@@ -57,8 +69,4 @@ app.post('/line-webhook', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  
-    setInterval(() => {
-    console.log('⏰ Server is alive at', new Date().toLocaleTimeString());
-  }, 30000);
 });
