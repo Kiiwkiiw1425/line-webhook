@@ -1,11 +1,16 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const axios = require('axios');
 
 const app = express();
-app.use(bodyParser.json());
+app.use(express.json());
+
+const PORT = process.env.PORT || 10000;
 
 const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0dlWtv3wwe7tk2nop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cP5HhfarUGbsNymT7q9eu4GoXBv/hy3EO3iUl0jj2FsLwdB04t89/1O/w1cDnyilFU='; // แก้ตรงนี้
+
+app.get('/', (req, res) => {
+  res.send('Server is running');
+});
 
 app.post('/line-webhook', async (req, res) => {
   const events = req.body.events;
@@ -47,4 +52,8 @@ app.post('/line-webhook', async (req, res) => {
   }
 
   res.sendStatus(200);
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
