@@ -18,27 +18,27 @@ app.post('/line-webhook', async (req, res) => {
       let replyText = '';
 
       if (userText === 'การใช้งานระบบทั่วไป') {
-        replyText = 'นี่คือเมนูการใช้งานระบบทั่วไป: ...'; // ใส่ข้อความตอบกลับที่ต้องการ
+        replyText = 'นี่คือข้อมูลการใช้งานระบบทั่วไป:\n- ลงทะเบียนใช้งานครั้งแรก\n- เปลี่ยนรหัสผ่าน\n- ติดต่อฝ่ายสนับสนุน';
       } else {
         replyText = `คุณพิมพ์ว่า: ${userText}`;
       }
 
       const replyMessage = {
-        replyToken: replyToken,
+        replyToken,
         messages: [
           {
             type: 'text',
-            text: replyText
-          }
-        ]
+            text: replyText,
+          },
+        ],
       };
 
       try {
         await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
-          }
+            Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`,
+          },
         });
       } catch (error) {
         console.error('Error sending reply:', error.response ? error.response.data : error.message);
