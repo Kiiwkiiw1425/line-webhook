@@ -1,4 +1,10 @@
-module.exports = {
+const flexMessage = {
+  type: 'flex',
+  altText: '📚 เมนูเลือกหมวดหมู่คู่มือ',
+  contents: {
+    type: 'carousel',
+    contents: [
+      {
   "type": "carousel",
   "contents": [
     {
@@ -188,4 +194,11 @@ module.exports = {
       }
     }
   ]
+}
+
+
+      
+    ]
+  }
 };
+module.exports = flexMessage;
