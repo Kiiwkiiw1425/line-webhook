@@ -1,7 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const { mainMenu, usageMenu } = require('./flexMessages');
+const { mainMenu, categoryMenus } = require('./flexMessages');
 
 const app = express();
 app.use(bodyParser.json());
@@ -13,24 +13,22 @@ app.post('/webhook', async (req, res) => {
   const events = req.body.events;
   for (const event of events) {
     if (event.type === 'message' && event.message.type === 'text') {
-      const userText = event.message.text;
+      const userText = event.message.text.trim();
       const replyToken = event.replyToken;
       let message;
 
       if (userText === 'เมนูหลัก' || userText === 'หมวดหมู่คู่มือ') {
         message = mainMenu;
-      } else if (userText === 'การใช้งานระบบทั่วไป') {
-        message = usageMenu;
-      }
-
-      if (message) {
-        await replyToLine(replyToken, message);
+      } else if (categoryMenus[userText]) {
+        message = categoryMenus[userText];
       } else {
-        await replyToLine(replyToken, {
+        message = {
           type: 'text',
           text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "เมนูหลัก" เพื่อเริ่มต้น'
-        });
+        };
       }
+
+      await replyToLine(replyToken, message);
     }
   }
   res.sendStatus(200);
