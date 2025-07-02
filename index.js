@@ -1,59 +1,50 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const axios = require('axios');
-const flexMessage = require('./flexMessage'); // <-- เมนู Flex
+const { mainMenu, usageMenu } = require('./flexMessages');
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 10000;
 const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0dlWtv3wwe7tk2nop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cP5HhfarUGbsNymT7q9eu4GoXBv/hy3EO3iUl0jj2FsLwdB04t89/1O/w1cDnyilFU=';// Channel Token
 
-app.post('/line-webhook', async (req, res) => {
+app.post('/webhook', async (req, res) => {
   const events = req.body.events;
-
-  for (let event of events) {
+  for (const event of events) {
     if (event.type === 'message' && event.message.type === 'text') {
+      const userText = event.message.text;
       const replyToken = event.replyToken;
-      const userText = event.message.text.trim();
+      let message;
 
-      let replyMessage;
-
-      if (userText === 'คู่มือการใช้งาน') {
-        // ตอบเมนู Flex Message
-        replyMessage = {
-          replyToken,
-          messages: [flexMessage]
-        };
-      } else {
-        // กรณีข้อความอื่น เช่นคลิกเมนูย่อย
-        replyMessage = {
-          replyToken,
-          messages: [
-            {
-              type: 'text',
-              text: `คุณเลือก: ${userText}`
-            }
-          ]
-        };
+      if (userText === 'เมนูหลัก' || userText === 'หมวดหมู่คู่มือ') {
+        message = mainMenu;
+      } else if (userText === 'การใช้งานระบบทั่วไป') {
+        message = usageMenu;
       }
 
-      try {
-        await axios.post('https://api.line.me/v2/bot/message/reply', replyMessage, {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`
-          }
-        });
-      } catch (error) {
-        console.error('❌ Error sending reply:', error.response?.data || error.message);
+      if (message) {
+        await replyMessage(replyToken, message);
       }
     }
   }
-
   res.sendStatus(200);
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+async function replyMessage(replyToken, message) {
+  const url = 'https://api.line.me/v2/bot/message/reply';
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`
+  };
+  const body = {
+    replyToken,
+    messages: [message]
+  };
+  await axios.post(url, body, { headers });
+}
 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+});
