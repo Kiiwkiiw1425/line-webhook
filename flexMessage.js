@@ -221,14 +221,14 @@ const usageMenu = {
           margin: 'lg',
           spacing: 'sm',
           contents: [
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '📌 ลงทะเบียนใช้งานครั้งแรก', text: 'ลงทะเบียนใช้งานครั้งแรก' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '🔑 เปลี่ยนรหัสผ่าน (จำรหัสได้)', text: 'เปลี่ยนรหัสผ่าน (จำรหัสได้)' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '🔀 เปลี่ยนรหัสผ่าน (ลืมรหัส)', text: 'เปลี่ยนรหัสผ่าน (ลืมรหัส)' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '📵 ไม่มี OTP / ปิดหน้ากรอก', text: 'เปลี่ยนรหัสผ่าน (ไม่มี OTP)' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '📧 อีเมลไม่ได้ รหัสผ่านขัดข้อง', text: 'เปลี่ยนรหัสผ่าน (อีเมลเข้าไม่ได้)' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '👤 แก้โปรไฟล์ & ดูกิจกรรม', text: 'แก้โปรไฟล์และดูกิจกรรม' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '🎭 เปลี่ยนบทบาทผู้ใช้งาน', text: 'เปลี่ยนบทบาทผู้ใช้งาน' } },
-            { type: 'button', style: 'secondary', action: { type: 'message', label: '🇹🇭 เข้าระบบด้วย THAID', text: 'เข้าสู่ระบบด้วย THAID' } }
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '📌 ลงทะเบียนใช้งานครั้งแรก', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX0QNBk-xCtAuJvgtZROkjwBdhmaMo5kGPz9KVggPe328Q?e=cOCn3k' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '🔑 เปลี่ยนรหัสผ่าน (จำรหัสได้)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EcOznyF3GF9Gqpt2cFRZS5IB8nHIaDuaX6hcrbeTaX9ssQ?e=4cQB7J' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '🔀 เปลี่ยนรหัสผ่าน (ลืมรหัส)', uri: 'https://example.com/manuals/change-password-forgot.pdf' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '📵 ไม่มี OTP / ปิดหน้ากรอก', uri: 'https://example.com/manuals/no-otp.pdf' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '📧 อีเมลไม่ได้ รหัสผ่านขัดข้อง', uri: 'https://example.com/manuals/email-error.pdf' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '👤 แก้โปรไฟล์ & ดูกิจกรรม', uri: 'https://example.com/manuals/profile-activity.pdf' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '🎭 เปลี่ยนบทบาทผู้ใช้งาน', uri: 'https://example.com/manuals/role-switch.pdf' } },
+            { type: 'button', style: 'secondary', action: { type: 'uri', label: '🇹🇭 เข้าระบบด้วย THAID', uri: 'https://example.com/manuals/thaid-login.pdf' } }
           ]
         }
       ]
