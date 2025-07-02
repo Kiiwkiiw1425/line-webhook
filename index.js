@@ -17,14 +17,12 @@ app.post('/webhook', async (req, res) => {
       const replyToken = event.replyToken;
       let message;
 
-      // ตรวจสอบคำสั่ง
       if (userText === 'เมนูหลัก' || userText === 'หมวดหมู่คู่มือ') {
         message = mainMenu;
       } else if (userText === 'การใช้งานระบบทั่วไป') {
         message = usageMenu;
       }
 
-      // ตอบกลับถ้ามี message
       if (message) {
         await replyToLine(replyToken, message);
       }
@@ -46,7 +44,6 @@ async function replyToLine(replyToken, message) {
   await axios.post(url, body, { headers });
 }
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
