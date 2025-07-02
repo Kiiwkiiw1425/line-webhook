@@ -102,11 +102,11 @@ const mainMenu = {
 
 const categoryMenus = {
   'การใช้งานระบบทั่วไป': createSubmenu('🔧 การใช้งานระบบทั่วไป', [
-    { label: '📌 ลงทะเบียนใช้งาน DPIS6', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX0QNBk-xCtAuJvgtZROkjwBdhmaMo5kGPz9KVggPe328Q?e=cOCn3k' },
-    { label: '🔑 เปลี่ยนรหัสผ่าน (จำรหัสได้)', uri: 'https://example.com/manuals/pass-remember.pdf' },
+    { label: '📌 ลงทะเบียนใช้งาน DPIS6', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX0QNBk-xCtAuJvgtZROkjwBdhmaMo5kGPz9KVggPe328Q?e=cOCn3k&web=1' },
+    { label: '🔑 เปลี่ยนรหัสผ่าน (จำรหัสได้)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EerK3yQLC-VJqOaw8ECO1PoBdXNkfrxpAbBglOijpn_KlA?e=FFJdEP' },
     { label: '🔀 เปลี่ยนรหัสผ่าน (ลืมรหัส)', uri: 'https://example.com/manuals/pass-forgot.pdf' },
-    { label: '📵 ไม่ได้ OTP / ปิดหน้า', uri: 'https://example.com/manuals/no-otp.pdf' },
-    { label: '📧 อีเมลไม่ได้', uri: 'https://example.com/manuals/email-issue.pdf' },
+    { label: '📵 ไม่ได้ OTP / ปิดหน้าต่าง', uri: 'https://example.com/manuals/no-otp.pdf' },
+    { label: '📧 จำรหัสและอีเมลไม่ได้', uri: 'https://example.com/manuals/email-issue.pdf' },
     { label: '👤 จัดการโปรไฟล์', uri: 'https://example.com/manuals/profile.pdf' },
     { label: '🎭 เปลี่ยนบทบาท', uri: 'https://example.com/manuals/role-switch.pdf' },
     { label: '🇹🇭 เข้าด้วย ThaiID', uri: 'https://example.com/manuals/thaid.pdf' }
