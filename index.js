@@ -45,7 +45,12 @@ async function replyToLine(replyToken, message) {
     replyToken,
     messages: [message]
   };
-  await axios.post(url, body, { headers });
+
+  try {
+    await axios.post(url, body, { headers });
+  } catch (error) {
+    console.error('LINE Reply Error:', error.response?.data || error.message);
+  }
 }
 
 app.listen(PORT, () => {
