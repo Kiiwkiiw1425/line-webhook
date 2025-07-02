@@ -17,25 +17,27 @@ app.post('/webhook', async (req, res) => {
       const replyToken = event.replyToken;
       let message;
 
+      // ตรวจสอบคำสั่ง
       if (userText === 'เมนูหลัก' || userText === 'หมวดหมู่คู่มือ') {
         message = mainMenu;
       } else if (userText === 'การใช้งานระบบทั่วไป') {
         message = usageMenu;
       }
 
+      // ตอบกลับถ้ามี message
       if (message) {
-        await replyMessage(replyToken, message);
+        await replyToLine(replyToken, message);
       }
     }
   }
   res.sendStatus(200);
 });
 
-async function replyMessage(replyToken, message) {
+async function replyToLine(replyToken, message) {
   const url = 'https://api.line.me/v2/bot/message/reply';
   const headers = {
     'Content-Type': 'application/json',
-    Authorization: `Bearer ${CHANNEL_ACCESS_TOKEN}`
+    'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
   };
   const body = {
     replyToken,
