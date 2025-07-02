@@ -23,7 +23,9 @@ app.post('/webhook', async (req, res) => {
         message = usageMenu;
       }
 
-      else {
+      if (message) {
+        await replyToLine(replyToken, message);
+      } else {
         await replyToLine(replyToken, {
           type: 'text',
           text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "เมนูหลัก" เพื่อเริ่มต้น'
