@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 10000;
 const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0dlWtv3wwe7tk2nop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cP5HhfarUGbsNymT7q9eu4GoXBv/hy3EO3iUl0jj2FsLwdB04t89/1O/w1cDnyilFU=';// Channel Token
 
 app.post('/webhook', async (req, res) => {
+  console.log(JSON.stringify(req.body, null, 2));
   const events = req.body.events;
   for (const event of events) {
     if (event.type === 'message' && event.message.type === 'text') {
