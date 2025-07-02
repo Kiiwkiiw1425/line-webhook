@@ -18,14 +18,14 @@ app.post('/line-webhook', async (req, res) => {
       const replyToken = event.replyToken;
       let message;
 
-      if (userText === 'เมนูหลัก' || userText === 'หมวดหมู่คู่มือ') {
+      if (userText === 'คู่มือการใช้งาน' || userText === 'คู่มือ') {
         message = mainMenu;
       } else if (categoryMenus[userText]) {
         message = categoryMenus[userText];
       } else {
         message = {
           type: 'text',
-          text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "เมนูหลัก" เพื่อเริ่มต้น'
+          text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "คู่มือการใช้งาน" เพื่อเริ่มต้น'
         };
       }
 
