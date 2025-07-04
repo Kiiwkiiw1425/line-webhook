@@ -30,14 +30,15 @@ app.post('/line-webhook', async (req, res) => {
         if (matched && categoryMenus[matched]) {
           message = categoryMenus[matched];
         } else {
-          // ไม่กำหนด message = ... เมื่อไม่พบเมนู
           message = null;
         }
       }
-      
+
       if (message) {
-        await replyToLine(replyToken, message); // ถ้า message เป็น null จะไม่ตอบกลับเลย
+        await replyToLine(replyToken, message);
       }
+    }
+  }
 
   res.sendStatus(200);
 });
