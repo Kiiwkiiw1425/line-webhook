@@ -17,7 +17,8 @@ const fileNameToThaiName = {
   Evaluation: 'การประเมินผล',
   ImportExport: 'นำเข้า/ส่งออกข้อมูล',
   Budget: 'บริหารวงเงิน',
-  Other: 'อื่นๆ'
+  Other: 'อื่นๆ',
+  Application : 'แอปพลิเคชัน'
 };
 
 fs.readdirSync(manualDir).forEach(file => {
