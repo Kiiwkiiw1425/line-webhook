@@ -108,75 +108,12 @@ const mainMenu = {
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '✅ การประเมินผล', text: 'การประเมินผล' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '📥 นำเข้า/ส่งออกข้อมูล', text: 'นำเข้า/ส่งออกข้อมูล' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '💰 บริหารวงเงิน', text: 'บริหารวงเงิน' } },
-                { type: 'button', style: 'secondary', action: { type: 'message', label: '📖 อื่นๆ', text: 'อื่นๆ' } },
-                { type: 'button', style: 'secondary', action: { type: 'message', label: '📱 แอปพลิเคชัน', text: 'แอปพลิเคชัน' } }
-              ]
-            }
-          ]
-        }
-      },
-
-      // 🆘 บับเบิลช่วยเหลือ
-      {
-        type: 'bubble',
-        size: 'mega',
-        body: {
-          type: 'box',
-          layout: 'vertical',
-          spacing: 'md',
-          paddingAll: '20px',
-          contents: [
-            {
-              type: 'text',
-              text: '🆘 ช่วยเหลือ',
-              weight: 'bold',
-              size: 'xl',
-              color: '#B71C1C'
-            },
-            {
-              type: 'box',
-              layout: 'vertical',
-              spacing: 'sm',
-              contents: [
-                { type: 'button', style: 'primary', color: '#F44336', action: { type: 'uri', label: '📄 คำถามที่พบบ่อย', uri: 'https://yourdomain.com/faq' } },
-                { type: 'button', style: 'primary', color: '#FF7043', action: { type: 'message', label: '💬 ติดต่อแอดมิน', text: 'แอดมิน' } }
-              ]
-            }
-          ]
-        }
-      },
-
-      // 🛠 บับเบิลอัปเดตระบบ
-      {
-        type: 'bubble',
-        size: 'mega',
-        body: {
-          type: 'box',
-          layout: 'vertical',
-          spacing: 'md',
-          paddingAll: '20px',
-          contents: [
-            {
-              type: 'text',
-              text: '🛠 การอัปเดตระบบ',
-              weight: 'bold',
-              size: 'xl',
-              color: '#33691E'
-            },
-            {
-              type: 'box',
-              layout: 'vertical',
-              spacing: 'sm',
-              contents: [
-                { type: 'button', style: 'primary', color: '#689F38', action: { type: 'uri', label: '📅 อัปเดตประจำวัน', uri: 'https://yourdomain.com/daily-updates' } },
-                { type: 'button', style: 'primary', color: '#558B2F', action: { type: 'uri', label: '📡 สถานะใช้งาน DPIS6', uri: 'https://yourdomain.com/dpis-status' } }
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📖 อื่นๆ', text: 'อื่นๆ' } }
               ]
             }
           ]
         }
       }
-    ]
-  }
 };
 
 // รวม manual ทั้งหมด
