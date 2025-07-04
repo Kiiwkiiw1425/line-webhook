@@ -2,16 +2,39 @@ const fs = require('fs');
 const path = require('path');
 
 const categoryMenus = {};
-
 const manualDir = __dirname;
+
+// Mapping จากชื่อไฟล์ (ไม่ต้องมี 'manual' และ '.js') → ชื่อหมวดภาษาไทย
+const fileNameToThaiName = {
+  UsageGeneral: 'การใช้งานระบบทั่วไป',
+  SystemSetting: 'ตั้งค่าระบบและนโยบาย',
+  Personnel: 'ข้อมูลบุคลากร',
+  Permission: 'สิทธิการใช้งาน',
+  Leave: 'การลา',
+  Structure: 'โครงสร้าง/ตำแหน่ง',
+  Command: 'คำสั่ง',
+  Report: 'รายงาน',
+  Evaluation: 'การประเมินผล',
+  ImportExport: 'นำเข้า/ส่งออกข้อมูล',
+  Budget: 'บริหารวงเงิน',
+  Other: 'อื่นๆ'
+};
 
 fs.readdirSync(manualDir).forEach(file => {
   if (file !== 'index.js' && file.endsWith('.js')) {
     const manual = require(path.join(manualDir, file));
-    // ใช้ชื่อไฟล์ (ตัดคำว่า manual และ .js ออก) เป็น key
-    const name = manual.altText?.replace(/^เมนู\s*"?|"?$/g, '').trim();
-    if (name) {
-      categoryMenus[name] = manual;
+
+    // ตัด prefix และนามสกุลไฟล์ → manualUsageGeneral.js → UsageGeneral
+    const baseName = file
+      .replace(/^manual/, '') // ลบ manual หน้าไฟล์
+      .replace(/\.js$/, '');  // ลบ .js
+
+    const thaiName = fileNameToThaiName[baseName];
+
+    if (thaiName) {
+      categoryMenus[thaiName] = manual;
+    } else {
+      console.warn(`⚠️ ไม่พบ mapping สำหรับไฟล์ ${file} (${baseName})`);
     }
   }
 });
