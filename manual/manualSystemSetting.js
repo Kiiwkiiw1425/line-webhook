@@ -1,15 +1,14 @@
 // manualSystemSetting.js
 const createSubmenu = require('../utils/createSubmenu');
 
-const systemSettingManual = createSubmenu('🔧 การใช้งานระบบทั่วไป', [
-  { label: '📌 ลงทะเบียนใช้งาน DPIS6', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX0QNBk-xCtAuJvgtZROkjwBdhmaMo5kGPz9KVggPe328Q?e=fGxFt5&web=1' },
-  { label: '🔑 เปลี่ยนรหัสผ่าน (จำรหัสได้)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EerK3yQLC-VJqOaw8ECO1PoBdXNkfrxpAbBglOijpn_KlA?e=8c9npa&download=1&web=1' },
-  { label: '🔀 เปลี่ยนรหัสผ่าน (ลืมรหัส)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EdDGHR_YxSNLnUh1xwFAGKkB2cKODsuPzLzBLAoAA8bj0A?e=rPG5ah' },
-  { label: '📵 ไม่ได้ OTP / ปิดหน้าต่าง', uri: 'https://example.com/manuals/no-otp.pdf' },
-  { label: '📧 จำรหัสและอีเมลไม่ได้', uri: 'https://example.com/manuals/email-issue.pdf' },
-  { label: '👤 จัดการโปรไฟล์', uri: 'https://example.com/manuals/profile.pdf' },
-  { label: '🎭 เปลี่ยนบทบาท', uri: 'https://example.com/manuals/role-switch.pdf' },
-  { label: '🇹🇭 เข้าด้วย ThaiID', uri: 'https://example.com/manuals/thaid.pdf' }
+const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบและนโยบาย', [
+  {label: '📅 ตั้งค่าปีงบประมาณ (ผู้ดูแลระบบ)',uri: 'https://example.com/manuals/fiscal-year-setting.pdf'},
+  {label: '🎛 ตั้งค่าการแสดงผลของโปรแกรม',uri: 'https://example.com/manuals/ui-config.pdf'},
+  {label: '📂 ตั้งค่าเมนูด้านข้าง (Sidebar)',uri: 'https://example.com/manuals/sidebar-setting.pdf'},
+  {label: '🖥 ตรวจสอบเครื่องแม่ข่าย & อัปเดต',uri: 'https://example.com/manuals/server-check-update.pdf'},
+  {label: '📜 ปรับปรุงนโยบายการใช้งาน',uri: 'https://example.com/manuals/policy-update.pdf'},
+  {label: '🧹 ลบไฟล์ Back Up ป้องกันไดรฟ์เต็ม',uri: 'https://example.com/manuals/clean-backup.pdf'},
+  {label: '⚙ ตั้งค่าตัวแปรระบบ (System Config)',uri: 'https://example.com/manuals/system-config.pdf'}
 ]);
 
 module.exports = systemSettingManual;
