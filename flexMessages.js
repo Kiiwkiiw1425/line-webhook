@@ -1,5 +1,4 @@
-//flexMessages.js
-
+// flexMessages.js
 const usageGeneralManual = require('./manual/manualUsageGeneral');
 const systemSettingManual = require('./manual/manualSystemSetting');
 const personnelManual = require('./manual/manualPersonnel');
@@ -12,6 +11,7 @@ const evaluationManual = require('./manual/manualEvaluation');
 const importExportManual = require('./manual/manualImportExport');
 const budgetManual = require('./manual/manualBudget');
 const otherManual = require('./manual/manualOther');
+const applicationManual = require('./manual/manualApplication');
 
 const mainMenu = {
   type: 'flex',
@@ -19,6 +19,7 @@ const mainMenu = {
   contents: {
     type: 'carousel',
     contents: [
+      // 🔹 บับเบิล 1
       {
         type: 'bubble',
         size: 'mega',
@@ -49,6 +50,8 @@ const mainMenu = {
           ]
         }
       },
+
+      // 🔹 บับเบิล 2
       {
         type: 'bubble',
         size: 'mega',
@@ -79,6 +82,8 @@ const mainMenu = {
           ]
         }
       },
+
+      // 🔹 บับเบิล 3
       {
         type: 'bubble',
         size: 'mega',
@@ -103,7 +108,68 @@ const mainMenu = {
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '✅ การประเมินผล', text: 'การประเมินผล' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '📥 นำเข้า/ส่งออกข้อมูล', text: 'นำเข้า/ส่งออกข้อมูล' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '💰 บริหารวงเงิน', text: 'บริหารวงเงิน' } },
-                { type: 'button', style: 'secondary', action: { type: 'message', label: '📖 อื่นๆ', text: 'อื่นๆ' } }
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📖 อื่นๆ', text: 'อื่นๆ' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📱 แอปพลิเคชัน', text: 'แอปพลิเคชัน' } }
+              ]
+            }
+          ]
+        }
+      },
+
+      // 🆘 บับเบิลช่วยเหลือ
+      {
+        type: 'bubble',
+        size: 'mega',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'md',
+          paddingAll: '20px',
+          contents: [
+            {
+              type: 'text',
+              text: '🆘 ช่วยเหลือ',
+              weight: 'bold',
+              size: 'xl',
+              color: '#B71C1C'
+            },
+            {
+              type: 'box',
+              layout: 'vertical',
+              spacing: 'sm',
+              contents: [
+                { type: 'button', style: 'primary', color: '#F44336', action: { type: 'uri', label: '📄 คำถามที่พบบ่อย', uri: 'https://yourdomain.com/faq' } },
+                { type: 'button', style: 'primary', color: '#FF7043', action: { type: 'message', label: '💬 ติดต่อแอดมิน', text: 'แอดมิน' } }
+              ]
+            }
+          ]
+        }
+      },
+
+      // 🛠 บับเบิลอัปเดตระบบ
+      {
+        type: 'bubble',
+        size: 'mega',
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'md',
+          paddingAll: '20px',
+          contents: [
+            {
+              type: 'text',
+              text: '🛠 การอัปเดตระบบ',
+              weight: 'bold',
+              size: 'xl',
+              color: '#33691E'
+            },
+            {
+              type: 'box',
+              layout: 'vertical',
+              spacing: 'sm',
+              contents: [
+                { type: 'button', style: 'primary', color: '#689F38', action: { type: 'uri', label: '📅 อัปเดตประจำวัน', uri: 'https://yourdomain.com/daily-updates' } },
+                { type: 'button', style: 'primary', color: '#558B2F', action: { type: 'uri', label: '📡 สถานะใช้งาน DPIS6', uri: 'https://yourdomain.com/dpis-status' } }
               ]
             }
           ]
@@ -113,7 +179,7 @@ const mainMenu = {
   }
 };
 
-// รวม manual ทั้ง 12 หมวดไว้ในออบเจกต์เดียว
+// รวม manual ทั้งหมด
 const categoryMenus = {
   'การใช้งานระบบทั่วไป': usageGeneralManual,
   'ตั้งค่าระบบและนโยบาย': systemSettingManual,
@@ -126,7 +192,8 @@ const categoryMenus = {
   'การประเมินผล': evaluationManual,
   'นำเข้า/ส่งออกข้อมูล': importExportManual,
   'บริหารวงเงิน': budgetManual,
-  'อื่นๆ': otherManual
+  'อื่นๆ': otherManual,
+  'แอปพลิเคชัน': applicationManual
 };
 
 module.exports = {
