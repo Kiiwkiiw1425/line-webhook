@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual'); // ✅ โหลดหมวดหมู่
+const categoryMenus = require('./manual'); // ✅ โหลดทุกหมวดจาก manual/
 const matchCategory = require('./utils/matchCategory'); // ✅ โหลดฟังก์ชันจับคำใกล้เคียง
 
 const app = express();
