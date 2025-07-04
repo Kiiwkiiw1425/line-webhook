@@ -12,6 +12,5 @@ const usageGeneralManual = createSubmenu('🔧 การใช้งานระ
   { label: '🇹🇭 เข้าด้วย ThaiID', uri: 'https://example.com/manuals/thaid.pdf' }
 ]);
 
-module.exports = {
-  usageGeneralManual
-};
+module.exports = usageGeneralManual;
+
