@@ -19,7 +19,6 @@ const mainMenu = {
   contents: {
     type: 'carousel',
     contents: [
-      // 🔹 บับเบิล 1
       {
         type: 'bubble',
         size: 'mega',
@@ -47,9 +46,11 @@ const mainMenu = {
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '🔐 สิทธิการใช้งาน', text: 'สิทธิการใช้งาน' } }
               ]
             }
+          ]
+        }
       },
 
-      // 🔹 บับเบิล 2
+      // Bubble 2 ต่อเลย
       {
         type: 'bubble',
         size: 'mega',
@@ -81,7 +82,7 @@ const mainMenu = {
         }
       },
 
-      // 🔹 บับเบิล 3
+      // Bubble 3
       {
         type: 'bubble',
         size: 'mega',
@@ -112,6 +113,8 @@ const mainMenu = {
           ]
         }
       }
+    ]
+  }
 };
 
 // รวม manual ทั้งหมด
