@@ -19,7 +19,11 @@ function createSubmenu(title, items) {
             contents: items.map(item => ({
               type: 'button',
               style: 'secondary',
-              action: { type: 'uri', label: item.label, uri: item.uri }
+              action: {
+                type: 'uri',
+                label: item.label,
+                uri: item.uri
+              }
             }))
           }
         ]
@@ -29,4 +33,3 @@ function createSubmenu(title, items) {
 }
 
 module.exports = createSubmenu;
-
