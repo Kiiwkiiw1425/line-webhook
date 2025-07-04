@@ -4,7 +4,7 @@ const path = require('path');
 const categoryMenus = {};
 const manualDir = __dirname;
 
-// Mapping จากชื่อไฟล์ (ไม่ต้องมี 'manual' และ '.js') → ชื่อหมวดภาษาไทย
+// Mapping จากชื่อไฟล์ (ตัด 'manual' และ '.js') → ชื่อหมวดภาษาไทย
 const fileNameToThaiName = {
   UsageGeneral: 'การใช้งานระบบทั่วไป',
   SystemSetting: 'ตั้งค่าระบบและนโยบาย',
@@ -18,7 +18,9 @@ const fileNameToThaiName = {
   ImportExport: 'นำเข้า/ส่งออกข้อมูล',
   Budget: 'บริหารวงเงิน',
   Other: 'อื่นๆ',
-  Application : 'แอปพลิเคชัน'
+  Application: 'แอปพลิเคชัน',
+  Help: 'ช่วยเหลือ',
+  Update: 'การอัปเดตระบบ'
 };
 
 fs.readdirSync(manualDir).forEach(file => {
