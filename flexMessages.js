@@ -1,5 +1,15 @@
-// flexMessages.js
-const categoryMenus = require('./manual');
+const { usageGeneralManual } = require('./manual/manualUsageGeneral');
+const { systemSettingManual } = require('./manual/manualSystemSetting');
+const { personnelManual } = require('./manual/manualPersonnel');
+const { permissionManual } = require('./manual/manualPermission');
+const { leaveManual } = require('./manual/manualLeave');
+const { structureManual } = require('./manual/manualStructure');
+const { commandManual } = require('./manual/manualCommand');
+const { reportManual } = require('./manual/manualReport');
+const { evaluationManual } = require('./manual/manualEvaluation');
+const { importExportManual } = require('./manual/manualImportExport');
+const { budgetManual } = require('./manual/manualBudget');
+const { otherManual } = require('./manual/manualOther');
 
 const mainMenu = {
   type: 'flex',
@@ -101,35 +111,21 @@ const mainMenu = {
   }
 };
 
-function createSubmenu(title, items) {
-  return {
-    type: 'flex',
-    altText: `เมนู "${title}"`,
-    contents: {
-      type: 'bubble',
-      size: 'mega',
-      body: {
-        type: 'box',
-        layout: 'vertical',
-        spacing: 'md',
-        paddingAll: '20px',
-        contents: [
-          { type: 'text', text: title, weight: 'bold', size: 'xl', color: '#1F2E55' },
-          {
-            type: 'box',
-            layout: 'vertical',
-            spacing: 'sm',
-            contents: items.map(item => ({
-              type: 'button',
-              style: 'secondary',
-              action: { type: 'uri', label: item.label, uri: item.uri }
-            }))
-          }
-        ]
-      }
-    }
-  };
-}
+// รวม manual ทั้ง 12 หมวดไว้ในออบเจกต์เดียว
+const categoryMenus = {
+  'การใช้งานระบบทั่วไป': usageGeneralManual,
+  'ตั้งค่าระบบและนโยบาย': systemSettingManual,
+  'ข้อมูลบุคลากร': personnelManual,
+  'สิทธิการใช้งาน': permissionManual,
+  'การลา': leaveManual,
+  'โครงสร้าง/ตำแหน่ง': structureManual,
+  'คำสั่ง': commandManual,
+  'รายงาน': reportManual,
+  'การประเมินผล': evaluationManual,
+  'นำเข้า/ส่งออกข้อมูล': importExportManual,
+  'บริหารวงเงิน': budgetManual,
+  'อื่นๆ': otherManual
+};
 
 module.exports = {
   mainMenu,
