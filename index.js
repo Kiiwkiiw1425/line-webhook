@@ -1,13 +1,14 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const { mainMenu, categoryMenus } = require('./flexMessages');
+const { mainMenu } = require('./flexMessages');
+const categoryMenus = require('./manual'); // ✅ โหลดหมวดจาก manual/index.js
 
 const app = express();
 app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 10000;
-const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0dlWtv3wwe7tk2nop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cP5HhfarUGbsNymT7q9eu4GoXBv/hy3EO3iUl0jj2FsLwdB04t89/1O/w1cDnyilFU=';// Channel Token
+const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0dlWtv3wwe7tk2nop4OPcjdIs+0hxFiYtbVTLNfRnzaa2tso5NUakO/3cP5HhfarUGbsNymT7q9eu4GoXBv/hy3EO3iUl0jj2FsLwdB04t89/1O/w1cDnyilFU=';
 
 app.post('/line-webhook', async (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
