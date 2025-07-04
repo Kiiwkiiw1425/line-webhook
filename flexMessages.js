@@ -1,5 +1,5 @@
 // flexMessages.js
-const { usageGeneralManual } = require('./manualUsageGeneral');
+const categoryMenus = require('./manual');
 
 const mainMenu = {
   type: 'flex',
