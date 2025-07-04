@@ -30,16 +30,14 @@ app.post('/line-webhook', async (req, res) => {
         if (matched && categoryMenus[matched]) {
           message = categoryMenus[matched];
         } else {
-          message = {
-            type: 'text',
-            text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "คู่มือการใช้งาน" เพื่อเริ่มต้น'
-          };
+          // ไม่กำหนด message = ... เมื่อไม่พบเมนู
+          message = null;
         }
       }
-
-      await replyToLine(replyToken, message);
-    }
-  }
+      
+      if (message) {
+        await replyToLine(replyToken, message); // ถ้า message เป็น null จะไม่ตอบกลับเลย
+      }
 
   res.sendStatus(200);
 });
