@@ -2,7 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual'); // ✅ โหลดหมวดจาก manual/index.js
+const categoryMenus = require('./manual'); // ✅ โหลดหมวดหมู่
+const matchCategory = require('./utils/matchCategory'); // ✅ โหลดฟังก์ชันจับคำใกล้เคียง
 
 const app = express();
 app.use(bodyParser.json());
@@ -13,6 +14,7 @@ const CHANNEL_ACCESS_TOKEN = 'LTvTIQbvACnHATlxrtwRxWjas16JaJ92+0BF9hD8ikIDMMvVB0
 app.post('/line-webhook', async (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
   const events = req.body.events;
+
   for (const event of events) {
     if (event.type === 'message' && event.message.type === 'text') {
       const userText = event.message.text.trim();
@@ -24,15 +26,21 @@ app.post('/line-webhook', async (req, res) => {
       } else if (categoryMenus[userText]) {
         message = categoryMenus[userText];
       } else {
-        message = {
-          type: 'text',
-          text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "คู่มือการใช้งาน" เพื่อเริ่มต้น'
-        };
+        const matched = matchCategory(userText);
+        if (matched && categoryMenus[matched]) {
+          message = categoryMenus[matched];
+        } else {
+          message = {
+            type: 'text',
+            text: '❌ ไม่พบเมนูที่คุณพิมพ์ กรุณาพิมพ์ "คู่มือการใช้งาน" เพื่อเริ่มต้น'
+          };
+        }
       }
 
       await replyToLine(replyToken, message);
     }
   }
+
   res.sendStatus(200);
 });
 
@@ -42,6 +50,7 @@ async function replyToLine(replyToken, message) {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
   };
+
   const body = {
     replyToken,
     messages: [message]
