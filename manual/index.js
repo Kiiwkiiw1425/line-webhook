@@ -1,29 +1,19 @@
-const usageGeneral = require('./manualUsageGeneral');
-const systemSetting = require('./manualSystemSetting');
-const personnel = require('./manualPersonnel');
-const permission = require('./manualPermission');
-const leave = require('./manualLeave');
-const structure = require('./manualStructure');
-const command = require('./manualCommand');
-const report = require('./manualReport');
-const evaluation = require('./manualEvaluation');
-const dataImportExport = require('./manualImportExport');
-const budget = require('./manualBudget');
-const other = require('./manualOther');
+const fs = require('fs');
+const path = require('path');
 
-const categoryMenus = {
-  'การใช้งานระบบทั่วไป': usageGeneral,
-  'ตั้งค่าระบบและนโยบาย': systemSetting,
-  'ข้อมูลบุคลากร': personnel,
-  'สิทธิการใช้งาน': permission,
-  'การลา': leave,
-  'โครงสร้าง/ตำแหน่ง': structure,
-  'คำสั่ง': command,
-  'รายงาน': report,
-  'การประเมินผล': evaluation,
-  'นำเข้า/ส่งออกข้อมูล': dataImportExport,
-  'บริหารวงเงิน': budget,
-  'อื่นๆ': other
-};
+const categoryMenus = {};
+
+const manualDir = __dirname;
+
+fs.readdirSync(manualDir).forEach(file => {
+  if (file !== 'index.js' && file.endsWith('.js')) {
+    const manual = require(path.join(manualDir, file));
+    // ใช้ชื่อไฟล์ (ตัดคำว่า manual และ .js ออก) เป็น key
+    const name = manual.altText?.replace(/^เมนู\s*"?|"?$/g, '').trim();
+    if (name) {
+      categoryMenus[name] = manual;
+    }
+  }
+});
 
 module.exports = categoryMenus;
