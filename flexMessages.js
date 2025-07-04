@@ -1,3 +1,5 @@
+//flexMessages.js
+
 const usageGeneralManual = require('./manual/manualUsageGeneral');
 const systemSettingManual = require('./manual/manualSystemSetting');
 const personnelManual = require('./manual/manualPersonnel');
