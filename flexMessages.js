@@ -1,4 +1,4 @@
-const { usageGeneralManual } = require('./manual/manualUsageGeneral');
+const usageGeneralManual = require('./manual/manualUsageGeneral');
 const { systemSettingManual } = require('./manual/manualSystemSetting');
 const { personnelManual } = require('./manual/manualPersonnel');
 const { permissionManual } = require('./manual/manualPermission');
