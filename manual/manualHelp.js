@@ -46,7 +46,6 @@ module.exports = {
             {
               type: 'text',
               text: '💬 ติดต่อแอดมิน',
-              weight: 'bold',
               color: '#FFFFFF',
               size: 'md'
             }
