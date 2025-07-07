@@ -21,7 +21,7 @@ module.exports = {
         {
           type: 'button',
           style: 'primary',
-          color: '#F44336',
+          color: '#FF7043',
           action: {
             type: 'uri',
             label: '📄 คำถามที่พบบ่อย',
