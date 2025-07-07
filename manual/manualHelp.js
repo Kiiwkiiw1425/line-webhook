@@ -9,38 +9,25 @@ module.exports = {
       layout: 'vertical',
       spacing: 'lg',
       paddingAll: '20px',
-      backgroundColor: '#FFF8F6',
+      backgroundColor: '#F9FBE7', // พื้นหลังสีเขียวอ่อน
       contents: [
         {
           type: 'text',
           text: '🆘 เมนูช่วยเหลือ',
           weight: 'bold',
           size: 'xl',
-          color: '#B71C1C',
+          color: '#1B5E20', // เขียวเข้ม
           align: 'center'
         },
         {
-          type: 'box',
-          layout: 'vertical',
-          backgroundColor: '#FF7043',
-          cornerRadius: 'md',
-          paddingAll: '12px',
-          justifyContent: 'center',
-          alignItems: 'center',
+          type: 'button',
+          style: 'primary',
+          color: '#558B2F', // เขียวเข้มสำหรับปุ่ม
           action: {
             type: 'uri',
             label: '📄 คำถามที่พบบ่อย',
-            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%84%E0%B8%B3%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%9E%E0%B8%9A%E0%B8%9A%E0%B8%AD%E0%B8%A2-faq?authuser=0'
-          },
-          contents: [
-            {
-              type: 'text',
-              text: '📄 คำถามที่พบบ่อย',
-              weight: 'bold',
-              color: '#FFFFFF',
-              size: 'md'
-            }
-          ]
+            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%84%E0%B8%B3%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B5%E0%B9%88%E0%B8%9E%E0%B8%9A%E0%B8%9A%E0%B9%88%E0%B8%AD%E0%B8%A2-faq'
+          }
         },
         {
           type: 'box',
