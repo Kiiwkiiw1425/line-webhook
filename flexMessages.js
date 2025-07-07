@@ -27,6 +27,7 @@ const mainMenu = {
           layout: 'vertical',
           spacing: 'sm',
           paddingAll: '20px',
+          backgroundColor: '#f2f2f2',
           contents: [
             {
               type: 'text',
