@@ -24,6 +24,9 @@ module.exports = {
           layout: 'vertical',
           backgroundColor: '#FF7043',
           cornerRadius: 'md',
+          paddingAll: '12px',
+          justifyContent: 'center',
+          alignItems: 'center',
           action: {
             type: 'uri',
             label: '📄 คำถามที่พบบ่อย',
