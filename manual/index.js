@@ -19,8 +19,8 @@ const fileNameToThaiName = {
   Budget: 'บริหารวงเงิน',
   Other: 'อื่นๆ',
   Application: 'แอปพลิเคชัน',
-  Help: 'ช่วยเหลือ',
-  Update: 'การอัปเดตระบบ'
+  d6-Help: 'ช่วยเหลือ',
+  d6-Update: 'การอัปเดตระบบ'
 };
 
 fs.readdirSync(manualDir).forEach(file => {
