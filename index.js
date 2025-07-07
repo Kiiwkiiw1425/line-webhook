@@ -2,8 +2,10 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual'); // ✅ โหลดทุกหมวดจาก manual/
-const matchCategory = require('./utils/matchCategory'); // ✅ โหลดฟังก์ชันจับคำใกล้เคียง
+const categoryMenus = require('./manual'); // โหลดทุกหมวดจาก manual/
+const matchCategory = require('./utils/matchCategory'); // โหลดฟังก์ชันจับคำใกล้เคียง
+const d6Help = require('./manual/d6-Help');
+const d6Update = require('./manual/d6-Update');
 
 const app = express();
 app.use(bodyParser.json());
