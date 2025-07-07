@@ -10,16 +10,8 @@ function createSubmenu(title, items) {
         layout: 'vertical',
         spacing: 'md',
         paddingAll: '20px',
-        backgroundColor: '#FFFFFF',
         contents: [
-          {
-            type: 'text',
-            text: title,
-            weight: 'bold',
-            size: 'xl',
-            color: '#1F2E55',
-            align: 'center'
-          },
+          { type: 'text', text: title, weight: 'bold', size: 'xl', color: '#1F2E55' },
           {
             type: 'box',
             layout: 'vertical',
@@ -28,8 +20,6 @@ function createSubmenu(title, items) {
               type: 'button',
               style: 'secondary',
               height: 'sm', // ปรับความสูง
-              color: '#F0A04B',
-              margin: 'sm',
               action: {
                 type: 'uri',
                 label: item.label,
