@@ -10,7 +10,7 @@ function createSubmenu(title, items) {
         layout: 'vertical',
         spacing: 'md',
         paddingAll: '20px',
-        backgroundColor: '#F9FBE7', // เพิ่มพื้นหลังสบายตา
+        backgroundColor: '#FFFFFF',
         contents: [
           {
             type: 'text',
@@ -27,8 +27,8 @@ function createSubmenu(title, items) {
             contents: items.map(item => ({
               type: 'button',
               style: 'secondary',
-              height: 'sm', // ปรับให้สูงพอดี
-              color: '#8BC34A', // สีเขียวอ่อน (หรือเปลี่ยนได้)
+              height: 'sm', // ปรับความสูง
+              color: '#f7f7f7', // สีเทาอ่อน
               margin: 'sm',
               action: {
                 type: 'uri',
