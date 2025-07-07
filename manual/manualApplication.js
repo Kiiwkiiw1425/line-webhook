@@ -16,13 +16,13 @@ module.exports = {
           text: '📱 ดาวน์โหลด Mobile App',
           weight: 'bold',
           size: 'xl',
-          color: '#1B5E20', // เขียวเข้ม
+          color: '#1F2E55', 
           align: 'center'
         },
         {
           type: 'button',
           style: 'primary',
-          color: '#558B2F', // เขียวเข้มสำหรับปุ่ม
+          color: '#F0A04B',
           action: {
             type: 'uri',
             label: '📲 โหลดบน iOS (App Store)',
@@ -32,7 +32,7 @@ module.exports = {
         {
           type: 'button',
           style: 'primary',
-          color: '#558B2F', // เขียวเข้มสำหรับปุ่ม
+          color: '#F0A04B', //
           action: {
             type: 'uri',
             label: '📲 โหลดบน Android (Play Store)',
