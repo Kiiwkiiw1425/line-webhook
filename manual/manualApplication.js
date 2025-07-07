@@ -1,28 +1,22 @@
-// manual/manualApplication.js
-
-module.exports = {
-  type: 'flex',
-  altText: 'เมนู "แอปพลิเคชันมือถือ"',
-  contents: {
-    type: 'bubble',
-    size: 'mega',
-    body: {
+body: {
       type: 'box',
       layout: 'vertical',
       spacing: 'lg',
       paddingAll: '20px',
+      backgroundColor: '#F9FBE7', // พื้นหลังสีเขียวอ่อน
       contents: [
         {
           type: 'text',
           text: '📱 ดาวน์โหลด Mobile App',
           weight: 'bold',
           size: 'xl',
-          color: '#1F2E55',
+          color: '#1B5E20', // เขียวเข้ม
           align: 'center'
         },
         {
           type: 'button',
           style: 'primary',
+          color: '#558B2F', // เขียวเข้มสำหรับปุ่ม
           action: {
             type: 'uri',
             label: '📲 โหลดบน iOS (App Store)',
@@ -31,7 +25,8 @@ module.exports = {
         },
         {
           type: 'button',
-          style: 'secondary',
+          style: 'primary',
+          color: '#558B2F', // เขียวเข้มสำหรับปุ่ม
           action: {
             type: 'uri',
             label: '📲 โหลดบน Android (Play Store)',
@@ -41,4 +36,3 @@ module.exports = {
       ]
     }
   }
-};
