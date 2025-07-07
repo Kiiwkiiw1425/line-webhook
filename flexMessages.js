@@ -12,6 +12,8 @@ const importExportManual = require('./manual/manualImportExport');
 const budgetManual = require('./manual/manualBudget');
 const otherManual = require('./manual/manualOther');
 const applicationManual = require('./manual/manualApplication');
+const d6Help = require('./manual/d6-Help');
+const d6Update = require('./manual/d6-Update');
 
 const mainMenu = {
   type: 'flex',
