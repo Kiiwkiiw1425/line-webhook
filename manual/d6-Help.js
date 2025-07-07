@@ -25,7 +25,7 @@ module.exports = {
           action: {
             type: 'uri',
             label: '📄 คำถามที่พบบ่อย',
-            uri: 'https://yourdomain.com/faq'
+            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%84%E0%B8%B3%E0%B8%96%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%9E%E0%B8%9A%E0%B8%9A%E0%B8%AD%E0%B8%A2-faq?authuser=0'
           }
         },
         {
