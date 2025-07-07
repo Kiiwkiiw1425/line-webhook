@@ -1,3 +1,18 @@
+// flexMessages.js
+const usageGeneralManual = require('./manual/manualUsageGeneral');
+const systemSettingManual = require('./manual/manualSystemSetting');
+const personnelManual = require('./manual/manualPersonnel');
+const permissionManual = require('./manual/manualPermission');
+const leaveManual = require('./manual/manualLeave');
+const structureManual = require('./manual/manualStructure');
+const commandManual = require('./manual/manualCommand');
+const reportManual = require('./manual/manualReport');
+const evaluationManual = require('./manual/manualEvaluation');
+const importExportManual = require('./manual/manualImportExport');
+const budgetManual = require('./manual/manualBudget');
+const otherManual = require('./manual/manualOther');
+const applicationManual = require('./manual/manualApplication');
+
 const mainMenu = {
   type: 'flex',
   altText: '📚 เมนูเลือกหมวดหมู่คู่มือ',
