@@ -9,19 +9,20 @@ module.exports = {
       layout: 'vertical',
       spacing: 'lg',
       paddingAll: '20px',
+      backgroundColor: '#F9FBE7', //พื้นหลังสีเขียวอ่อน
       contents: [
         {
           type: 'text',
           text: '🛠 การอัปเดตระบบ',
           weight: 'bold',
           size: 'xl',
-          color: '#33691E',
+          color: '#1B5E20', //เขียวเข้ม อ่านง่าย
           align: 'center'
         },
         {
           type: 'button',
           style: 'primary',
-          color: '#B1C29E',
+          color: '#558B2F', //เขียวเข้มสำหรับปุ่ม
           action: {
             type: 'uri',
             label: '📅 อัปเดตประจำวัน',
@@ -29,11 +30,20 @@ module.exports = {
           }
         },
         {
-          type: 'text',
-          text: '📡 สถานะใช้งาน DPIS6',
-          size: 'sm',
-          color: '#AAAAAA',
-          align: 'center'
+          type: 'box',
+          layout: 'vertical',
+          paddingAll: '10px',
+          backgroundColor: '#EEEEEE', //สีเทาอ่อน
+          cornerRadius: 'md',
+          contents: [
+            {
+              type: 'text',
+              text: '📡 สถานะใช้งาน DPIS6 (ยังไม่เปิดใช้งาน)',
+              size: 'sm',
+              color: '#555555',
+              align: 'center'
+            }
+          ]
         }
       ]
     }
