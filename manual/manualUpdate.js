@@ -21,7 +21,7 @@ module.exports = {
         {
           type: 'button',
           style: 'primary',
-          color: '#689F38',
+          color: '#FADA7A',
           action: {
             type: 'uri',
             label: '📅 อัปเดตประจำวัน',
@@ -31,7 +31,7 @@ module.exports = {
         {
           type: 'button',
           style: 'secondary',
-          color: '#558B2F',
+          color: '#FADA7A',
           action: {
             type: 'uri',
             label: '📡 สถานะใช้งาน DPIS6',
