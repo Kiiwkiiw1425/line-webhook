@@ -25,7 +25,7 @@ const mainMenu = {
         body: {
           type: 'box',
           layout: 'vertical',
-          spacing: 'md',
+          spacing: 'sm',
           paddingAll: '20px',
           contents: [
             {
@@ -57,7 +57,7 @@ const mainMenu = {
         body: {
           type: 'box',
           layout: 'vertical',
-          spacing: 'md',
+          spacing: 'sm',
           paddingAll: '20px',
           contents: [
             {
@@ -89,7 +89,7 @@ const mainMenu = {
         body: {
           type: 'box',
           layout: 'vertical',
-          spacing: 'md',
+          spacing: 'sm',
           paddingAll: '20px',
           contents: [
             {
