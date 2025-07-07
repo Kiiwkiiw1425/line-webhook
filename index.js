@@ -2,17 +2,20 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual'); // โหลดเมนูย่อย
-const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
+const categoryMenus = require('./manual'); // โหลดทุกหมวดจาก manual/
+const matchCategory = require('./utils/matchCategory'); // โหลดฟังก์ชันจับคำใกล้เคียง
 
 const app = express();
 app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 10000;
-const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN;
+const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN; // ใช้จาก .env หรือ Render
+
+// เก็บเวลาผู้ใช้ตอบล่าสุด (userId => timestamp)
+const userLastActive = new Map();
 
 // ฟังก์ชันส่งข้อความตอบกลับ LINE
-async function replyToLine(replyToken, messages) {
+async function replyToLine(replyToken, message) {
   const url = 'https://api.line.me/v2/bot/message/reply';
   const headers = {
     'Content-Type': 'application/json',
@@ -21,7 +24,7 @@ async function replyToLine(replyToken, messages) {
 
   const body = {
     replyToken,
-    messages: Array.isArray(messages) ? messages : [messages]
+    messages: [message]
   };
 
   try {
@@ -31,9 +34,9 @@ async function replyToLine(replyToken, messages) {
   }
 }
 
-// ฟังก์ชันสร้าง Flex Message ถาม "คุณได้รับข้อมูลครบถ้วนหรือยัง?"
-function createCheckInfoFlex() {
-  return {
+// ฟังก์ชันส่ง Flex Message แบบเล็ก ถาม "คุณได้รับข้อมูลครบถ้วนหรือยัง?"
+async function sendCheckInfoFlex(replyToken) {
+  const flexMessage = {
     type: 'flex',
     altText: 'คุณได้รับข้อมูลครบถ้วนหรือยัง?',
     contents: {
@@ -77,9 +80,10 @@ function createCheckInfoFlex() {
       }
     }
   };
+
+  await replyToLine(replyToken, flexMessage);
 }
 
-// Webhook สำหรับรับข้อความจาก LINE
 app.post('/line-webhook', async (req, res) => {
   console.log(JSON.stringify(req.body, null, 2));
   const events = req.body.events || [];
@@ -88,8 +92,12 @@ app.post('/line-webhook', async (req, res) => {
     if (event.type === 'message' && event.message.type === 'text') {
       const userText = event.message.text.trim();
       const replyToken = event.replyToken;
+      const userId = event.source.userId;
 
-      let message = null;
+      // บันทึกเวลาผู้ใช้ตอบล่าสุด
+      userLastActive.set(userId, Date.now());
+
+      let message;
 
       if (userText === 'คู่มือการใช้งาน' || userText === 'คู่มือ') {
         message = mainMenu;
@@ -99,21 +107,26 @@ app.post('/line-webhook', async (req, res) => {
         const matched = matchCategory(userText);
         if (matched && categoryMenus[matched]) {
           message = categoryMenus[matched];
+        } else {
+          message = null;
         }
       }
 
       if (message) {
-        // ✅ ส่ง Flex เมนูหลัก + ข้อความสอบถามในรอบเดียว
-        await replyToLine(replyToken, [
-          message,
-          createCheckInfoFlex()
-        ]);
-      } else {
-        await replyToLine(replyToken, {
-          type: 'text',
-          text: 'ขออภัย ไม่พบหมวดหมู่ที่คุณต้องการ กรุณาลองใหม่อีกครั้ง หรือพิมพ์ "คู่มือ" เพื่อดูเมนูหลักครับ'
-        });
+        await replyToLine(replyToken, message);
       }
+
+      // ตั้ง Timeout 1 นาที หลังผู้ใช้ตอบข้อความ เพื่อเช็ค inactivity
+      setTimeout(async () => {
+        const lastActive = userLastActive.get(userId) || 0;
+        if (Date.now() - lastActive >= 40000) {
+          try {
+            await sendCheckInfoFlex(replyToken);
+          } catch (err) {
+            console.error('Error sending check info flex:', err);
+          }
+        }
+      }, 60000);
     }
   }
 
