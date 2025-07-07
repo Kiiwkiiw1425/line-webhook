@@ -9,7 +9,7 @@ module.exports = {
       layout: 'vertical',
       spacing: 'lg',
       paddingAll: '20px',
-      backgroundColor: '#F9FBE7', // พื้นหลังสีเขียวอ่อน
+      backgroundColor: '#FFFFFF', // พื้นหลังสีขาว
       contents: [
         {
           type: 'text',
