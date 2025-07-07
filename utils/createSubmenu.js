@@ -17,7 +17,7 @@ function createSubmenu(title, items) {
             text: title,
             weight: 'bold',
             size: 'xl',
-            color: '#1B5E20',
+            color: '#1F2E55',
             align: 'center'
           },
           {
