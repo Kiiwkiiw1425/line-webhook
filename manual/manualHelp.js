@@ -36,20 +36,20 @@ module.exports = {
             {
               type: 'text',
               text: '📄 คำถามที่พบบ่อย',
-              align: 'center',
               weight: 'bold',
               color: '#FFFFFF',
-              size: 'md',
-              margin: 'md'
+              size: 'md'
             }
-          ],
-          paddingAll: '12px'
+          ]
         },
         {
           type: 'box',
           layout: 'vertical',
           backgroundColor: '#FF7043',
           cornerRadius: 'md',
+          paddingAll: '12px',
+          justifyContent: 'center',
+          alignItems: 'center',
           action: {
             type: 'message',
             label: '💬 ติดต่อแอดมิน',
@@ -59,14 +59,11 @@ module.exports = {
             {
               type: 'text',
               text: '💬 ติดต่อแอดมิน',
-              align: 'center',
               weight: 'bold',
               color: '#FFFFFF',
-              size: 'md',
-              margin: 'md'
+              size: 'md'
             }
-          ],
-          paddingAll: '12px'
+          ]
         }
       ]
     }
