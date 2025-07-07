@@ -29,13 +29,12 @@ module.exports = {
           }
         },
         {
-          type: 'button',
+          type: 'text',
           style: 'secondary',
           color: '#B1C29E',
           action: {
             type: 'uri',
             label: '📡 สถานะใช้งาน DPIS6',
-            uri: ''
           }
         }
       ]
