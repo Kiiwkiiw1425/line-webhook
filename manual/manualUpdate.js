@@ -35,7 +35,7 @@ module.exports = {
           action: {
             type: 'uri',
             label: '📡 สถานะใช้งาน DPIS6',
-            uri: 'https://yourdomain.com/dpis-status'
+            uri: ''
           }
         }
       ]
