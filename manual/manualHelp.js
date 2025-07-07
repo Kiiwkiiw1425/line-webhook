@@ -32,7 +32,7 @@ module.exports = {
         {
           type: 'box',
           layout: 'vertical',
-          backgroundColor: '#FF7043',
+          backgroundColor: '#558B2F',
           cornerRadius: 'md',
           paddingAll: '12px',
           justifyContent: 'center',
