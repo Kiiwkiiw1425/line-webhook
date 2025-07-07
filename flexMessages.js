@@ -19,7 +19,6 @@ const mainMenu = {
   contents: {
     type: 'carousel',
     contents: [
-      // Bubble 1
       {
         type: 'bubble',
         size: 'mega',
@@ -28,32 +27,30 @@ const mainMenu = {
           layout: 'vertical',
           spacing: 'md',
           paddingAll: '20px',
-          backgroundColor: '#FFFFFF', // พื้นหลังเขียวอ่อน
           contents: [
             {
               type: 'text',
               text: '📚 เลือกหมวดหมู่คู่มือ',
               weight: 'bold',
               size: 'xl',
-              color: '#1F2E55', // เขียวเข้ม
-              align: 'center'
+              color: '#1F2E55'
             },
             {
               type: 'box',
               layout: 'vertical',
               spacing: 'sm',
               contents: [
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '🖥 การใช้งานระบบทั่วไป', text: 'การใช้งานระบบทั่วไป' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '⚙ ตั้งค่าระบบและนโยบาย', text: 'ตั้งค่าระบบและนโยบาย' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '👤 ข้อมูลบุคลากร', text: 'ข้อมูลบุคลากร' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '🔐 สิทธิการใช้งาน', text: 'สิทธิการใช้งาน' } }
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '🖥 การใช้งานระบบทั่วไป', text: 'การใช้งานระบบทั่วไป' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '⚙ ตั้งค่าระบบและนโยบาย', text: 'ตั้งค่าระบบและนโยบาย' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '👤 ข้อมูลบุคลากร', text: 'ข้อมูลบุคลากร' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '🔐 สิทธิการใช้งาน', text: 'สิทธิการใช้งาน' } }
               ]
             }
           ]
         }
       },
 
-      // Bubble 2
+      // Bubble 2 ต่อเลย
       {
         type: 'bubble',
         size: 'mega',
@@ -62,25 +59,23 @@ const mainMenu = {
           layout: 'vertical',
           spacing: 'md',
           paddingAll: '20px',
-          backgroundColor: '#F9FBE7',
           contents: [
             {
               type: 'text',
               text: '📚 หมวดหมู่เพิ่มเติม',
               weight: 'bold',
               size: 'xl',
-              color: '#1F2E55',
-              align: 'center'
+              color: '#1F2E55'
             },
             {
               type: 'box',
               layout: 'vertical',
               spacing: 'sm',
               contents: [
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '📆 การลา', text: 'การลา' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '🏢 โครงสร้าง/ตำแหน่ง', text: 'โครงสร้าง/ตำแหน่ง' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '📄 คำสั่ง', text: 'คำสั่ง' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '📊 รายงาน', text: 'รายงาน' } }
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📆 การลา', text: 'การลา' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '🏢 โครงสร้าง/ตำแหน่ง', text: 'โครงสร้าง/ตำแหน่ง' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📄 คำสั่ง', text: 'คำสั่ง' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📊 รายงาน', text: 'รายงาน' } }
               ]
             }
           ]
@@ -96,25 +91,23 @@ const mainMenu = {
           layout: 'vertical',
           spacing: 'md',
           paddingAll: '20px',
-          backgroundColor: '#F9FBE7',
           contents: [
             {
               type: 'text',
               text: '📚 หมวดหมู่เพิ่มเติม',
               weight: 'bold',
               size: 'xl',
-              color: '#1F2E55',
-              align: 'center'
+              color: '#1F2E55'
             },
             {
               type: 'box',
               layout: 'vertical',
               spacing: 'sm',
               contents: [
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '✅ การประเมินผล', text: 'การประเมินผล' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '📥 นำเข้า/ส่งออกข้อมูล', text: 'นำเข้า/ส่งออกข้อมูล' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '💰 บริหารวงเงิน', text: 'บริหารวงเงิน' } },
-                { type: 'button', style: 'secondary', color: '#F0A04B', action: { type: 'message', label: '📖 อื่นๆ', text: 'อื่นๆ' } }
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '✅ การประเมินผล', text: 'การประเมินผล' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📥 นำเข้า/ส่งออกข้อมูล', text: 'นำเข้า/ส่งออกข้อมูล' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '💰 บริหารวงเงิน', text: 'บริหารวงเงิน' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📖 อื่นๆ', text: 'อื่นๆ' } }
               ]
             }
           ]
@@ -122,4 +115,26 @@ const mainMenu = {
       }
     ]
   }
+};
+
+// รวม manual ทั้งหมด
+const categoryMenus = {
+  'การใช้งานระบบทั่วไป': usageGeneralManual,
+  'ตั้งค่าระบบและนโยบาย': systemSettingManual,
+  'ข้อมูลบุคลากร': personnelManual,
+  'สิทธิการใช้งาน': permissionManual,
+  'การลา': leaveManual,
+  'โครงสร้าง/ตำแหน่ง': structureManual,
+  'คำสั่ง': commandManual,
+  'รายงาน': reportManual,
+  'การประเมินผล': evaluationManual,
+  'นำเข้า/ส่งออกข้อมูล': importExportManual,
+  'บริหารวงเงิน': budgetManual,
+  'อื่นๆ': otherManual,
+  'แอปพลิเคชัน': applicationManual
+};
+
+module.exports = {
+  mainMenu,
+  categoryMenus
 };
