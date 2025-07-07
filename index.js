@@ -119,7 +119,7 @@ app.post('/line-webhook', async (req, res) => {
       // ตั้ง Timeout 1 นาที หลังผู้ใช้ตอบข้อความ เพื่อเช็ค inactivity
       setTimeout(async () => {
         const lastActive = userLastActive.get(userId) || 0;
-        if (Date.now() - lastActive >= 60000) {
+        if (Date.now() - lastActive >= 40000) {
           try {
             await sendCheckInfoFlex(replyToken);
           } catch (err) {
