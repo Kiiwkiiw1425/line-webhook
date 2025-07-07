@@ -16,13 +16,13 @@ module.exports = {
           text: '🆘 เมนูช่วยเหลือ',
           weight: 'bold',
           size: 'xl',
-          color: '#1B5E20', // เขียวเข้ม
+          color: '#1F2E55', // เขียวเข้ม
           align: 'center'
         },
         {
           type: 'button',
           style: 'primary',
-          color: '#558B2F', // เขียวเข้มสำหรับปุ่ม
+          color: '#F0A04B', // เขียวเข้มสำหรับปุ่ม
           action: {
             type: 'uri',
             label: '📄 คำถามที่พบบ่อย',
@@ -32,7 +32,7 @@ module.exports = {
         {
           type: 'box',
           layout: 'vertical',
-          backgroundColor: '#558B2F',
+          backgroundColor: '#F0A04B',
           cornerRadius: 'md',
           paddingAll: '12px',
           justifyContent: 'center',
