@@ -28,7 +28,7 @@ function createSubmenu(title, items) {
               type: 'button',
               style: 'secondary',
               height: 'sm', // ปรับความสูง
-              color: '#f7f7f7', // สีเทาอ่อน
+              color: '#c9c9c9', // สีเทาอ่อน
               margin: 'sm',
               action: {
                 type: 'uri',
