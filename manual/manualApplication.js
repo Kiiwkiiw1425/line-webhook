@@ -1,4 +1,10 @@
-body: {
+module.exports = {
+  type: 'flex',
+  altText: '📱 ดาวน์โหลด Mobile App',
+  contents: {
+    type: 'bubble',
+    size: 'mega',
+    body: {
       type: 'box',
       layout: 'vertical',
       spacing: 'lg',
@@ -36,3 +42,4 @@ body: {
       ]
     }
   }
+};
