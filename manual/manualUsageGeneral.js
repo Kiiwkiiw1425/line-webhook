@@ -3,6 +3,7 @@ const createSubmenu = require('../utils/createSubmenu');
 
 const usageGeneralManual = createSubmenu('🔧 การใช้งานระบบทั่วไป', [
   { label: '📌 ลงทะเบียนใช้งาน DPIS6', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX0QNBk-xCtAuJvgtZROkjwBdhmaMo5kGPz9KVggPe328Q?e=fGxFt5&web=1' },
+  { label: '📌 Login ด้วยเลขบัตรประชาชนหรือEmail', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EcrLBWlSB1BLu71YVdkTV4MBb-tJSYy1fPp9bMrdFb07AQ?e=8mjA34&web=1' },  
   { label: '🔑 เปลี่ยนรหัสผ่าน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EcOznyF3GF9Gqpt2cFRZS5IB8nHIaDuaX6hcrbeTaX9ssQ?e=K1Mhnd&web=1' },
   { label: '🔑 เปลี่ยนรหัสผ่าน (จำรหัสได้)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EerK3yQLC-VJqOaw8ECO1PoBdXNkfrxpAbBglOijpn_KlA?e=8c9npa&download=1&web=1' },
   { label: '🔑 เปลี่ยนรหัสผ่าน (ลืมรหัส)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EerK3yQLC-VJqOaw8ECO1PoBdXNkfrxpAbBglOijpn_KlA?e=aELSQ5&web=1' },
