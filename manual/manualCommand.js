@@ -1,5 +1,5 @@
 const createSubmenu = require('../utils/createSubmenu');
-const commandManual = createSubmenu('📄 คำสั่ง/บัญชีแนบท้าย', [
+const commandManual = createSubmenu('📄 บัญชีแนบท้าย/คำสั่ง', [
   {label: '📥 บรรจุ/แต่งตั้ง/รับโอน)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ece90tBH6XZBheUQuKRKv7gBu-1mqL9VnrXgMAceGoiAqQ?e=cPm4lX'},
   {label: '⬆ เลื่อนระดับ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EZlzRhhGeydAo9arIXWo0-IBWgw5O2ypYIwQCod1qzN6SA?e=3Xdv5F'},
   {label: '🚪 ให้โอน/พ้นจากราชการ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EWFIwsokAWZBpvPmMLQHHW4Bd37JAFgp6NPD5Fs31wqIYQ?e=LGj3TD'},
