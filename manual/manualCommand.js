@@ -9,6 +9,7 @@ const commandManual = createSubmenu('📄 คำสั่ง/บัญชีแ�
   {label: '⚖ รักษาการแทน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eeg9dRrUqAxMr9me8X_X2LkB8n1M0NHA24nxFmqMCJ2B2w?e=iJMh6Z'},
   {label: '⚖ มอบหมายงาน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQ1NK04ZG0hLsswPIz7gThEBvBih1r7NkUQerQasWhHCtA?e=mRjWPe'},
   {label: '💵 คำสั่งเงินเดือน ว9/2567', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EUpCeWNf6IRFsUiPKhnJm7kBGRax8FJF1I7t-aXxyjAhwg?e=m8KSaZ'},
-  {label: '📝 ยกเลิก/แก้ไขคำสั่ง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXpwo3HG1YBOshHmDi0VZOoBa58I3CeiOo4_pZbhYcoTCg?e=mEghxZ'}
+  {label: '📝 ยกเลิก/แก้ไขคำสั่ง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXpwo3HG1YBOshHmDi0VZOoBa58I3CeiOo4_pZbhYcoTCg?e=mEghxZ'},
+  {label: '📝 รวมขั้นตอนการบรรจุข้าราชการ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXOayl9HHalEte5rd_-RY0kBB4tMn9JXImfngsf-vVmpHw?e=V1lxwl'}
 ]);
 module.exports = commandManual;
