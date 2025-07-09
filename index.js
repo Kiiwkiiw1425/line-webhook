@@ -70,6 +70,11 @@ app.post('/line-webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
+// ping endpoint
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
