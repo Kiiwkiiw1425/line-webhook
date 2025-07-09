@@ -9,6 +9,7 @@ const leaveManual = createSubmenu('📆 การลา', [
   {label: '⏱ ขอลงเวลา (Mobile)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQmW2QkzcPJHopnN1Po_rjEBGssZvvNDb70w8zb75ZyWlg?e=c4ddcU'},
   {label: '✅ อนุมัติการลา (Mobile)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EdYxEq3lIXhJvCbjUa3nrBYB0jWkgE0cH-6w6EW-ZYt9TA?e=eCp1Vk'},
   {label: '🗃 อนุมัติคำร้อง (Mobile)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ER2nFZsDatZDhyLMT1YUScIB5V6dzq_nCtTZzMJYa2aEbQ?e=3HQA8u'},
-  {label: '❌ ยกเลิกคำขอลา (Mobile)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ET7cRnqDBV1Ivwjl_xtuEMEB-aEyVEjl2WiY3DPqwR-1QA?e=JZBXTO'}
+  {label: '❌ ยกเลิกคำขอลา (Mobile)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ET7cRnqDBV1Ivwjl_xtuEMEB-aEyVEjl2WiY3DPqwR-1QA?e=JZBXTO'},
+  {label: '📅 กําหนดผู้มีสิทธิอนุญาตลา', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EWbDCcOF-_1MswbUfuvamzIBmuSVygVkqZVUa-Ek22RsPQ?e=MAzaC3'}
 ]);
 module.exports = leaveManual;
