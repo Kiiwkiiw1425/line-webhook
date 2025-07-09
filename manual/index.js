@@ -12,7 +12,7 @@ const fileNameToThaiName = {
   Permission: 'สิทธิการใช้งาน',
   Leave: 'การลา',
   Structure: 'โครงสร้าง/ตำแหน่ง',
-  Command: 'คำสั่ง',
+  Command: 'บัญชีแนบท้าย/คำสั่ง',
   Report: 'รายงาน',
   Evaluation: 'การประเมินผล',
   ImportExport: 'นำเข้า/ส่งออกข้อมูล',
