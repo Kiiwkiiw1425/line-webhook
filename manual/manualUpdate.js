@@ -26,7 +26,7 @@ module.exports = {
           action: {
             type: 'uri',
             label: '📅 อัปเดตประจำวัน',
-            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-dpis6'
+            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%AD%E0%B8%9B%E0%B9%80%E0%B8%94%E0%B8%95%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-dpis?authuser=0'
           }
         },
         {
@@ -36,7 +36,7 @@ module.exports = {
           action: {
             type: 'uri',
             label: '📡 สถานะใช้งาน DPIS6',
-            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-dpis6'
+            uri: 'https://sites.google.com/view/manual-dpis6/%E0%B8%81%E0%B8%B2%E0%B8%A3%E0%B9%83%E0%B8%8A%E0%B8%87%E0%B8%B2%E0%B8%99%E0%B8%A3%E0%B8%B0%E0%B8%9A%E0%B8%9A-dpis6?authuser=0'
           }
         }
       ]
