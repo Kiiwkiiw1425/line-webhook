@@ -74,7 +74,7 @@ const mainMenu = {
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '📆 การลา', text: 'การลา' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '🏢 โครงสร้าง/ตำแหน่ง', text: 'โครงสร้าง/ตำแหน่ง' } },
-                { type: 'button', style: 'secondary', action: { type: 'message', label: '📄 คำสั่ง', text: 'คำสั่ง' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '📄 คำสั่ง/บัญชีแนบท้าย', text: 'คำสั่ง/บัญชีแนบท้าย' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '📊 รายงาน', text: 'รายงาน' } }
               ]
             }
@@ -125,7 +125,7 @@ const categoryMenus = {
   'สิทธิการใช้งาน': permissionManual,
   'การลา': leaveManual,
   'โครงสร้าง/ตำแหน่ง': structureManual,
-  'คำสั่ง': commandManual,
+  'คำสั่ง/บัญชีแนบท้าย': commandManual,
   'รายงาน': reportManual,
   'การประเมินผล': evaluationManual,
   'นำเข้า/ส่งออกข้อมูล': importExportManual,
