@@ -30,7 +30,7 @@ for (const [category, keywords] of Object.entries(keywordMap)) {
 
 const fuse = new Fuse(fuseData, {
   keys: ['keyword'],
-  threshold: 0.4,
+  threshold: 0.3,
   includeScore: true
 });
 
