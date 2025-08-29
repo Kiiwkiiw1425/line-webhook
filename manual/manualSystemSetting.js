@@ -1,7 +1,8 @@
 // manualSystemSetting.js
 const createSubmenu = require('../utils/createSubmenu');
+const submanualLoginSettings = require('./submanual_LoginSettings'); // เรียกใช้ไฟล์ใหม่
 
-const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบและนโยบาย', [
+const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ/นโยบาย', [
   { label: '📅 ตั้งค่าปีงบประมาณ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EeSoPNxLh2NMtFshuOcjc4sBVs7Ss-XEHTj-35vqOpseGA?e=DgvI05' },
   { label: '🎛 ตั้งค่าการแสดงผล', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EbfdRWo8ZAhLswTJaGVc3DAByLf3slS4Jo6jhfU3nb6ioA?e=qEV0E5' },
   { label: '📂 ตั้งค่าเมนูด้านข้าง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX3c2jyd86NNhZCZv1NkjrUBETX5q1TES_pykD262K650g?e=19QKV2' },
@@ -9,8 +10,8 @@ const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ
   { label: '📜 ปรับปรุงนโยบาย', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ed4r5bp3Ap1Fr8LK8KGErOMBgVPlBaXUk_AQaHEErg6u_g?e=CjXos3' },
   { label: '🧹 ลบไฟล์ Back Up', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eb_nifk3pItFti6lPXZ_54kBhoeATNtBtt47_DSMURd1lA?e=FGrHG3' },
   { label: '⚙ ตั้งค่าตัวแปรระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ES02TRgtHwVOuVN2B9oemDABsCSn3ZS2BVOyLBHK4lPwDQ?e=HvDcKU' },
-  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ (Email หรือ ID Card)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ETwgTtbDg4RPrFi17YEDaNMB-yv0px0wBfYaa20WixK0lg?e=mvHDgk' },
-  { label: '🔒 รูปแบบการเข้าสู่ระบบ2', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eade9U6fhGlJpMkLyu1ssqIBwG38O0vBGkQ4UVhKJHzFFw?e=l0yOcG' }
+  // เปลี่ยนเป็นเรียกใช้ไฟล์ใหม่ที่ import เข้ามา
+  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ', submenu: submanualLoginSettings }
 ]);
 
 module.exports = systemSettingManual;
