@@ -120,7 +120,7 @@ const mainMenu = {
 // รวม manual ทั้งหมด
 const categoryMenus = {
   'การใช้งานระบบทั่วไป': usageGeneralManual,
-  'ตั้งค่าระบบ': systemSettingManual,
+  'ตั้งค่าระบบ/นโยบาย': systemSettingManual,
   'ข้อมูลบุคลากร': personnelManual,
   'สิทธิการใช้งาน': permissionManual,
   'การลา': leaveManual,
