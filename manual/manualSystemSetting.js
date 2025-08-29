@@ -8,7 +8,11 @@ const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ
   { label: '🖥 ตรวจสอบระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EY3TZQuCwb1Lu_dTIyh7s30B8IQZT3N_FnkKn5tawOtn5g?e=muiY1M' },
   { label: '📜 ปรับปรุงนโยบาย', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ed4r5bp3Ap1Fr8LK8KGErOMBgVPlBaXUk_AQaHEErg6u_g?e=CjXos3' },
   { label: '🧹 ลบไฟล์ Back Up', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eb_nifk3pItFti6lPXZ_54kBhoeATNtBtt47_DSMURd1lA?e=FGrHG3' },
-  { label: '⚙ ตั้งค่าตัวแปรระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ES02TRgtHwVOuVN2B9oemDABsCSn3ZS2BVOyLBHK4lPwDQ?e=HvDcKU' }
+  { label: '⚙ ตั้งค่าตัวแปรระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ES02TRgtHwVOuVN2B9oemDABsCSn3ZS2BVOyLBHK4lPwDQ?e=HvDcKU' },
+  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ (Email หรือ ID Card with OTP to email)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ETwgTtbDg4RPrFi17YEDaNMB-yv0px0wBfYaa20WixK0lg?e=mvHDgk' },
+  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ (LDAP)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eade9U6fhGlJpMkLyu1ssqIBwG38O0vBGkQ4UVhKJHzFFw?e=l0yOcG' },
+  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ (Smart Card)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Edp_saUvNqBHpjpXr1HK0SoBHipNY3IZ6u5JgYV2aSNIDw?e=donLby' },
+  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ (Username และ Password)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQroPfCb7LJNtRw7Y-f3EZoBzFAI72Lnfuaob5TkyEaiMw?e=IF3gzT' }
 ]);
 
 module.exports = systemSettingManual;
