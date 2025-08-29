@@ -41,7 +41,7 @@ const mainMenu = {
               spacing: 'sm',
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '🖥 การใช้งานระบบทั่วไป', text: 'การใช้งานระบบทั่วไป' } },
-                { type: 'button', style: 'secondary', action: { type: 'message', label: '⚙ ตั้งค่าระบบ', text: 'ตั้งค่าระบบ' } },
+                { type: 'button', style: 'secondary', action: { type: 'message', label: '⚙ ตั้งค่าระบบ/นโยบาย', text: 'ตั้งค่าระบบ/นโยบาย' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '👤 ข้อมูลบุคลากร', text: 'ข้อมูลบุคลากร' } },
                 { type: 'button', style: 'secondary', action: { type: 'message', label: '🔐 สิทธิการใช้งาน', text: 'สิทธิการใช้งาน' } }
               ]
