@@ -7,7 +7,7 @@ const manualDir = __dirname;
 // Mapping จากชื่อไฟล์ (ตัด 'manual' และ '.js') → ชื่อหมวดภาษาไทย
 const fileNameToThaiName = {
   UsageGeneral: 'การใช้งานระบบทั่วไป',
-  SystemSetting: 'ตั้งค่าระบบและนโยบาย',
+  SystemSetting: 'ตั้งค่าระบบ/นโยบาย',
   Personnel: 'ข้อมูลบุคลากร',
   Permission: 'สิทธิการใช้งาน',
   Leave: 'การลา',
