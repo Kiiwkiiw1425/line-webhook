@@ -9,7 +9,7 @@ const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ
   { label: '📜 ปรับปรุงนโยบาย', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ed4r5bp3Ap1Fr8LK8KGErOMBgVPlBaXUk_AQaHEErg6u_g?e=CjXos3' },
   { label: '🧹 ลบไฟล์ Back Up', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eb_nifk3pItFti6lPXZ_54kBhoeATNtBtt47_DSMURd1lA?e=FGrHG3' },
   { label: '⚙ ตั้งค่าตัวแปรระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ES02TRgtHwVOuVN2B9oemDABsCSn3ZS2BVOyLBHK4lPwDQ?e=HvDcKU' },
-  { label: '🔒 รูปแบบการเข้าสู่ระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ETwgTtbDg4RPrFi17YEDaNMB-yv0px0wBfYaa20WixK0lg?e=mvHDgk' },
+  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ (Email หรือ ID Card)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ETwgTtbDg4RPrFi17YEDaNMB-yv0px0wBfYaa20WixK0lg?e=mvHDgk' },
   { label: '🔒 รูปแบบการเข้าสู่ระบบ2', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eade9U6fhGlJpMkLyu1ssqIBwG38O0vBGkQ4UVhKJHzFFw?e=l0yOcG' }
 ]);
 
