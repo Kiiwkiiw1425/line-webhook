@@ -12,7 +12,7 @@ const importExportManual = require('./manual/manualImportExport');
 const budgetManual = require('./manual/manualBudget');
 const otherManual = require('./manual/manualOther');
 const applicationManual = require('./manual/manualApplication');
-const applicationManual = require('./manual/submanual_LoginSettings');
+const manualLoginSettings = require('./manual/submanual_LoginSettings');
 
 const mainMenu = {
   type: 'flex',
