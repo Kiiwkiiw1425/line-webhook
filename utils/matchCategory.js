@@ -1,15 +1,18 @@
 // utils/matchCategory.js
-const Fuse = require('fuse.js');
+function matchCategory(text) {
+    if (!text || text.length < 2) return null;
+    const normalizedText = normalize(text);
 
-// --- Normalize function (ตัดวรรณยุกต์/ทำให้ lowercase)
-function normalize(text) {
-  return text
-    .toLowerCase()
-    .normalize('NFD') // แยกสระ/วรรณยุกต์ออกมา
-    .replace(/[\u0300-\u036f]/g, '') // ลบวรรณยุกต์
-    .replace(/\s+/g, ' ') // แปลง space ติดกันให้เป็น space เดียว
-    .trim();
-}
+    // ปรับ threshold ตามความยาวของคำ
+    const currentThreshold = normalizedText.length < 4 ? 0.4 : 0.3; 
+
+    const fuse = new Fuse(fuseData, {
+        keys: ['keyword'],
+        threshold: currentThreshold,
+        includeScore: true
+    });
+
+    const results = fuse.search(normalizedText);
 
 // --- 1. keywordMap
 const keywordMap = {
