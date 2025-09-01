@@ -1,17 +1,17 @@
 // utils/matchCategory.js
 const Fuse = require('fuse.js');
 
-// --- Normalize function (ตัดวรรณยุกต์/ทำให้ lowercase)
+// --- Normalize function (cuts diacritics/makes lowercase)
 function normalize(text) {
   return text
     .toLowerCase()
-    .normalize('NFD') // แยกสระ/วรรณยุกต์ออกมา
-    .replace(/[\u0300-\u036f]/g, '') // ลบวรรณยุกต์
-    .replace(/\s+/g, ' ') // แปลง space ติดกันให้เป็น space เดียว
+    .normalize('NFD') // Separates vowels/diacritics
+    .replace(/[\u0300-\u036f]/g, '') // Removes diacritics
+    .replace(/\s+/g, ' ') // Converts multiple spaces to a single space
     .trim();
 }
 
-// --- 1. keywordMap (ต้องอยู่ด้านนอกฟังก์ชัน)
+// --- 1. keywordMap
 const keywordMap = {
   'การใช้งานระบบทั่วไป': ['ระบบทั่วไป', 'ใช้งาน', 'เข้าใช้งาน', 'เข้าสู่ระบบ', 'ล็อกอิน', 'Login', 'เข้าใช้งานระบบDPIS', 'กิจกรรมการใช้งาน', 'การลงทะเบียนเข้าใช้งานระบบDPIS', 'ดูกิจกรรมการใช้งาน', 'การลงทะเบียน', 'จัดการโปรไฟล์', 'SignUp', 'signup', 'เปลี่ยนบทบาท', 'สลับบทบาท', 'การจัดการโปรไฟล์', 'การเปลี่ยนบทบาท', 'dpis6', 'การใช้งานระบบทั่วไป', 'thaiid', 'otp', 'รหัสผ่าน', 'forgot password'],
   'ตั้งค่าระบบ/นโยบาย': ['ตั้งค่า', 'ตั้งค่าระบบ', 'ตั้งค่าปีงบประมาณ', 'ตั้งค่าปีงบ', 'ตั้งค่าการแสดงผล', 'ตั้งค่าเมนูด้านข้าง', 'เมนูด้านข้าง', 'นโยบาย', 'config', 'ระบบ', 'การตั้งค่า', 'นโยบายการใช้งาน', 'System Config', 'ไฟล์ Backup', 'ตั้งค่าตัวแปรระบบ'],
@@ -30,7 +30,7 @@ const keywordMap = {
   'การอัปเดตระบบ': ['อัปเดต', 'อัปเดตระบบ', 'อัปเดตประจำวัน', 'status', 'สถานะ dpis6']
 };
 
-// --- 2. เตรียมข้อมูลสำหรับ Fuse.js (ต้องอยู่ด้านนอกฟังก์ชัน)
+// --- 2. Prepare data for Fuse.js
 const fuseData = [];
 for (const [category, keywords] of Object.entries(keywordMap)) {
   for (const keyword of keywords) {
@@ -38,24 +38,28 @@ for (const [category, keywords] of Object.entries(keywordMap)) {
   }
 }
 
-// --- 3. สร้าง Fuse Instance (ต้องอยู่ด้านนอกฟังก์ชัน)
+// --- 3. Create Fuse Instance (outside the function)
 const fuse = new Fuse(fuseData, {
   keys: ['keyword'],
-  threshold: 0.25,
+  threshold: 0.3, // A balanced threshold for general use
   includeScore: true
 });
 
-// --- 4. ฟังก์ชัน matchCategory (ไม่จำเป็นต้องสร้าง Fuse Instance ซ้ำ)
+// --- 4. matchCategory function
 function matchCategory(text) {
   if (!text || text.length < 2) return null;
-  const results = fuse.search(normalize(text));
+  const normalizedText = normalize(text);
+  const results = fuse.search(normalizedText);
 
   if (results.length > 0) {
     const best = results[0];
-    return {
-      category: best.item.category,
-      score: best.score
-    };
+    // Add a check to ensure the score is below a certain value
+    if (best.score <= 0.4) { // Only return a match if the score is good
+        return {
+            category: best.item.category,
+            score: best.score
+        };
+    }
   }
   return null;
 }
