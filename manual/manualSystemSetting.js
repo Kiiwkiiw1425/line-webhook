@@ -1,7 +1,7 @@
 // manualSystemSetting.js
 const createSubmenu = require('../utils/createSubmenu');
 
-const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบและนโยบาย', [
+const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ/นโยบาย', [
   { label: '📅 ตั้งค่าปีงบประมาณ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EeSoPNxLh2NMtFshuOcjc4sBVs7Ss-XEHTj-35vqOpseGA?e=DgvI05' },
   { label: '🎛 ตั้งค่าการแสดงผล', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EbfdRWo8ZAhLswTJaGVc3DAByLf3slS4Jo6jhfU3nb6ioA?e=qEV0E5' },
   { label: '📂 ตั้งค่าเมนูด้านข้าง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX3c2jyd86NNhZCZv1NkjrUBETX5q1TES_pykD262K650g?e=19QKV2' },
