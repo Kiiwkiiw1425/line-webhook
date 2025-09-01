@@ -1,20 +1,17 @@
 // utils/matchCategory.js
-function matchCategory(text) {
-    if (!text || text.length < 2) return null;
-    const normalizedText = normalize(text);
+const Fuse = require('fuse.js');
 
-    // ปรับ threshold ตามความยาวของคำ
-    const currentThreshold = normalizedText.length < 4 ? 0.4 : 0.3; 
+// --- Normalize function (ตัดวรรณยุกต์/ทำให้ lowercase)
+function normalize(text) {
+  return text
+    .toLowerCase()
+    .normalize('NFD') // แยกสระ/วรรณยุกต์ออกมา
+    .replace(/[\u0300-\u036f]/g, '') // ลบวรรณยุกต์
+    .replace(/\s+/g, ' ') // แปลง space ติดกันให้เป็น space เดียว
+    .trim();
+}
 
-    const fuse = new Fuse(fuseData, {
-        keys: ['keyword'],
-        threshold: currentThreshold,
-        includeScore: true
-    });
-
-    const results = fuse.search(normalizedText);
-
-// --- 1. keywordMap
+// --- 1. keywordMap (ต้องอยู่ด้านนอกฟังก์ชัน)
 const keywordMap = {
   'การใช้งานระบบทั่วไป': ['ระบบทั่วไป', 'ใช้งาน', 'เข้าใช้งาน', 'เข้าสู่ระบบ', 'ล็อกอิน', 'Login', 'เข้าใช้งานระบบDPIS', 'กิจกรรมการใช้งาน', 'การลงทะเบียนเข้าใช้งานระบบDPIS', 'ดูกิจกรรมการใช้งาน', 'การลงทะเบียน', 'จัดการโปรไฟล์', 'SignUp', 'signup', 'เปลี่ยนบทบาท', 'สลับบทบาท', 'การจัดการโปรไฟล์', 'การเปลี่ยนบทบาท', 'dpis6', 'การใช้งานระบบทั่วไป', 'thaiid', 'otp', 'รหัสผ่าน', 'forgot password'],
   'ตั้งค่าระบบ/นโยบาย': ['ตั้งค่า', 'ตั้งค่าระบบ', 'ตั้งค่าปีงบประมาณ', 'ตั้งค่าปีงบ', 'ตั้งค่าการแสดงผล', 'ตั้งค่าเมนูด้านข้าง', 'เมนูด้านข้าง', 'นโยบาย', 'config', 'ระบบ', 'การตั้งค่า', 'นโยบายการใช้งาน', 'System Config', 'ไฟล์ Backup', 'ตั้งค่าตัวแปรระบบ'],
@@ -28,12 +25,12 @@ const keywordMap = {
   'นำเข้า/ส่งออกข้อมูล': ['นำเข้า', 'สลิปเงินเดือน','เงินเดือน','ส่งออก', 'import', 'export', 'ข้อมูลนำเข้า', 'excel'],
   'บริหารวงเงิน': ['วงเงิน', 'บริหาร', 'งบประมาณ', 'วงเงินเจ้าหน้าที่', 'จัดสรรงบ', 'บริหารวงเงิน', 'การบริหารวงเงิน', 'สิทธิบริหารวงเงิน'],
   'แอปพลิเคชัน': ['แอพ', 'แอป', 'โหลดแอพ', 'mobile', 'ios', 'android', 'ดาวน์โหลด', 'แอปพลิเคชัน'],
-  'อื่นๆ': ['อื่นๆ', 'paint'],
+  'อื่นๆ': ['อื่นๆ', 'paint', 'ครับ', 'ค่ะ', 'สวัสดี', 'โอเค'],
   'ช่วยเหลือ': ['ช่วยเหลือ', 'faq', 'ติดต่อ', 'support', 'คำถามที่พบบ่อย', 'admin'],
   'การอัปเดตระบบ': ['อัปเดต', 'อัปเดตระบบ', 'อัปเดตประจำวัน', 'status', 'สถานะ dpis6']
 };
 
-// --- 2. เตรียมข้อมูลสำหรับ Fuse.js
+// --- 2. เตรียมข้อมูลสำหรับ Fuse.js (ต้องอยู่ด้านนอกฟังก์ชัน)
 const fuseData = [];
 for (const [category, keywords] of Object.entries(keywordMap)) {
   for (const keyword of keywords) {
@@ -41,13 +38,14 @@ for (const [category, keywords] of Object.entries(keywordMap)) {
   }
 }
 
+// --- 3. สร้าง Fuse Instance (ต้องอยู่ด้านนอกฟังก์ชัน)
 const fuse = new Fuse(fuseData, {
   keys: ['keyword'],
   threshold: 0.25,
   includeScore: true
 });
 
-// --- 3. ฟังก์ชัน matchCategory
+// --- 4. ฟังก์ชัน matchCategory (ไม่จำเป็นต้องสร้าง Fuse Instance ซ้ำ)
 function matchCategory(text) {
   if (!text || text.length < 2) return null;
   const results = fuse.search(normalize(text));
