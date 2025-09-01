@@ -41,37 +41,47 @@ async function replyToLine(replyToken, message) {
 
 // Webhook รับข้อความจาก LINE
 app.post('/line-webhook', async (req, res) => {
-    console.log(JSON.stringify(req.body, null, 2));
-    const events = req.body.events || [];
+  const events = req.body.events || [];
 
-    for (const event of events) {
-        if (event.type === 'message' && event.message.type === 'text') {
-            const userText = event.message.text.trim();
-            const replyToken = event.replyToken;
+  for (const event of events) {
+    if (event.type === 'message' && event.message.type === 'text') {
+      const userText = event.message.text.trim().toLowerCase();
+      const replyToken = event.replyToken;
 
-            let message;
-
-            if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
-                message = mainMenu;
-            } else if (categoryMenus[userText]) {
-                message = categoryMenus[userText];
-            } else {
-                const matched = matchCategory(userText);
-                // แก้ไขส่วนนี้: ใช้ matched.category เพื่อเข้าถึงชื่อหมวดหมู่
-                if (matched && categoryMenus[matched.category]) {
-                    message = categoryMenus[matched.category];
-                } else {
-                    message = null;
-                }
-            }
-
-            if (message) {
-                await replyToLine(replyToken, message);
-            }
+      // ตรวจสอบ blacklist ก่อน
+      if (blacklist.includes(userText)) {
+        console.log(`Ignoring blacklisted word: ${userText}`);
+        return res.sendStatus(200);
+      }
+      
+      // ส่วนที่เหลือของโค้ดจะทำงานต่อเมื่อคำนั้นไม่อยู่ใน blacklist
+      let message;
+      
+      if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
+        message = mainMenu;
+      } else if (categoryMenus[userText]) {
+        message = categoryMenus[userText];
+      } else {
+        const matched = matchCategory(userText);
+        if (matched && categoryMenus[matched.category]) {
+          // เพิ่มเงื่อนไขเพื่อตรวจสอบคะแนนการจับคู่
+          if (matched.score <= 0.4) {
+             message = categoryMenus[matched.category];
+          } else {
+             message = null; // ถ้าคะแนนไม่ดีพอ ก็จะไม่ตอบกลับ
+          }
+        } else {
+          message = null;
         }
-    }
+      }
 
-    res.sendStatus(200);
+      if (message) {
+        await replyToLine(replyToken, message);
+      }
+    }
+  }
+
+  res.sendStatus(200);
 });
 
 // ping endpoint
