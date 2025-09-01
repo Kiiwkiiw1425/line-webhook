@@ -1,7 +1,6 @@
 // utils/matchCategory.js
 const Fuse = require('fuse.js');
 
-// --- Normalize function (cuts diacritics/makes lowercase)
 function normalize(text) {
   return text
     .toLowerCase()
@@ -41,7 +40,7 @@ for (const [category, keywords] of Object.entries(keywordMap)) {
 // --- 3. Create Fuse Instance (outside the function)
 const fuse = new Fuse(fuseData, {
   keys: ['keyword'],
-  threshold: 0.3, // A balanced threshold for general use
+  threshold: 0.25,
   includeScore: true
 });
 
