@@ -1,6 +1,6 @@
 // manualSystemSetting.js
 const createSubmenu = require('../utils/createSubmenu');
-const submanualLoginSettings = require('./submanual_LoginSettings'); // เรียกใช้ไฟล์ใหม่
+const submanualLoginSettings = require('./submanual_LoginSettings'); // เรียกใช้ไฟล์ที่สร้างเมนูย่อย
 
 const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ/นโยบาย', [
   { label: '📅 ตั้งค่าปีงบประมาณ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EeSoPNxLh2NMtFshuOcjc4sBVs7Ss-XEHTj-35vqOpseGA?e=DgvI05' },
@@ -10,8 +10,8 @@ const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ
   { label: '📜 ปรับปรุงนโยบาย', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ed4r5bp3Ap1Fr8LK8KGErOMBgVPlBaXUk_AQaHEErg6u_g?e=CjXos3' },
   { label: '🧹 ลบไฟล์ Back Up', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eb_nifk3pItFti6lPXZ_54kBhoeATNtBtt47_DSMURd1lA?e=FGrHG3' },
   { label: '⚙ ตั้งค่าตัวแปรระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ES02TRgtHwVOuVN2B9oemDABsCSn3ZS2BVOyLBHK4lPwDQ?e=HvDcKU' },
-  // เปลี่ยนเป็นเรียกใช้ไฟล์ใหม่ที่ import เข้ามา
-  { label: '🔒 กำหนดรูปแบบการเข้าสู่ระบบ', submenu: submanualLoginSettings }
+  // แก้ไขส่วนนี้ให้กลับไปใช้ 'submenu' ตามรูปแบบที่กำหนดเอง
+  { label: '🔐 กำหนดรูปแบบการเข้าสู่ระบบ', submenu: submanualLoginSettings }
 ]);
 
 module.exports = systemSettingManual;
