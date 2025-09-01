@@ -6,6 +6,8 @@ const { mainMenu } = require('./flexMessages');
 const categoryMenus = require('./manual'); // โหลดทุกหมวดจาก manual/
 const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
 
+const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
+
 const app = express();
 app.use(bodyParser.json());
 
