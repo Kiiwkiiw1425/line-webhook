@@ -52,8 +52,7 @@ function matchCategory(text) {
 
   if (results.length > 0) {
     const best = results[0];
-    // Add a check to ensure the score is below a certain value
-    if (best.score <= 0.4) { // Only return a match if the score is good
+    if (best.score <= 1) {
         return {
             category: best.item.category,
             score: best.score
