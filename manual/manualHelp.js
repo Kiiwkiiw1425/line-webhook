@@ -13,7 +13,7 @@ module.exports = {
       contents: [
         {
           type: 'text',
-          text: '🆘 เมนูช่วยเหลือ',
+          text: '🆘 เมนูคำถาม/ช่วยเหลือ',
           weight: 'bold',
           size: 'xl',
           color: '#1F2E55', // เขียวเข้ม
@@ -39,13 +39,13 @@ module.exports = {
           alignItems: 'center',
           action: {
             type: 'message',
-            label: '💬 ติดต่อแอดมิน',
-            text: 'แอดมิน'
+            label: '💬 ติดต่อเจ้าหน้าที่',
+            text: 'ติดต่อเจ้าหน้าที่'
           },
           contents: [
             {
               type: 'text',
-              text: '💬 ติดต่อแอดมิน',
+              text: '💬 ติดต่อเจ้าหน้าที่',
               color: '#FFFFFF',
               size: 'md'
             }
