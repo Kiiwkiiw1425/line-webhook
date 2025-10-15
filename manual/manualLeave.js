@@ -1,6 +1,6 @@
 const createSubmenu = require('../utils/createSubmenu');
 const leaveManual = createSubmenu('📆 การลา', [
-  {label: '⚙ ตั้งค่าการลา', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ERi96W7PeOxBovDYg3XEjOMB0SIVBEQSJatoL9Khw-XGcQ?e=ZbGc7v'},
+  {label: '⚙ ตั้งค่าการลา/ลาพักผ่อน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ERi96W7PeOxBovDYg3XEjOMB0SIVBEQSJatoL9Khw-XGcQ?e=ZbGc7v'},
   {label: '📅 ตั้งค่าปฏิทินวันหยุด', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQk2IKenec1Jq1yZ0_rtRPgBmg0d3RjXnyEApSW-RlXz3w?e=TApX13'},
   {label: '🧑‍💼 การลา (ผู้อนุมัติ)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EblDHxyIcSxNiYNsOGsEzucBH41uQ5mAruwU2Q6Zn-0IuA?e=ZAet40'},
   {label: '🧑‍📝 การลา (ผู้ยื่นลา)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQqReg0wlgJDi4SV3Mn8ausB4yaGA2Hl_cNSuuLFFc-gaw?e=5ngRjm'},

@@ -1,6 +1,6 @@
 module.exports = {
   type: 'flex',
-  altText: 'เมนู "ช่วยเหลือ"',
+  altText: 'เมนู "คำถาม/ช่วยเหลือ"',
   contents: {
     type: 'bubble',
     size: 'mega',
