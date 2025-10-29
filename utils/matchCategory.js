@@ -17,7 +17,7 @@ const keywordMap = {
   'แอปพลิเคชัน': ['แอพ', 'แอป', 'โหลดแอพ', 'mobile', 'ios', 'android', 'ดาวน์โหลด', 'แอปพลิเคชัน'],
   'อื่นๆ': ['อื่นๆ', 'paint'],
   'ช่วยเหลือ': ['ช่วยเหลือ','คำถาม','ติดต่อเจ้าหน้าที่', 'เจ้าหน้าที่','faq', 'ติดต่อ', 'support', 'คำถามที่พบบ่อย', 'admin'],
-  'การอัปเดตระบบ': ['อัปเดต', 'อัปเดตระบบ', 'อัปเดตประจำวัน', 'status', 'สถานะ dpis6', 'การใช้งานdpis6']
+  'การอัปเดตระบบ': ['อัปเดต', 'อัปเดท''อัปเดตระบบ', 'อัปเดตประจำวัน', 'status', 'สถานะ dpis6', 'การใช้งานdpis6']
 };
 
 // --- 2. Fuse.js
@@ -30,7 +30,7 @@ for (const [category, keywords] of Object.entries(keywordMap)) {
 
 const fuse = new Fuse(fuseData, {
   keys: ['keyword'],
-  threshold: 0.20,
+  threshold: 0.30,
   includeScore: true
 });
 
