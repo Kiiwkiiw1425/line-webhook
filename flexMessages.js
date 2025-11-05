@@ -1,20 +1,11 @@
-// flexMessages.js
-// --- 1. Imports ---
-const usageGeneralManual = require('./manual/manualUsageGeneral');
-const systemSettingManual = require('./manual/manualSystemSetting');
-const personnelManual = require('./manual/manualPersonnel');
-const permissionManual = require('./manual/manualPermission');
-const leaveManual = require('./manual/manualLeave');
-const structureManual = require('./manual/manualStructure');
-const commandManual = require('./manual/manualCommand');
-const reportManual = require('./manual/manualReport');
-const evaluationManual = require('./manual/manualEvaluation');
-const importExportManual = require('./manual/manualImportExport');
-const budgetManual = require('./manual/manualBudget');
-const otherManual = require('./manual/manualOther');
-const applicationManual = require('./manual/manualApplication');
+// flexMessages.js (ฉบับ Final)
 
-// --- 2. mainMenu ---
+// ⬇️⬇️⬇️ ส่วนที่เปลี่ยนแปลง ⬇️⬇️⬇️
+// (ลบ const ... = require('./manual/...') ทั้ง 13+ บรรทัดออกทั้งหมด)
+// ⬆️⬆️⬆️ จบส่วนเปลี่ยนแปลง ⬆️⬆️⬆️
+
+
+// mainMenu (ที่แก้ไขเป็น postback แล้ว)
 const mainMenu = {
   type: 'flex',
   altText: '📚 เมนูเลือกหมวดหมู่คู่มือ',
@@ -52,7 +43,7 @@ const mainMenu = {
           ]
         }
       },
-      // Bubble 2 (แก้ไขแล้ว)
+      // Bubble 2
       {
         type: 'bubble',
         size: 'mega',
@@ -75,7 +66,7 @@ const mainMenu = {
               spacing: 'sm',
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📆 การลา', data: 'action=show_menu&category=การลา', displayText: '📆 การลา' } },
-      _**“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”**_           { type: 'button', style: 'secondary', action: { type: 'postback', label: '🏢 โครงสร้าง/ตำแหน่ง', data: 'action=show_menu&category=โครงสร้าง/ตำแหน่ง', displayText: '🏢 โครงสร้าง/ตำแหน่ง' } },
+                { type: 'button', style: 'secondary', action: { type: 'postback', label: '🏢 โครงสร้าง/ตำแหน่ง', data: 'action=show_menu&category=โครงสร้าง/ตำแหน่ง', displayText: '🏢 โครงสร้าง/ตำแหน่ง' } },
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📄 คำสั่ง/บัญชีแนบท้าย', data: 'action=show_menu&category=คำสั่ง/บัญชีแนบท้าย', displayText: '📄 คำสั่ง/บัญชีแนบท้าย' } },
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📊 รายงาน', data: 'action=show_menu&category=รายงาน', displayText: '📊 รายงาน' } }
               ]
@@ -83,7 +74,7 @@ const mainMenu = {
           ]
         }
       },
-      // Bubble 3 (แก้ไขแล้ว)
+      // Bubble 3
       {
         type: 'bubble',
         size: 'mega',
@@ -92,7 +83,7 @@ const mainMenu = {
           layout: 'vertical',
           spacing: 'md',
           paddingAll: '20px',
-    _**“Thank you so much for the opportunity. I’m incredibly grateful for the experience and the mentorship I’ve received here.”**_         contents: [
+          contents: [
             {
               type: 'text',
               text: '📚 หมวดหมู่เพิ่มเติม',
@@ -102,7 +93,7 @@ const mainMenu = {
             },
             {
               type: 'box',
-      _**“This role has been a significant chapter for me, and I’m proud of the work we’ve accomplished together.”**_         layout: 'vertical',
+              layout: 'vertical',
               spacing: 'sm',
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '✅ การประเมินผล', data: 'action=show_menu&category=การประเมินผล', displayText: '✅ การประเมินผล' } },
@@ -118,25 +109,11 @@ const mainMenu = {
   }
 };
 
-// --- 3. categoryMenus ---
-const categoryMenus = {
-  'การใช้งานระบบทั่วไป': usageGeneralManual,
-  'ตั้งค่าระบบ/นโยบาย': systemSettingManual,
-  'ข้อมูลบุคลากร': personnelManual,
-  'สิทธิการใช้งาน': permissionManual,
-  'การลา': leaveManual,
-  'โครงสร้าง/ตำแหน่ง': structureManual,
-  'คำสั่ง/บัญชีแนบท้าย': commandManual,
-  'รายงาน': reportManual,
-  'การประเมินผล': evaluationManual,
-  'นำเข้า/ส่งออกข้อมูล': importExportManual,
-  'บริหารวงเงิน': budgetManual,
-  'อื่นๆ': otherManual,
-  'แอปพลิเคชัน': applicationManual // Key นี้ ไม่ได้อยู่บน mainMenu
-};
+// ⬇️⬇️⬇️ ส่วนที่เปลี่ยนแปลง ⬇️⬇️⬇️
+// (ลบ const categoryMenus = { ... } ทั้งก้อนออก)
 
-// --- 4. module.exports ---
 module.exports = {
-  mainMenu,
-  categoryMenus
+  mainMenu 
+ // (ลบ categoryMenus ออกจาก exports)
 };
+// ⬆️⬆️⬆️ จบส่วนเปลี่ยนแปลง ⬆️⬆️⬆️
