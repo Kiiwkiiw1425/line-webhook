@@ -2,11 +2,15 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-const { mainMenu, categoryMenus } = require('./flexMessages'); // การ import
-const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
 
-// Blacklist
-const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
+// ⬇️⬇️⬇️ ส่วนที่เปลี่ยนแปลง ⬇️⬇️⬇️
+// จากเดิมที่เคยดึงทุกอย่างมาจาก './flexMessages'
+// เราจะแยกกันดึงครับ
+const { mainMenu } = require('./flexMessages'); // 1. ดึงเมนูหลักจากที่นี่
+const categoryMenus = require('./manual'); // 2. ดึงเมนูย่อยอัตโนมัติจาก /manual/index.js
+// ⬆️⬆️⬆️ จบส่วนเปลี่ยนแปลง ⬆️⬆️⬆️
+
+const matchCategory = require('./utils/matchCategory'); 
 
 const app = express();
 app.use(bodyParser.json());
@@ -19,19 +23,17 @@ if (!CHANNEL_ACCESS_TOKEN) {
     process.exit(1);
 }
 
-// ฟังก์ชันส่งข้อความกลับไปยัง LINE
+// ฟังก์ชันส่งข้อความกลับไปยัง LINE (เหมือนเดิม)
 async function replyToLine(replyToken, message) {
     const url = 'https://api.line.me/v2/bot/message/reply';
     const headers = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
     };
-
     const body = {
         replyToken,
         messages: [message]
     };
-
     try {
         await axios.post(url, body, { headers });
     } catch (error) {
@@ -39,20 +41,16 @@ async function replyToLine(replyToken, message) {
     }
 }
 
-// ===========================================
-// Webhook หลัก
-// ===========================================
+// Webhook หลัก (รองรับ Postback)
 app.post('/line-webhook', async (req, res) => {
-  console.log(JSON.stringify(req.body, null, 2));
+  // console.log(JSON.stringify(req.body, null, 2));
   const events = req.body.events || [];
 
   for (const event of events) {
     try {
       if (event.type === 'message' && event.message.type === 'text') {
-        // 1. จัดการกับข้อความที่พิมพ์เข้ามา (Fallback)
         await handleTextMessage(event);
       } else if (event.type === 'postback') {
-        // 2. จัดการกับการคลิกปุ่ม (The New UI/UX)
         await handlePostback(event);
       }
     } catch (error) {
@@ -62,35 +60,24 @@ app.post('/line-webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-// ===========================================
-// ตัวจัดการ Postback
-// ===========================================
+// ตัวจัดการ Postback (Logic ใหม่สำหรับปุ่มคลิก)
 async function handlePostback(event) {
   const replyToken = event.replyToken;
-  const postbackData = event.postback.data; // เช่น "action=show_menu&category=การลา"
+  const postbackData = event.postback.data; 
   
-  // ใช้ URLSearchParams เพื่อแยก data
   const params = new URLSearchParams(postbackData);
   const action = params.get('action');
   const category = params.get('category');
-  // const subCategory = params.get('sub'); // (เผื่อสำหรับ L3)
 
   let message;
 
   if (action === 'show_menu' && category) {
-    // นี่คือการคลิกจากเมนูหลัก (L1)
-    // 'category' จะเป็น "การลา", "การประเมินผล", etc.
-    message = categoryMenus[category]; // ดึงเมนู L2 ที่คุณมีอยู่แล้ว
+    message = categoryMenus[category]; // ดึงเมนู L2 จากไฟล์ /manual ที่โหลดมา
     
     if (!message) {
       console.warn(`Postback Warning: Category "${category}" not found in categoryMenus.`);
       message = { type: 'text', text: `ขออภัย, ไม่พบเมนูสำหรับ "${category}"` };
     }
-
-  } else if (action === 'show_content') {
-    // Logic ที่คุณต้องสร้างเพิ่ม ถ้าเมนู L2 (categoryMenus)
-    // ไม่ได้ link ไปยัง PDF โดยตรง แต่ต้องส่ง L3
-    // message = findContent(category, subCategory); 
   }
 
   if (message) {
@@ -98,29 +85,21 @@ async function handlePostback(event) {
   }
 }
 
-// ===========================================
-// ตัวจัดการ Text (Logic เดิมของคุณที่ปรับปรุง)
-// ===========================================
+// ตัวจัดการ Text (Logic เดิมสำหรับพิมพ์)
 async function handleTextMessage(event) {
   const userText = event.message.text.trim();
   const replyToken = event.replyToken;
 
   let message;
 
-  // Logic เดิมของคุณ (ใช้เป็น Fallback)
   if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
     message = mainMenu; // L1 (12 ปุ่ม)
-  } else if (categoryMenus[userText]) {
-    // กรณีพิมพ์ตรงตัวเป๊ะ
-    message = categoryMenus[userText]; // L2
   } else {
-    // กรณีพิมพ์คำใกล้เคียง
-    const matched = matchCategory(userText);
+    const matched = matchCategory(userText); // ใช้ Fuse.js ค้นหา
     if (matched && categoryMenus[matched]) {
-      message = categoryMenus[matched];
+      message = categoryMenus[matched]; // L2
     } else {
-      // ไม่ต้องตอบข้อความทั่วไป
-      message = null; 
+      message = null; // ไม่ต้องตอบ
     }
   }
 
@@ -129,8 +108,7 @@ async function handleTextMessage(event) {
   }
 }
 
-
-// ping endpoint (เหมือนเดิม)
+// ping endpoint
 app.get('/ping', (req, res) => {
   res.send('pong');
 });
