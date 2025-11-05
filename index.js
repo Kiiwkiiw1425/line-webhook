@@ -1,16 +1,21 @@
-// index.js
+// index.js (ฉบับสมบูรณ์)
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
-
-// ⬇️⬇️⬇️ ส่วนที่เปลี่ยนแปลง ⬇️⬇️⬇️
-// จากเดิมที่เคยดึงทุกอย่างมาจาก './flexMessages'
-// เราจะแยกกันดึงครับ
-const { mainMenu } = require('./flexMessages'); // 1. ดึงเมนูหลักจากที่นี่
-const categoryMenus = require('./manual'); // 2. ดึงเมนูย่อยอัตโนมัติจาก /manual/index.js
-// ⬆️⬆️⬆️ จบส่วนเปลี่ยนแปลง ⬆️⬆️⬆️
-
 const matchCategory = require('./utils/matchCategory'); 
+
+// 1. Import เมนูทั้งหมด
+//    - categoryMenus มาจาก /manual/index.js ที่คุณสร้างไว้
+//    - ที่เหลือมาจาก flexMessages.js
+// -----------------------------------------------------------
+const categoryMenus = require('./manual'); 
+const { 
+  mainMenu, 
+  levelSelectorMenu, 
+  beginnerMenu, 
+  beginnerContent 
+} = require('./flexMessages'); 
+// -----------------------------------------------------------
 
 const app = express();
 app.use(bodyParser.json());
@@ -23,7 +28,9 @@ if (!CHANNEL_ACCESS_TOKEN) {
     process.exit(1);
 }
 
-// ฟังก์ชันส่งข้อความกลับไปยัง LINE (เหมือนเดิม)
+/**
+ * ฟังก์ชันส่งข้อความกลับไปยัง LINE
+ */
 async function replyToLine(replyToken, message) {
     const url = 'https://api.line.me/v2/bot/message/reply';
     const headers = {
@@ -32,7 +39,7 @@ async function replyToLine(replyToken, message) {
     };
     const body = {
         replyToken,
-        messages: [message]
+        messages: Array.isArray(message) ? message : [message] // รองรับการส่งหลายข้อความ
     };
     try {
         await axios.post(url, body, { headers });
@@ -41,7 +48,9 @@ async function replyToLine(replyToken, message) {
     }
 }
 
-// Webhook หลัก (รองรับ Postback)
+/**
+ * Webhook หลัก
+ */
 app.post('/line-webhook', async (req, res) => {
   // console.log(JSON.stringify(req.body, null, 2));
   const events = req.body.events || [];
@@ -60,23 +69,41 @@ app.post('/line-webhook', async (req, res) => {
   res.sendStatus(200);
 });
 
-// ตัวจัดการ Postback (Logic ใหม่สำหรับปุ่มคลิก)
+/**
+ * ตัวจัดการ Postback (สำหรับปุ่มคลิก)
+ */
 async function handlePostback(event) {
   const replyToken = event.replyToken;
   const postbackData = event.postback.data; 
   
   const params = new URLSearchParams(postbackData);
   const action = params.get('action');
-  const category = params.get('category');
+  const category = params.get('category'); // (สำหรับ Advance)
+  const level = params.get('level'); // (สำหรับ L1)
+  const topic = params.get('topic'); // (สำหรับ Beginner)
 
   let message;
 
-  if (action === 'show_menu' && category) {
-    message = categoryMenus[category]; // ดึงเมนู L2 จากไฟล์ /manual ที่โหลดมา
-    
+  // --- Flow L1 -> L2 (เลือก Beginner/Advance) ---
+  if (action === 'show_level') {
+    if (level === 'beginner') {
+      message = beginnerMenu; // ส่งสารบัญเริ่มต้น
+    } else if (level === 'advance') {
+      message = mainMenu; // ส่งเมนู Advance 12 ปุ่ม
+    }
+  } 
+  // --- Flow L1-Advance -> L2-Advance ---
+  else if (action === 'show_menu' && category) {
+    message = categoryMenus[category]; // (Flow เดิมของคุณ)
     if (!message) {
-      console.warn(`Postback Warning: Category "${category}" not found in categoryMenus.`);
       message = { type: 'text', text: `ขออภัย, ไม่พบเมนูสำหรับ "${category}"` };
+    }
+  }
+  // --- Flow L2-Beginner -> L3-Beginner ---
+  else if (action === 'show_content' && topic) {
+    message = beginnerContent[topic]; // ดึงเนื้อหาจาก object beginnerContent
+    if (!message) {
+      message = { type: 'text', text: `ขออภัย, เนื้อหาสำหรับ "${topic}" ยังไม่พร้อม` };
     }
   }
 
@@ -85,19 +112,25 @@ async function handlePostback(event) {
   }
 }
 
-// ตัวจัดการ Text (Logic เดิมสำหรับพิมพ์)
+/**
+ * ตัวจัดการ Text (สำหรับพิมพ์)
+ */
 async function handleTextMessage(event) {
   const userText = event.message.text.trim();
   const replyToken = event.replyToken;
 
   let message;
 
+  // --- (จุดเริ่มต้น Flow ใหม่) ---
   if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
-    message = mainMenu; // L1 (12 ปุ่ม)
-  } else {
+    message = levelSelectorMenu; // ⭐️ ส่งหน้าเลือก Level
+  } 
+  // --- (Fallback Flow เดิมสำหรับ Advance user) ---
+  else {
     const matched = matchCategory(userText); // ใช้ Fuse.js ค้นหา
     if (matched && categoryMenus[matched]) {
-      message = categoryMenus[matched]; // L2
+      // ถ้าพิมพ์คำว่า "การลา" (ซึ่งเป็น Advance) ก็ส่งเมนู L2 Advance เลย
+      message = categoryMenus[matched]; 
     } else {
       message = null; // ไม่ต้องตอบ
     }
