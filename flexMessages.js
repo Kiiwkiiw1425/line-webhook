@@ -1,18 +1,16 @@
-// flexMessages.js (ฉบับ Final)
+// flexMessages.js (ฉบับสมบูรณ์)
 
-// ⬇️⬇️⬇️ ส่วนที่เปลี่ยนแปลง ⬇️⬇️⬇️
-// (ลบ const ... = require('./manual/...') ทั้ง 13+ บรรทัดออกทั้งหมด)
-// ⬆️⬆️⬆️ จบส่วนเปลี่ยนแปลง ⬆️⬆️⬆️
-
-
-// mainMenu (ที่แก้ไขเป็น postback แล้ว)
+// ------------------------------------------------
+// 1. mainMenu (L1 - Advance)
+//    เมนู 12 ปุ่ม (Advance) ที่ใช้ Postback
+// ------------------------------------------------
 const mainMenu = {
   type: 'flex',
-  altText: '📚 เมนูเลือกหมวดหมู่คู่มือ',
+  altText: '📚 เมนูเลือกหมวดหมู่คู่มือ (Advance)',
   contents: {
     type: 'carousel',
     contents: [
-      // Bubble 1
+      // Bubble 1 (แก้ไขแล้ว)
       {
         type: 'bubble',
         size: 'mega',
@@ -43,7 +41,7 @@ const mainMenu = {
           ]
         }
       },
-      // Bubble 2
+      // Bubble 2 (แก้ไขแล้ว)
       {
         type: 'bubble',
         size: 'mega',
@@ -74,7 +72,7 @@ const mainMenu = {
           ]
         }
       },
-      // Bubble 3
+      // Bubble 3 (แก้ไขแล้ว)
       {
         type: 'bubble',
         size: 'mega',
@@ -86,7 +84,7 @@ const mainMenu = {
           contents: [
             {
               type: 'text',
-              text: '📚 หมวดหมู่เพิ่มเติม',
+        _**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_           text: '📚 หมวดหมู่เพิ่มเติม',
               weight: 'bold',
               size: 'xl',
               color: '#1F2E55'
@@ -109,11 +107,183 @@ const mainMenu = {
   }
 };
 
-// ⬇️⬇️⬇️ ส่วนที่เปลี่ยนแปลง ⬇️⬇️⬇️
-// (ลบ const categoryMenus = { ... } ทั้งก้อนออก)
-
-module.exports = {
-  mainMenu 
- // (ลบ categoryMenus ออกจาก exports)
+// ------------------------------------------------
+// 2. levelSelectorMenu (L1)
+//    (เมนูใหม่) หน้าเลือก Level Beginner / Advance
+// ------------------------------------------------
+const levelSelectorMenu = {
+  type: 'flex',
+  altText: 'เลือกประเภทคู่มือ',
+  contents: {
+    type: 'bubble',
+    size: 'giga',
+    header: {
+      type: 'box',
+      layout: 'vertical',
+      paddingAll: '20px',
+      backgroundColor: '#1F2E55',
+      contents: [
+        { type: 'text', text: 'เรียนรู้การใช้งาน DPIS6', color: '#FFFFFF', size: 'xl', weight: 'bold' }
+      ]
+    },
+    body: {
+      type: 'box',
+      layout: 'vertical',
+      spacing: 'lg',
+      paddingAll: '20px',
+      contents: [
+        // --- 1. Beginner ---
+        {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            { type: 'text', text: '👶 คู่มือฉบับเริ่มต้น', weight: 'bold', size: 'lg' },
+            { type: 'text', text: 'สำหรับพนักงานใหม่: เรียนรู้การลา, เบิกจ่าย, ดูสลิป', size: 'sm', wrap: true, margin: 'md' },
+            { 
+              type: 'button', 
+              action: { type: 'postback', label: 'เริ่มเรียน (มือใหม่)', data: 'action=show_level&level=beginner' },
+              style: 'primary',
+              margin: 'lg'
+            }
+          ]
+        },
+        { type: 'separator' },
+        // --- 2. Advance ---
+        {
+          type: 'box',
+          layout: 'vertical',
+          contents: [
+            { type: 'text', text: '🚀 คู่มือฉบับ Advance', weight: 'bold', size: 'lg' },
+            { type: 'text', text: 'สำหรับหัวหน้างาน, HR, Admin: การตั้งค่า, อนุมัติ, รายงาน', size: 'sm', wrap: true, margin: 'md' },
+            { 
+              type: 'button', 
+              action: { type: 'postback', label: 'ดูคู่มือ (Advance)', data: 'action=show_level&level=advance' },
+              style: 'secondary',
+              margin: 'lg'
+            }
+          ]
+        }
+      ]
+    }
+  }
 };
-// ⬆️⬆️⬆️ จบส่วนเปลี่ยนแปลง ⬆️⬆️⬆️
+
+// ------------------------------------------------
+// 3. beginnerMenu (L2 - Beginner)
+//    (เมนูใหม่) สารบัญบทเรียนเริ่มต้น (Module 1, 2)
+// ------------------------------------------------
+const beginnerMenu = {
+  type: 'flex',
+  altText: 'สารบัญบทเรียนเริ่มต้น',
+  contents: {
+    type: 'carousel',
+    contents: [
+      // Module 1: ก้าวแรก
+      {
+        type: 'bubble',
+        size: 'kilo',
+        header: { type: 'box', layout: 'vertical', backgroundColor: '#F0F0F0', contents: [{ type: 'text', text: '🎯 Module 1: ก้าวแรก', weight: 'bold', margin: 'md', size: 'md'}] },
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'sm',
+          contents: [
+            { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธีเข้าใช้งาน / Login', data: 'action=show_content&topic=login' } },
+            { type: 'button', style: 'link', action: { type: 'postback', label: 'ลืมรหัสผ่าน ทำยังไง?', data: 'action=show_content&topic=forgot_password' } },
+            { type: 'button', style: 'link', action: { type: 'postback', label: 'ทัวร์หน้าจอหลัก', data: 'action=show_content&topic=dashboard' } }
+          ]
+        }
+      },
+      // Module 2: ภารกิจยอดฮิต
+      {
+        type: 'bubble',
+        size: 'kilo',
+        header: { type: 'box', layout: 'vertical', backgroundColor: '#F0F0F0', contents: [{ type: 'text', text: '🎯 Module 2: ภารกิจยอดฮิต', weight: 'bold', margin: 'md', size: 'md'}] },
+        body: {
+          type: 'box',
+          layout: 'vertical',
+          spacing: 'sm',
+          contents: [
+            { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธียื่นใบลา', data: 'action=show_content&topic=leave' } },
+            { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธีดูสลิปเงินเดือน', data: 'action=show_content&topic=payroll' } },
+            { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธียื่นเบิกจ่าย', data: 'action=show_content&topic=reimburse' } }
+          ]
+        }
+      }
+    ]
+  }
+};
+
+// ------------------------------------------------
+// 4. beginnerContent (L3 - Beginner)
+//    (เมนูใหม่) คลังเนื้อหาบทเรียน (คุณต้องเติมเนื้อหาส่วนที่เหลือเอง)
+// ------------------------------------------------
+const beginnerContent = {
+  // --- หัวข้อ "การลา" ---
+  'leave': {
+    type: 'flex',
+    altText: 'วิธียื่นใบลา',
+    contents: {
+      type: 'bubble',
+      size: 'giga',
+      header: { type: 'box', layout: 'vertical', backgroundColor: '#1F2E55', contents: [{ type: 'text', text: 'บทเรียน: วิธียื่นใบลา', weight: 'bold', color: '#FFFFFF', margin: 'md', size: 'lg'}] },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        spacing: 'md',
+        contents: [
+          { type: 'text', text: 'การยื่นใบลาใน DPIS6 มี 4 ขั้นตอนง่ายๆ ดังนี้:', wrap: true },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '1️⃣', flex: 0 }, { type: 'text', text: 'ไปที่เมนู "ระบบงานลา" > "สร้างใบลา"', wrap: true }] },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '2️⃣', flex: 0 }, { type: 'text', text: 'เลือกประเภทการลา (ลาป่วย, ลากิจ, พักร้อน)', wrap: true }] },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '3️⃣', flex: 0 }, { type: 'text', text: 'เลือกวันที่ในปฏิทิน และใส่เหตุผล', wrap: true }] },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '4️⃣', flex: 0 }, { type: 'text', text: 'ตรวจสอบวันลาคงเหลือ แล้วกด "ยื่นส่ง"', wrap: true }] }
+        ]
+      },
+      footer: {
+        type: 'box',
+        layout: 'vertical',
+        contents: [
+          { type: 'button', style: 'link', action: { type: 'uri', label: 'ดูวิดีโอ (60 วิ)', uri: 'https://youtube.com' } } // (ใส่ link วิดีโอของคุณ)
+        ]
+      }
+    }
+  },
+  // --- หัวข้อ "ดูสลิป" ---
+  'payroll': {
+    type: 'flex',
+    altText: 'วิธีดูสลิปเงินเดือน',
+    contents: {
+      type: 'bubble',
+      size: 'giga',
+      header: { type: 'box', layout: 'vertical', backgroundColor: '#1F2E55', contents: [{ type: 'text', text: 'บทเรียน: วิธีดูสลิปเงินเดือน', weight: 'bold', color: '#FFFFFF', margin: 'md', size: 'lg'}] },
+      body: {
+        type: 'box',
+        layout: 'vertical',
+        paddingAll: '20px',
+        spacing: 'md',
+        contents: [
+          { type: 'text', text: 'คุณสามารถดูสลิปเงินเดือน (E-Payroll) ได้ 2 ขั้นตอน:', wrap: true },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '1️⃣', flex: 0 }, { type: 'text', text: 'ไปที่เมนู "ข้อมูลส่วนตัว" > "สลิปเงินเดือน"', wrap: true }] },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '2️⃣', flex: 0 }, { type: 'text', text: 'เลือกเดือนที่ต้องการดู และกด "ค้นหา"', wrap: true }] }
+        ]
+      }
+    }
+  },
+  // --- (คุณต้องสร้างเนื้อหา 'login', 'forgot_password', 'dashboard', 'reimburse' เพิ่มเติมที่นี่) ---
+  'login': { type: 'text', text: 'นี่คือเนื้อหา "วิธีเข้าใช้งาน"' },
+  'forgot_password': { type: 'text', text: 'นี่คือเนื้อหา "ลืมรหัสผ่าน"' },
+  'dashboard': { type: 'text', text: 'นี่คือเนื้อหา "ทัวร์หน้าจอหลัก"' },
+  'reimburse': { type: 'text', text: 'นี่คือเนื้อหา "วิธียื่นเบิกจ่าย"' }
+};
+
+
+// ------------------------------------------------
+// 5. Exports (ส่งออก 4 เมนูหลัก)
+// ------------------------------------------------
+module.exports = {
+  mainMenu, 
+  levelSelectorMenu, 
+  beginnerMenu, 
+  beginnerContent 
+};
