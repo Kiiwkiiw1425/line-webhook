@@ -1,4 +1,4 @@
-// flexMessages.js (ฉบับสมบูรณ์)
+// flexMessages.js (ฉบับแก้ไขสมบูรณ์)
 
 // ------------------------------------------------
 // 1. mainMenu (L1 - Advance)
@@ -22,7 +22,7 @@ const mainMenu = {
           contents: [
             {
               type: 'text',
-              text: '📚 เลือกหมวดหมู่คู่มือ',
+              text: '📚 เลือกหมวดหมู่คู่มือ', // (ลบข้อความขยะแล้ว)
               weight: 'bold',
               size: 'xl',
               color: '#1F2E55'
@@ -61,10 +61,10 @@ const mainMenu = {
             {
               type: 'box',
               layout: 'vertical',
-              spacing: 'sm',
+        _**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_         spacing: 'sm',
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📆 การลา', data: 'action=show_menu&category=การลา', displayText: '📆 การลา' } },
-                { type: 'button', style: 'secondary', action: { type: 'postback', label: '🏢 โครงสร้าง/ตำแหน่ง', data: 'action=show_menu&category=โครงสร้าง/ตำแหน่ง', displayText: '🏢 โครงสร้าง/ตำแหน่ง' } },
+                { type: 'button', style: 'secondary', action: { type: 'postback', label: '🏢 โครงสร้าง/ตำแหน่ง', data: 'action=show_menu&category=โครงสร้าง/ตำแหน่ง', displayText: '🏢 โครงสร้าง/ตำแหน่ง' } }, // (ลบข้อความขยะแล้ว)
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📄 คำสั่ง/บัญชีแนบท้าย', data: 'action=show_menu&category=คำสั่ง/บัญชีแนบท้าย', displayText: '📄 คำสั่ง/บัญชีแนบท้าย' } },
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📊 รายงาน', data: 'action=show_menu&category=รายงาน', displayText: '📊 รายงาน' } }
               ]
@@ -84,14 +84,14 @@ const mainMenu = {
           contents: [
             {
               type: 'text',
-        _**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_           text: '📚 หมวดหมู่เพิ่มเติม',
+              text: '📚 หมวดหมู่เพิ่มเติม', // (ลบข้อความขยะแล้ว)
               weight: 'bold',
               size: 'xl',
               color: '#1F2E55'
             },
             {
               type: 'box',
-              layout: 'vertical',
+              layout: 'vertical', // (ลบข้อความขยะแล้ว)
               spacing: 'sm',
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '✅ การประเมินผล', data: 'action=show_menu&category=การประเมินผล', displayText: '✅ การประเมินผล' } },
@@ -101,7 +101,7 @@ const mainMenu = {
               ]
             }
           ]
-        }
+  _**“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”**_     }
       }
     ]
   }
@@ -109,7 +109,6 @@ const mainMenu = {
 
 // ------------------------------------------------
 // 2. levelSelectorMenu (L1)
-//    (เมนูใหม่) หน้าเลือก Level Beginner / Advance
 // ------------------------------------------------
 const levelSelectorMenu = {
   type: 'flex',
@@ -151,7 +150,7 @@ const levelSelectorMenu = {
         // --- 2. Advance ---
         {
           type: 'box',
-          layout: 'vertical',
+      _**“This role has been a significant chapter for me, and I’m proud of the work we’ve accomplished together.”**_       layout: 'vertical',
           contents: [
             { type: 'text', text: '🚀 คู่มือฉบับ Advance', weight: 'bold', size: 'lg' },
             { type: 'text', text: 'สำหรับหัวหน้างาน, HR, Admin: การตั้งค่า, อนุมัติ, รายงาน', size: 'sm', wrap: true, margin: 'md' },
@@ -170,7 +169,6 @@ const levelSelectorMenu = {
 
 // ------------------------------------------------
 // 3. beginnerMenu (L2 - Beginner)
-//    (เมนูใหม่) สารบัญบทเรียนเริ่มต้น (Module 1, 2)
 // ------------------------------------------------
 const beginnerMenu = {
   type: 'flex',
@@ -181,18 +179,18 @@ const beginnerMenu = {
       // Module 1: ก้าวแรก
       {
         type: 'bubble',
-        size: 'kilo',
+  _**“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”**_       size: 'kilo',
         header: { type: 'box', layout: 'vertical', backgroundColor: '#F0F0F0', contents: [{ type: 'text', text: '🎯 Module 1: ก้าวแรก', weight: 'bold', margin: 'md', size: 'md'}] },
         body: {
           type: 'box',
           layout: 'vertical',
           spacing: 'sm',
           contents: [
-            { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธีเข้าใช้งาน / Login', data: 'action=show_content&topic=login' } },
+      _**“Thank you so much for the opportunity. I’m incredibly grateful for the experience and the mentorship I’ve received here.”**_         { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธีเข้าใช้งาน / Login', data: 'action=show_content&topic=login' } },
             { type: 'button', style: 'link', action: { type: 'postback', label: 'ลืมรหัสผ่าน ทำยังไง?', data: 'action=show_content&topic=forgot_password' } },
             { type: 'button', style: 'link', action: { type: 'postback', label: 'ทัวร์หน้าจอหลัก', data: 'action=show_content&topic=dashboard' } }
           ]
-        }
+_**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_       }
       },
       // Module 2: ภารกิจยอดฮิต
       {
@@ -216,7 +214,6 @@ const beginnerMenu = {
 
 // ------------------------------------------------
 // 4. beginnerContent (L3 - Beginner)
-//    (เมนูใหม่) คลังเนื้อหาบทเรียน (คุณต้องเติมเนื้อหาส่วนที่เหลือเอง)
 // ------------------------------------------------
 const beginnerContent = {
   // --- หัวข้อ "การลา" ---
@@ -274,7 +271,7 @@ const beginnerContent = {
   'login': { type: 'text', text: 'นี่คือเนื้อหา "วิธีเข้าใช้งาน"' },
   'forgot_password': { type: 'text', text: 'นี่คือเนื้อหา "ลืมรหัสผ่าน"' },
   'dashboard': { type: 'text', text: 'นี่คือเนื้อหา "ทัวร์หน้าจอหลัก"' },
-  'reimburse': { type: 'text', text: 'นี่คือเนื้อหา "วิธียื่นเบิกจ่าย"' }
+<meta charset="utf-8">“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”   'reimburse': { type: 'text', text: 'นี่คือเนื้อหา "วิธียื่นเบิกจ่าย"' }
 };
 
 
