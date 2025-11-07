@@ -159,8 +159,7 @@ const levelSelectorMenu = {
               type: 'button', 
               action: { type: 'postback', label: 'ดูคู่มือ (Advance)', data: 'action=show_level&level=advance' },
               style: 'secondary',
-              margin: 'lg'
-      _**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_       }
+              margin: 'lg' }
           ]
         }
       ]
