@@ -1,8 +1,7 @@
-// flexMessages.js (ฉบับแก้ไข SyntaxError)
+// flexMessages.js (ฉบับแก้ไข SyntaxError ทั้งหมด)
 
 // ------------------------------------------------
 // 1. mainMenu (L1 - Advance)
-//    เมนู 12 ปุ่ม (Advance) ที่ใช้ Postback
 // ------------------------------------------------
 const mainMenu = {
   type: 'flex',
@@ -53,7 +52,7 @@ const mainMenu = {
           contents: [
             {
               type: 'text',
-              text: '📚 หมวดหมู่เพิ่มเติม',
+  _**“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”**_           text: '📚 หมวดหมู่เพิ่มเติม',
               weight: 'bold',
               size: 'xl',
               color: '#1F2E55'
@@ -109,7 +108,6 @@ const mainMenu = {
 
 // ------------------------------------------------
 // 2. levelSelectorMenu (L1)
-//    (เมนูใหม่) หน้าเลือก Level Beginner / Advance
 // ------------------------------------------------
 const levelSelectorMenu = {
   type: 'flex',
@@ -159,7 +157,8 @@ const levelSelectorMenu = {
               type: 'button', 
               action: { type: 'postback', label: 'ดูคู่มือ (Advance)', data: 'action=show_level&level=advance' },
               style: 'secondary',
-              margin: 'lg' }
+              margin: 'lg'
+            }
           ]
         }
       ]
@@ -188,7 +187,7 @@ const beginnerMenu = {
           contents: [
             { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธีเข้าใช้งาน / Login', data: 'action=show_content&topic=login' } },
             { type: 'button', style: 'link', action: { type: 'postback', label: 'ลืมรหัสผ่าน ทำยังไง?', data: 'action=show_content&topic=forgot_password' } },
-            { type: 'button', style: 'link', action: { type: 'postback', label: 'ทัวร์หน้าจอหลัก', data: 'action=show_content&topic=dashboard' } }
+          _**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_   { type: 'button', style: 'link', action: { type: 'postback', label: 'ทัวร์หน้าจอหลัก', data: 'action=show_content&topic=dashboard' } }
           ]
         }
       },
@@ -233,7 +232,7 @@ const beginnerContent = {
           { type: 'text', text: 'การยื่นใบลาใน DPIS6 มี 4 ขั้นตอนง่ายๆ ดังนี้:', wrap: true },
           { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '1️⃣', flex: 0 }, { type: 'text', text: 'ไปที่เมนู "ระบบงานลา" > "สร้างใบลา"', wrap: true }] },
           { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '2️⃣', flex: 0 }, { type: 'text', text: 'เลือกประเภทการลา (ลาป่วย, ลากิจ, พักร้อน)', wrap: true }] },
-          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '3️⃣', flex: 0 }, { type: 'text', text: 'เลือกวันที่ในปฏิทิน และใส่เหตุผล', wrap: true }] },
+        _**“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”**_   { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '3️⃣', flex: 0 }, { type: 'text', text: 'เลือกวันที่ในปฏิทิน และใส่เหตุผล', wrap: true }] },
           { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '4️⃣', flex: 0 }, { type: 'text', text: 'ตรวจสอบวันลาคงเหลือ แล้วกด "ยื่นส่ง"', wrap: true }] }
         ]
       },
