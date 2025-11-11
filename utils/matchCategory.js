@@ -32,30 +32,35 @@ const keywordMap = {
   'อัปเดตระบบ/การใช้งาน': ['อัปเดต', 'อัปเดท','อัปเดตระบบ', 'อัปเดตประจำวัน', 'status', 'สถานะ dpis6', 'การใช้งานdpis6', 'อัพเดท'] // เพิ่มคำสะกดผิด
 };
 
-// --- 2. Fuse.js
+// --- 2. Setup Fuse.js ---
 const fuseData = [];
 for (const [category, keywords] of Object.entries(keywordMap)) {
-  for (const keyword of keywords) {
-    fuseData.push({ category, keyword: keyword.toLowerCase() });
-  }
+    for (const keyword of keywords) {
+        fuseData.push({ category, keyword: keyword.toLowerCase() });
+    }
 }
 
 const fuse = new Fuse(fuseData, {
-  keys: ['keyword'],
-  threshold: 0.30, // ปรับเพิ่มเป็น 0.30 เพื่อความยืดหยุ่นในการค้นหา
-  includeScore: true
+    keys: ['keyword'],
+    threshold: 0.30, 
+    includeScore: true
 });
 
-// --- 3. ฟังก์ชัน matchCategory
+// --- 3. Match Function ---
 function matchCategory(text) {
-  if (!text) return null;
-  const results = fuse.search(text.toLowerCase());
+    if (!text) return null;
+    const results = fuse.search(text.toLowerCase());
 
-  if (results.length > 0) {
-    // คืนค่าหมวดหมู่ที่มีคะแนนดีที่สุด
-    return results[0].item.category;
-  }
-  return null;
+    if (results.length > 0) {
+        return results[0].item.category;
+    }
+    return null;
 }
 
-module.exports = matchCategory;
+// ------------------------------------------------
+// Exports
+// ------------------------------------------------
+module.exports = {
+    matchCategory,
+    // (สามารถส่งออก keywordMap ถ้าจำเป็น)
+};
