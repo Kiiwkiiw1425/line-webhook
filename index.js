@@ -5,7 +5,7 @@ const express = require('express');
 const { Client, middleware } = require('@line/bot-sdk');
 const { URLSearchParams } = require('url'); 
 const flexMessages = require('./flexMessages');
-const { matchCategory } = require('./fuseConfig'); 
+const { fuseConfig } = require('./fuseConfig'); 
 
 // --- 1. Configuration (ปรับเปลี่ยนตาม Line API ของคุณ) ---
 const config = {
