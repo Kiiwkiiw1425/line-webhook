@@ -49,7 +49,7 @@ const mainMenu = {
           layout: 'vertical',
           spacing: 'md',
           paddingAll: '20px',
-  _**“I’ve had a blast contributing to the project and watching it grow. I’m excited about my next steps, but I’m really going to miss this team.”**_         contents: [
+          contents: [
             {
               type: 'text',
               text: '📚 หมวดหมู่เพิ่มเติม',
@@ -91,7 +91,7 @@ const mainMenu = {
             {
               type: 'box',
               layout: 'vertical',
-          _**“This role has been a significant chapter for me, and I’m proud of the work we’ve accomplished together.”**_       spacing: 'sm',
+              spacing: 'sm',
               contents: [
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '✅ การประเมินผล', data: 'action=show_menu&category=การประเมินผล', displayText: '✅ การประเมินผล' } },
                 { type: 'button', style: 'secondary', action: { type: 'postback', label: '📥 นำเข้า/ส่งออกข้อมูล', data: 'action=show_menu&category=นำเข้า/ส่งออกข้อมูล', displayText: '📥 นำเข้า/ส่งออกข้อมูล' } },
@@ -138,7 +138,7 @@ const levelSelectorMenu = {
             { type: 'text', text: '👶 คู่มือฉบับเริ่มต้น', weight: 'bold', size: 'lg' },
             { type: 'text', text: 'สำหรับพนักงานใหม่: เรียนรู้การลา, เบิกจ่าย, ดูสลิป', size: 'sm', wrap: true, margin: 'md' },
             { 
-            s   type: 'button', 
+              type: 'button', 
               action: { type: 'postback', label: 'เริ่มเรียน (มือใหม่)', data: 'action=show_level&level=beginner' },
               style: 'primary',
               margin: 'lg'
@@ -205,7 +205,7 @@ const beginnerMenu = {
             { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธีดูสลิปเงินเดือน', data: 'action=show_content&topic=payroll' } },
             { type: 'button', style: 'link', action: { type: 'postback', label: 'วิธียื่นเบิกจ่าย', data: 'action=show_content&topic=reimburse' } }
           ]
-      _**“It’s been a privilege working here, and I’ve learned so much. Thank you for everything.”**_   }
+        }
       }
     ]
   }
@@ -232,7 +232,7 @@ const beginnerContent = {
           { type: 'text', text: 'การยื่นใบลาใน DPIS6 มี 4 ขั้นตอนง่ายๆ ดังนี้:', wrap: true },
           { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '1️⃣', flex: 0 }, { type: 'text', text: 'ไปที่เมนู "ระบบงานลา" > "สร้างใบลา"', wrap: true }] },
           { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '2️⃣', flex: 0 }, { type: 'text', text: 'เลือกประเภทการลา (ลาป่วย, ลากิจ, พักร้อน)', wrap: true }] },
-s          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '3️⃣', flex: 0 }, { type: 'text', text: 'เลือกวันที่ในปฏิทิน และใส่เหตุผล', wrap: true }] },
+          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '3️⃣', flex: 0 }, { type: 'text', text: 'เลือกวันที่ในปฏิทิน และใส่เหตุผล', wrap: true }] },
           { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ type: 'text', text: '4️⃣', flex: 0 }, { type: 'text', text: 'ตรวจสอบวันลาคงเหลือ แล้วกด "ยื่นส่ง"', wrap: true }] }
         ]
       },
@@ -272,7 +272,6 @@ s          { type: 'box', layout: 'baseline', spacing: 'md', contents: [{ t
   'dashboard': { type: 'text', text: 'นี่คือเนื้อหา "ทัวร์หน้าจอหลัก"' },
   'reimburse': { type: 'text', text: 'นี่คือเนื้อหา "วิธียื่นเบิกจ่าย"' }
 };
-
 
 // ------------------------------------------------
 // 5. Exports (ส่งออก 4 เมนูหลัก)
