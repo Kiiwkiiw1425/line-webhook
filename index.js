@@ -1,26 +1,41 @@
-// index.js (หรือไฟล์ Line Message Handler หลัก)
+// index.js
 
-// ต้องนำเข้า 'url' สำหรับการใช้ URLSearchParams ใน Node.js บางเวอร์ชัน
-const { URLSearchParams } = require('url'); 
-
-// นำเข้า Flex Message และ Logic การค้นหา
+const express = require('express');
+const { Client, middleware } = require('@line/bot-sdk');
+const { URLSearchParams } = require('url'); // สำหรับจัดการ Postback
 const flexMessages = require('./flexMessages');
 const { matchCategory } = require('./fuseConfig'); 
 
-// คำที่ต้องการดักจับ (สำหรับแสดง userRoleSelector)
+// --- 1. Configuration (ปรับเปลี่ยนตาม Line API ของคุณ) ---
+const config = {
+  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || 'YOUR_CHANNEL_ACCESS_TOKEN',
+  channelSecret: process.env.LINE_CHANNEL_SECRET || 'YOUR_CHANNEL_SECRET',
+};
+
+const client = new Client(config);
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// คำที่ต้องการดักจับเพื่อแสดง userRoleSelector
 const GUIDE_KEYWORDS = ['คู่มือ', 'วิธีใช้', 'คู่มือการใช้งาน', 'เริ่มต้นใช้งาน'];
 
-function handleUserMessage(userMessage) {
-    // โค้ดนี้ถูกออกแบบมาเพื่อรองรับทั้งข้อความปกติและ postback data
-    const normalizedMessage = userMessage.toLowerCase().trim();
+// ------------------------------------------------
+// 2. Handler Logic
+// ------------------------------------------------
 
-    // 1. Logic ดักจับคำหลัก 'คู่มือ', 'วิธีใช้' (ส่ง userRoleSelector)
+function handleUserMessage(userMessage) {
+    // ต้องตรวจสอบว่าเป็น string ก่อน
+    if (typeof userMessage !== 'string') return null;
+
+    const normalizedMessage = userMessage.toLowerCase().trim();
+    let replyMessage = null;
+
+    // A. Logic ดักจับคำหลัก 'คู่มือ' (ส่ง userRoleSelector)
     if (GUIDE_KEYWORDS.some(keyword => normalizedMessage.includes(keyword)) && !normalizedMessage.startsWith('action=')) {
-        // เพิ่มเงื่อนไข !normalizedMessage.startsWith('action=') เพื่อไม่ให้ดักจับ Postback ที่มีคำว่า 'คู่มือ'
-        return flexMessages.userRoleSelector;
+        replyMessage = flexMessages.userRoleSelector;
     }
 
-    // 2. Logic จัดการ Postback Data (Postback Handler)
+    // B. Logic จัดการ Postback Data (Postback Handler)
     if (normalizedMessage.startsWith('action=')) {
         const urlParams = new URLSearchParams(userMessage);
         const action = urlParams.get('action');
@@ -28,52 +43,90 @@ function handleUserMessage(userMessage) {
         const category = urlParams.get('category');
         const topic = urlParams.get('topic');
 
-        // จัดการ Postback จาก userRoleSelector
         if (action === 'show_level') {
             if (level === 'beginner') {
-                return flexMessages.beginnerMenu;
+                replyMessage = flexMessages.beginnerMenu;
             } else if (level === 'advance') {
-                return flexMessages.mainMenu;
+                replyMessage = flexMessages.mainMenu;
             }
         }
         
-        // จัดการ Postback จาก mainMenu (Advance)
         if (action === 'show_menu' && category) {
-            // โค้ด Logic ในการแสดงเมนูย่อยของหมวดหมู่ Advance (ต้องมี Submenu Flex Message)
-            // เช่น: return flexMessages.advancedSubMenus[category]; 
-            // ตอนนี้ยังไม่มีเมนูย่อยจริง ๆ จึงขอส่งเป็นข้อความตอบกลับธรรมดา
-            return { type: 'text', text: `กำลังแสดงเมนูสำหรับหมวดหมู่: ${category} (Advance)` };
+            // Placeholder: ควรส่ง Flex Message เมนูย่อยของ Advance ที่นี่
+            replyMessage = { type: 'text', text: `กำลังแสดงเมนูสำหรับหมวดหมู่: ${category} (Advance)` };
         }
 
-        // จัดการ Postback จาก beginnerMenu (Content)
         if (action === 'show_content' && topic) {
-            return flexMessages.beginnerContent[topic];
-        }
-
-        // ... (เพิ่ม Postback Logic อื่นๆ)
-    }
-
-
-    // 3. Fallback Logic (ใช้ Fuse.js ค้นหา)
-    const matchedCategory = matchCategory(userMessage);
-    if (matchedCategory) {
-        // ถ้าเป็นการค้นหาคำทั่วไปที่นำไปสู่หมวดหมู่ Advance ให้แสดง mainMenu
-        if (['การใช้งานระบบทั่วไป', 'ตั้งค่าระบบ/นโยบาย', 'ข้อมูลบุคลากร', 'สิทธิการใช้งาน', 'การลา', 'โครงสร้าง/ตำแหน่ง', 'คำสั่ง/บัญชีแนบท้าย', 'รายงาน', 'การประเมินผล', 'นำเข้า/ส่งออกข้อมูล', 'บริหารวงเงิน', 'แอปพลิเคชัน'].includes(matchedCategory)) {
-             return flexMessages.mainMenu; 
-        }
-        // ถ้าเป็นคำถาม/ช่วยเหลือ ก็ตอบเป็น Text ทั่วไป
-        if (matchedCategory === 'คำถาม/ช่วยเหลือ') {
-            return { type: 'text', text: 'ติดต่อเจ้าหน้าที่ หรือดูคำถามที่พบบ่อยได้ที่นี่ค่ะ' };
+            replyMessage = flexMessages.beginnerContent[topic];
         }
     }
 
-    // Default response (ไม่พบคำตอบ)
-    return { type: 'text', text: 'ขออภัยค่ะ ไม่พบคำตอบที่เกี่ยวข้อง ลองพิมพ์ "คู่มือ" เพื่อเริ่มต้นใช้งาน หรือระบุคำค้นหาให้ชัดเจนขึ้น' };
+
+    // C. Fallback Logic (ใช้ Fuse.js ค้นหา)
+    if (!replyMessage) {
+        const matchedCategory = matchCategory(userMessage);
+        if (matchedCategory) {
+             // ถ้าเป็นการค้นหาคำทั่วไปที่นำไปสู่เมนู Advance
+            if (matchedCategory !== 'คำถาม/ช่วยเหลือ') {
+                 replyMessage = flexMessages.mainMenu; 
+            } else {
+                replyMessage = { type: 'text', text: 'ติดต่อเจ้าหน้าที่ หรือดูคำถามที่พบบ่อยได้ที่นี่ค่ะ' };
+            }
+        }
+    }
+
+    // D. Default response
+    if (!replyMessage) {
+        replyMessage = { type: 'text', text: 'ขออภัยค่ะ ไม่พบคำตอบที่เกี่ยวข้อง ลองพิมพ์ "คู่มือ" เพื่อเริ่มต้นใช้งาน หรือระบุคำค้นหาให้ชัดเจนขึ้น' };
+    }
+
+    return replyMessage;
 }
 
+
 // ------------------------------------------------
-// Exports (ส่งออกฟังก์ชัน handler เพื่อให้ Line Bot Framework เรียกใช้)
+// 3. Line Bot Event Handler
 // ------------------------------------------------
-module.exports = {
-    handleUserMessage
+
+const handleEvent = async (event) => {
+    if (event.type !== 'message' && event.type !== 'postback') {
+        return null;
+    }
+
+    let userMessage = '';
+
+    if (event.type === 'message' && event.message.type === 'text') {
+        userMessage = event.message.text;
+    } else if (event.type === 'postback') {
+        userMessage = event.postback.data;
+    } else {
+        return null;
+    }
+
+    const reply = handleUserMessage(userMessage);
+
+    if (reply) {
+        return client.replyMessage(event.replyToken, reply);
+    }
 };
+
+// ------------------------------------------------
+// 4. Server Setup
+// ------------------------------------------------
+
+app.post('/webhook', middleware(config), (req, res) => {
+    Promise.all(req.body.events.map(handleEvent))
+        .then((result) => res.json(result))
+        .catch((err) => {
+            console.error(err);
+            res.status(500).end();
+        });
+});
+
+app.get('/', (req, res) => {
+    res.send('Line Webhook is running!');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running at ${PORT}`);
+});
