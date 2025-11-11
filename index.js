@@ -1,8 +1,9 @@
-// index.js
+// index.js (โค้ดที่ได้รับการปรับปรุง)
 
+// ต้องมั่นใจว่าไฟล์ทั้งหมดนี้อยู่ถูก Path และติดตั้ง dependencies ครบ
 const express = require('express');
 const { Client, middleware } = require('@line/bot-sdk');
-const { URLSearchParams } = require('url'); // สำหรับจัดการ Postback
+const { URLSearchParams } = require('url'); 
 const flexMessages = require('./flexMessages');
 const { matchCategory } = require('./fuseConfig'); 
 
@@ -24,7 +25,6 @@ const GUIDE_KEYWORDS = ['คู่มือ', 'วิธีใช้', 'คู�
 // ------------------------------------------------
 
 function handleUserMessage(userMessage) {
-    // ต้องตรวจสอบว่าเป็น string ก่อน
     if (typeof userMessage !== 'string') return null;
 
     const normalizedMessage = userMessage.toLowerCase().trim();
@@ -37,41 +37,56 @@ function handleUserMessage(userMessage) {
 
     // B. Logic จัดการ Postback Data (Postback Handler)
     if (normalizedMessage.startsWith('action=')) {
-        const urlParams = new URLSearchParams(userMessage);
-        const action = urlParams.get('action');
-        const level = urlParams.get('level');
-        const category = urlParams.get('category');
-        const topic = urlParams.get('topic');
-
-        if (action === 'show_level') {
-            if (level === 'beginner') {
-                replyMessage = flexMessages.beginnerMenu;
-            } else if (level === 'advance') {
-                replyMessage = flexMessages.mainMenu;
+        // เพิ่ม Try-Catch ภายใน Logic ส่วนนี้เพื่อดักจับ Error ในการประมวลผล Postback
+        try {
+            const urlParams = new URLSearchParams(userMessage);
+            const action = urlParams.get('action');
+            const level = urlParams.get('level');
+            const category = urlParams.get('category');
+            const topic = urlParams.get('topic');
+            
+            if (action === 'show_level') {
+                if (level === 'beginner') {
+                    replyMessage = flexMessages.beginnerMenu;
+                } else if (level === 'advance') {
+                    replyMessage = flexMessages.mainMenu;
+                }
             }
-        }
-        
-        if (action === 'show_menu' && category) {
-            // Placeholder: ควรส่ง Flex Message เมนูย่อยของ Advance ที่นี่
-            replyMessage = { type: 'text', text: `กำลังแสดงเมนูสำหรับหมวดหมู่: ${category} (Advance)` };
-        }
+            
+            if (action === 'show_menu' && category) {
+                // ต้องมีเมนูย่อยของ Advance ที่นี่ ถ้าไม่มีจะส่ง Text ตอบกลับ
+                replyMessage = { type: 'text', text: `กำลังแสดงเมนูสำหรับหมวดหมู่: ${category} (Advance) โปรดเพิ่ม Logic เมนูย่อยในโค้ด` };
+            }
 
-        if (action === 'show_content' && topic) {
-            replyMessage = flexMessages.beginnerContent[topic];
+            if (action === 'show_content' && topic) {
+                // ป้องกันการเข้าถึง undefined content
+                if(flexMessages.beginnerContent && flexMessages.beginnerContent[topic]) {
+                    replyMessage = flexMessages.beginnerContent[topic];
+                }
+            }
+        } catch (e) {
+            console.error("Postback Processing Error:", e);
+            // ตอบกลับด้วยข้อความ Error ป้องกันเซิร์ฟเวอร์ล่ม
+            replyMessage = { type: 'text', text: 'เกิดข้อผิดพลาดในการประมวลผลเมนู กรุณาลองใหม่' };
         }
     }
 
 
     // C. Fallback Logic (ใช้ Fuse.js ค้นหา)
     if (!replyMessage) {
-        const matchedCategory = matchCategory(userMessage);
-        if (matchedCategory) {
-             // ถ้าเป็นการค้นหาคำทั่วไปที่นำไปสู่เมนู Advance
-            if (matchedCategory !== 'คำถาม/ช่วยเหลือ') {
-                 replyMessage = flexMessages.mainMenu; 
-            } else {
-                replyMessage = { type: 'text', text: 'ติดต่อเจ้าหน้าที่ หรือดูคำถามที่พบบ่อยได้ที่นี่ค่ะ' };
+        // เพิ่ม Try-Catch เพื่อป้องกัน Fuse.js ล้มเหลว
+        try {
+            const matchedCategory = matchCategory(userMessage);
+            if (matchedCategory) {
+                if (matchedCategory !== 'คำถาม/ช่วยเหลือ') {
+                     replyMessage = flexMessages.mainMenu; 
+                } else {
+                    replyMessage = { type: 'text', text: 'ติดต่อเจ้าหน้าที่ หรือดูคำถามที่พบบ่อยได้ที่นี่ค่ะ' };
+                }
             }
+        } catch (e) {
+             console.error("Fuse Search Error:", e);
+             // ไม่ต้องทำอะไร ปล่อยให้ไปใช้ Default response
         }
     }
 
@@ -89,12 +104,13 @@ function handleUserMessage(userMessage) {
 // ------------------------------------------------
 
 const handleEvent = async (event) => {
+    // โค้ดนี้รับประกันว่า Event เป็น message หรือ postback เท่านั้น
     if (event.type !== 'message' && event.type !== 'postback') {
         return null;
     }
 
     let userMessage = '';
-
+    // การดึงข้อความ/Postback data
     if (event.type === 'message' && event.message.type === 'text') {
         userMessage = event.message.text;
     } else if (event.type === 'postback') {
@@ -115,11 +131,20 @@ const handleEvent = async (event) => {
 // ------------------------------------------------
 
 app.post('/webhook', middleware(config), (req, res) => {
+    // เพิ่มการ Logging ที่ชัดเจนขึ้น
+    console.log(`Received ${req.body.events.length} event(s).`);
+
     Promise.all(req.body.events.map(handleEvent))
         .then((result) => res.json(result))
         .catch((err) => {
-            console.error(err);
-            res.status(500).end();
+            // นี่คือส่วนสำคัญ: Log Error ที่ทำให้เซิร์ฟเวอร์ล่มระหว่างประมวลผล
+            console.error("LINE WEBHOOK ERROR (500 Internal Error):", err);
+            // ส่งสถานะ 200 กลับไปให้ LINE เพื่อยืนยันว่าได้รับ Event แล้ว (แม้ว่าประมวลผลไม่สำเร็จก็ตาม)
+            res.status(200).end(); 
+            
+            // หมายเหตุ: การส่ง 500 กลับไปทำให้ LINE แจ้งเตือน ถ้าคุณต้องการซ่อน Error จาก LINE ให้ใช้ res.status(200).end();
+            // แต่เนื่องจากคุณได้รับ 500 จาก LINE อยู่แล้ว แสดงว่าโค้ดล้มก่อนเข้าถึง Catch Block นี้
+            // โค้ดที่ล้มเหลวส่วนใหญ่อยู่ในการ require() หรือใน Promise.all
         });
 });
 
@@ -128,5 +153,5 @@ app.get('/', (req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Server running at ${PORT}`);
+    console.log(`Server running and listening on port ${PORT}`);
 });
