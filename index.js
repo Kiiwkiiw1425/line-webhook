@@ -1,151 +1,91 @@
-// index.js (ฉบับสมบูรณ์)
+// index.js (ไฟล์หลัก)
+
 const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-const matchCategory = require('./utils/matchCategory'); 
+const line = require('@line/bot-sdk');
 
-// 1. Import เมนูทั้งหมด
-//    - categoryMenus มาจาก /manual/index.js ที่คุณสร้างไว้
-//    - ที่เหลือมาจาก flexMessages.js
-// -----------------------------------------------------------
+// --- 1. นำเข้าเมนูทั้งหมดจากโฟลเดอร์ manual ---
 const categoryMenus = require('./manual'); 
-const { 
-  mainMenu, 
-  levelSelectorMenu, 
-  beginnerMenu, 
-  beginnerContent 
-} = require('./flexMessages'); 
-// -----------------------------------------------------------
+// (ไฟล์ manual/index.js ของคุณทำส่วนนี้ถูกต้องแล้ว)
 
+// --- 2. ตั้งค่า Config ---
+// (อย่าลืมตั้งค่า YOUR_CHANNEL_ACCESS_TOKEN และ YOUR_CHANNEL_SECRET ใน Environment ของ Server)
+const config = {
+  channelAccessToken: process.env.YOUR_CHANNEL_ACCESS_TOKEN,
+  channelSecret: process.env.YOUR_CHANNEL_SECRET
+};
+
+const client = new line.Client(config);
 const app = express();
-app.use(bodyParser.json());
 
-const PORT = process.env.PORT || 10000;
-const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN;
-
-if (!CHANNEL_ACCESS_TOKEN) {
-    console.error('❌ Environment variable CHANNEL_ACCESS_TOKEN is not set!');
-    process.exit(1);
-}
-
-/**
- * ฟังก์ชันส่งข้อความกลับไปยัง LINE
- */
-async function replyToLine(replyToken, message) {
-    const url = 'https://api.line.me/v2/bot/message/reply';
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
-    };
-    const body = {
-        replyToken,
-        messages: Array.isArray(message) ? message : [message] // รองรับการส่งหลายข้อความ
-    };
-    try {
-        await axios.post(url, body, { headers });
-    } catch (error) {
-        console.error('LINE Reply Error:', error.response?.data || error.message);
-    }
-}
-
-/**
- * Webhook หลัก
- */
-app.post('/line-webhook', async (req, res) => {
-  // console.log(JSON.stringify(req.body, null, 2));
-  const events = req.body.events || [];
-
-  for (const event of events) {
-    try {
-      if (event.type === 'message' && event.message.type === 'text') {
-        await handleTextMessage(event);
-      } else if (event.type === 'postback') {
-        await handlePostback(event);
-      }
-    } catch (error) {
-      console.error('Event Handling Error:', error.message);
-    }
-  }
-  res.sendStatus(200);
+// --- 3. สร้าง Endpoint /callback ---
+app.post('/callback', line.middleware(config), (req, res) => {
+  Promise
+    .all(req.body.events.map(handleEvent))
+    .then((result) => res.json(result))
+    .catch((err) => {
+      console.error(err);
+      res.status(500).end();
+    });
 });
 
-/**
- * ตัวจัดการ Postback (สำหรับปุ่มคลิก)
- */
-async function handlePostback(event) {
-  const replyToken = event.replyToken;
-  const postbackData = event.postback.data; 
-  
-  const params = new URLSearchParams(postbackData);
-  const action = params.get('action');
-  const category = params.get('category'); // (สำหรับ Advance)
-  const level = params.get('level'); // (สำหรับ L1)
-  const topic = params.get('topic'); // (สำหรับ Beginner)
+// --- 4. ส่วนสำคัญที่เพิ่มเข้ามา: จัดการ Event ---
+async function handleEvent(event) {
+  
+  // === 4.1: จัดการ Postback (ที่คลิกจาก Rich Menu) ===
+  // นี่คือส่วนที่แก้ปัญหา "ปุ่มนิ่ง" ครับ
+  if (event.type === 'postback') {
+    const data = event.postback.data; // เช่น 'action=help' หรือ 'action=update'
+    let replyContent;
 
-  let message;
+    // สร้างตัวแปล Postback data (action=help) ให้เป็น Key ภาษาไทย
+    // ที่ตรงกับใน manual/index.js ของคุณ
+    const postbackToActionKey = {
+      'action=help': 'คำถาม/ช่วยเหลือ',
+      'action=update': 'อัปเดตระบบ/การใช้งาน'
+      // เพิ่มปุ่มอื่นๆ ตรงนี้...
+    };
 
-  // --- Flow L1 -> L2 (เลือก Beginner/Advance) ---
-  if (action === 'show_level') {
-    if (level === 'beginner') {
-      message = beginnerMenu; // ส่งสารบัญเริ่มต้น
-    } else if (level === 'advance') {
-      message = mainMenu; // ส่งเมนู Advance 12 ปุ่ม
-    }
-  } 
-  // --- Flow L1-Advance -> L2-Advance ---
-  else if (action === 'show_menu' && category) {
-    message = categoryMenus[category]; // (Flow เดิมของคุณ)
-    if (!message) {
-      message = { type: 'text', text: `ขออภัย, ไม่พบเมนูสำหรับ "${category}"` };
-    }
-  }
-  // --- Flow L2-Beginner -> L3-Beginner ---
-  else if (action === 'show_content' && topic) {
-    message = beginnerContent[topic]; // ดึงเนื้อหาจาก object beginnerContent
-    if (!message) {
-      message = { type: 'text', text: `ขออภัย, เนื้อหาสำหรับ "${topic}" ยังไม่พร้อม` };
-    }
-  }
+    // ดึงชื่อ Key ภาษาไทย
+    const thaiNameKey = postbackToActionKey[data];
 
-  if (message) {
-    await replyToLine(replyToken, message);
-  }
+    if (thaiNameKey) {
+      // ค้นหาเนื้อหาเมนู (Flex Message) จาก Object ที่คุณเตรียมไว้
+      replyContent = categoryMenus[thaiNameKey];
+    }
+
+    if (replyContent) {
+      // ตอบกลับด้วย Flex Message ที่หาเจอ
+      return client.replyMessage(event.replyToken, replyContent);
+    } else {
+      // กรณีหาไม่เจอ (เช่น เพิ่มปุ่มใน JSON แต่ลืมเพิ่มใน postbackToActionKey)
+      console.warn(`ไม่พบเนื้อหาสำหรับ Postback data: ${data}`);
+      return client.replyMessage(event.replyToken, {
+        type: 'text',
+        text: 'ขออภัยครับ ไม่พบเนื้อหาที่ร้องขอ'
+      });
+    }
+  }
+
+  // === 4.2: จัดการ Message (ที่ User พิมพ์มา) ===
+  // ส่วนนี้จะใช้สำหรับ "ระบบตอบกลับอัตโนมัติ" ในข้อ 2 ครับ
+  if (event.type === 'message' && event.message.type === 'text') {
+    const userText = event.message.text;
+
+    // (เดี๋ยวเราจะมาเพิ่มโค้ด AI/ค้นหา ตรงนี้ในข้อ 2)
+    
+    // โค้ดชั่วคราว: ตอบกลับแบบนกแก้วไปก่อน
+    return client.replyMessage(event.replyToken, {
+      type: 'text',
+      text: 'คุณพิมพ์ว่า: ' + userText
+    });
+  }
+
+  // หากเป็น Event อื่นๆ ที่เราไม่สนใจ (เช่น join, leave)
+  return Promise.resolve(null);
 }
 
-/**
- * ตัวจัดการ Text (สำหรับพิมพ์)
- */
-async function handleTextMessage(event) {
-  const userText = event.message.text.trim();
-  const replyToken = event.replyToken;
-
-  let message;
-
-  // --- (จุดเริ่มต้น Flow ใหม่) ---
-  if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
-    message = levelSelectorMenu; // ⭐️ ส่งหน้าเลือก Level
-  } 
-  // --- (Fallback Flow เดิมสำหรับ Advance user) ---
-  else {
-    const matched = matchCategory(userText); // ใช้ Fuse.js ค้นหา
-    if (matched && categoryMenus[matched]) {
-      // ถ้าพิมพ์คำว่า "การลา" (ซึ่งเป็น Advance) ก็ส่งเมนู L2 Advance เลย
-      message = categoryMenus[matched]; 
-    } else {
-      message = null; // ไม่ต้องตอบ
-    }
-  }
-
-  if (message) {
-    await replyToLine(replyToken, message);
-  }
-}
-
-// ping endpoint
-app.get('/ping', (req, res) => {
-  res.send('pong');
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
+// สั่งรัน Server
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Bot กำลังรันอยู่ที่ port ${port}`);
 });
