@@ -85,7 +85,7 @@ async function handleEvent(event) {
 }
 
 // สั่งรัน Server
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 10000;
 app.listen(port, () => {
   console.log(`Bot กำลังรันอยู่ที่ port ${port}`);
 });
