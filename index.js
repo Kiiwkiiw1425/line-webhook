@@ -15,7 +15,7 @@ const config = {
 
 const client = new Client(config);
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
 // คำที่ต้องการดักจับเพื่อแสดง userRoleSelector
 const GUIDE_KEYWORDS = ['คู่มือ', 'วิธีใช้', 'คู่มือการใช้งาน', 'เริ่มต้นใช้งาน'];
