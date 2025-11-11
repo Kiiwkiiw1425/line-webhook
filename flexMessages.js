@@ -290,7 +290,30 @@ const beginnerContent = {
             }
         }
     },
-    // เนื้อหาที่เหลือ (ย่อเพื่อให้สั้นลง)
     'payroll': { type: 'flex', altText: 'วิธีดูสลิปเงินเดือน', contents: { type: 'bubble', body: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: 'คุณสามารถดูสลิปเงินเดือนได้ที่เมนู "ข้อมูลส่วนตัว" > "สลิปเงินเดือน"', wrap: true }] } } },
     'login': { type: 'flex', altText: 'วิธีเข้าใช้งานระบบ', contents: { type: 'bubble', body: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '💡 วิธีเข้าใช้งานระบบ: เข้าสู่ระบบด้วย Thai ID และรหัสผ่าน', wrap: true }] } } },
-    'forgot_password': { type: 'flex', altText: 'ลืมรหัสผ่าน', contents: { type: 'bubble', body: { type: 'box', layout: 'vertical', contents: [{ type: 'text', text: '🔒 ลืมรหัสผ่าน: คลิก "ลืมรหัสผ่าน" ที่หน้าจอ Login เพื่อตั้งค่าใหม่', wrap: true }] } }
+    'forgot_password': { 
+        type: 'flex', 
+        altText: 'ลืมรหัสผ่าน', 
+        contents: { 
+            type: 'bubble', 
+            body: { 
+                type: 'box', 
+                layout: 'vertical', 
+                contents: [{ type: 'text', text: '🔒 ลืมรหัสผ่าน: คลิก "ลืมรหัสผ่าน" ที่หน้าจอ Login เพื่อตั้งค่าใหม่', wrap: true }] 
+            } 
+        } 
+    } // <--- ต้องมี comma ถ้ามีรายการถัดไป หรือไม่มี comma ถ้าเป็นรายการสุดท้าย
+    // รายการที่เหลือหายไป
+}; // <--- ปิด Object beginnerContent
+
+// ------------------------------------------------
+// 5. Exports
+// ------------------------------------------------
+module.exports = {
+    mainMenu,
+    levelSelectorMenu,
+    beginnerMenu,
+    beginnerContent,
+    userRoleSelector
+};
