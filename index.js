@@ -27,7 +27,6 @@ app.post('/callback', line.middleware(config), (req, res) => {
     .all(req.body.events.map(handleEvent))
     .then((result) => res.json(result))
     .catch((err) => {
-      // โชว์ Error ใน Log หากเกิดปัญหาในการประมวลผล Event
       console.error("Webhook Error:", err);
       res.status(500).end();
     });
@@ -75,7 +74,7 @@ async function handleEvent(event) {
     // โค้ดสำหรับตอบกลับแบบนกแก้วชั่วคราว (จะถูกลบเมื่อเพิ่ม AI)
     return client.replyMessage(event.replyToken, {
       type: 'text',
-      text: 'คุณพิมพ์ว่า: ' + userText + ' (ตอนนี้ Webhook ทำงานแล้ว!)'
+      text: 'คุณพิมพ์ว่า: ' + userText
     });
   }
 
