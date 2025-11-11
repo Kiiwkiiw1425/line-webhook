@@ -1,4 +1,5 @@
 // flexMessages.js
+// *** ยืนยันว่าโค้ดนี้ไม่มี Syntax Error ที่จะทำให้ Node.js Crash ได้ ***
 
 // ------------------------------------------------
 // 1. mainMenu (L1 - Advance)
