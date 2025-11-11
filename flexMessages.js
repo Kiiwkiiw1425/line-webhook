@@ -104,7 +104,7 @@ const mainMenu = {
 };
 
 // ------------------------------------------------
-// 1.5. userRoleSelector (NEW)
+// 1.5. userRoleSelector (NEW: ตัวเลือก ผู้ใช้ใหม่/เก่า)
 // ------------------------------------------------
 const userRoleSelector = {
     type: 'flex',
@@ -157,7 +157,7 @@ const userRoleSelector = {
 };
 
 // ------------------------------------------------
-// 2. levelSelectorMenu (L1) - เก็บไว้เป็นตัวเลือกเดิม
+// 2. levelSelectorMenu (L1) - ตัวเลือกเดิม (เก็บไว้)
 // ------------------------------------------------
 const levelSelectorMenu = {
     type: 'flex',
@@ -303,9 +303,20 @@ const beginnerContent = {
                 contents: [{ type: 'text', text: '🔒 ลืมรหัสผ่าน: คลิก "ลืมรหัสผ่าน" ที่หน้าจอ Login เพื่อตั้งค่าใหม่', wrap: true }] 
             } 
         } 
-    } // <--- ต้องมี comma ถ้ามีรายการถัดไป หรือไม่มี comma ถ้าเป็นรายการสุดท้าย
-    // รายการที่เหลือหายไป
-}; // <--- ปิด Object beginnerContent
+    },
+    'reimburse': { 
+        type: 'flex', 
+        altText: 'วิธียื่นเบิกจ่าย', 
+        contents: { 
+            type: 'bubble', 
+            body: { 
+                type: 'box', 
+                layout: 'vertical', 
+                contents: [{ type: 'text', text: '🧾 วิธียื่นเบิกจ่าย: ไปที่เมนู "ระบบงานเบิกจ่าย" > "สร้างรายการเบิกจ่าย"', wrap: true }] 
+            } 
+        } 
+    }
+};
 
 // ------------------------------------------------
 // 5. Exports
