@@ -1,5 +1,8 @@
 // index.js (หรือไฟล์ Line Message Handler หลัก)
 
+// ต้องนำเข้า 'url' สำหรับการใช้ URLSearchParams ใน Node.js บางเวอร์ชัน
+const { URLSearchParams } = require('url'); 
+
 // นำเข้า Flex Message และ Logic การค้นหา
 const flexMessages = require('./flexMessages');
 const { matchCategory } = require('./fuseConfig'); 
@@ -8,10 +11,12 @@ const { matchCategory } = require('./fuseConfig');
 const GUIDE_KEYWORDS = ['คู่มือ', 'วิธีใช้', 'คู่มือการใช้งาน', 'เริ่มต้นใช้งาน'];
 
 function handleUserMessage(userMessage) {
+    // โค้ดนี้ถูกออกแบบมาเพื่อรองรับทั้งข้อความปกติและ postback data
     const normalizedMessage = userMessage.toLowerCase().trim();
 
     // 1. Logic ดักจับคำหลัก 'คู่มือ', 'วิธีใช้' (ส่ง userRoleSelector)
-    if (GUIDE_KEYWORDS.some(keyword => normalizedMessage.includes(keyword))) {
+    if (GUIDE_KEYWORDS.some(keyword => normalizedMessage.includes(keyword)) && !normalizedMessage.startsWith('action=')) {
+        // เพิ่มเงื่อนไข !normalizedMessage.startsWith('action=') เพื่อไม่ให้ดักจับ Postback ที่มีคำว่า 'คู่มือ'
         return flexMessages.userRoleSelector;
     }
 
@@ -30,13 +35,14 @@ function handleUserMessage(userMessage) {
             } else if (level === 'advance') {
                 return flexMessages.mainMenu;
             }
-            // ถ้ามาจาก levelSelectorMenu (เดิม) สามารถใส่ logic ตรงนี้ได้
         }
         
         // จัดการ Postback จาก mainMenu (Advance)
         if (action === 'show_menu' && category) {
-            // Logic เพื่อแสดงเมนูย่อยของหมวดหมู่ (ถ้ามี)
-            // (ตัวอย่าง: return flexMessages.subMenus[category])
+            // โค้ด Logic ในการแสดงเมนูย่อยของหมวดหมู่ Advance (ต้องมี Submenu Flex Message)
+            // เช่น: return flexMessages.advancedSubMenus[category]; 
+            // ตอนนี้ยังไม่มีเมนูย่อยจริง ๆ จึงขอส่งเป็นข้อความตอบกลับธรรมดา
+            return { type: 'text', text: `กำลังแสดงเมนูสำหรับหมวดหมู่: ${category} (Advance)` };
         }
 
         // จัดการ Postback จาก beginnerMenu (Content)
@@ -51,10 +57,13 @@ function handleUserMessage(userMessage) {
     // 3. Fallback Logic (ใช้ Fuse.js ค้นหา)
     const matchedCategory = matchCategory(userMessage);
     if (matchedCategory) {
-        // ถ้ามีการจับคู่ได้ ให้ส่งเมนูหมวดหมู่นั้นๆ (ขึ้นอยู่กับโครงสร้าง)
-        // ตัวอย่าง: ถ้าเป็นคำทั่วไปที่อยู่ในหมวดหมู่ advance ให้แสดง mainMenu
-        if (matchedCategory !== 'คำถาม/ช่วยเหลือ') {
+        // ถ้าเป็นการค้นหาคำทั่วไปที่นำไปสู่หมวดหมู่ Advance ให้แสดง mainMenu
+        if (['การใช้งานระบบทั่วไป', 'ตั้งค่าระบบ/นโยบาย', 'ข้อมูลบุคลากร', 'สิทธิการใช้งาน', 'การลา', 'โครงสร้าง/ตำแหน่ง', 'คำสั่ง/บัญชีแนบท้าย', 'รายงาน', 'การประเมินผล', 'นำเข้า/ส่งออกข้อมูล', 'บริหารวงเงิน', 'แอปพลิเคชัน'].includes(matchedCategory)) {
              return flexMessages.mainMenu; 
+        }
+        // ถ้าเป็นคำถาม/ช่วยเหลือ ก็ตอบเป็น Text ทั่วไป
+        if (matchedCategory === 'คำถาม/ช่วยเหลือ') {
+            return { type: 'text', text: 'ติดต่อเจ้าหน้าที่ หรือดูคำถามที่พบบ่อยได้ที่นี่ค่ะ' };
         }
     }
 
