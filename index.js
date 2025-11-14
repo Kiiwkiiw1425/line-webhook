@@ -1,149 +1,167 @@
-// index.js (โค้ดที่ได้รับการแก้ไข)
-
-// ต้องมั่นใจว่าไฟล์ทั้งหมดนี้อยู่ถูก Path และติดตั้ง dependencies ครบ
+// ------------------------------------------------
+// 1. DEPENDENCIES
+// ------------------------------------------------
 const express = require('express');
-const { Client, middleware } = require('@line/bot-sdk');
-const { URLSearchParams } = require('url'); 
+const line = require('@line/bot-sdk');
 
-// 🚨 แก้ไขจุดสำคัญ: ต้องดึง matchCategory ออกมาโดยตรง 
-const flexMessages = require('./flexMessages');
-const { matchCategory } = require('./fuseConfig'); 
+// ------------------------------------------------
+// 2. MODULE IMPORTS (Core Logic)
+// ------------------------------------------------
+// categoryMenus: โหลดเนื้อหาคู่มือย่อย (L2/L3) จาก /manual
+const categoryMenus = require('./manual'); 
 
-// --- 1. Configuration (ปรับเปลี่ยนตาม Line API ของคุณ) ---
+// flexMessages: โหลดเมนูนำทางหลัก (L1) เช่น หน้าเลือก Level, เมนู Advance
+const flexMessages = require('./flexMessages'); 
+
+// matchCategory: โหลดฟังก์ชันค้นหาคีย์เวิร์ด
+const matchCategory = require('./utils/matchCategory'); 
+
+// ------------------------------------------------
+// 3. CONFIG & INITIALIZATION
+// ------------------------------------------------
+// *** สำคัญมาก: ต้องตั้งค่า Environment Variables บน Server ที่ Deploy ***
 const config = {
-  channelAccessToken: process.env.LINE_CHANNEL_ACCESS_TOKEN || 'YOUR_CHANNEL_ACCESS_TOKEN',
-  channelSecret: process.env.LINE_CHANNEL_SECRET || 'YOUR_CHANNEL_SECRET',
+  channelAccessToken: process.env.YOUR_CHANNEL_ACCESS_TOKEN,
+  channelSecret: process.env.YOUR_CHANNEL_SECRET
 };
 
-const client = new Client(config);
-const app = express();
-const PORT = process.env.PORT || 10000;
-
-// คำที่ต้องการดักจับเพื่อแสดง userRoleSelector
-const GUIDE_KEYWORDS = ['คู่มือ', 'วิธีใช้', 'คู่มือการใช้งาน', 'เริ่มต้นใช้งาน'];
-
-// ------------------------------------------------
-// 2. Handler Logic
-// ------------------------------------------------
-
-function handleUserMessage(userMessage) {
-    if (typeof userMessage !== 'string') return null;
-
-    const normalizedMessage = userMessage.toLowerCase().trim();
-    let replyMessage = null;
-
-    // A. Logic ดักจับคำหลัก 'คู่มือ' (ส่ง userRoleSelector)
-    if (GUIDE_KEYWORDS.some(keyword => normalizedMessage.includes(keyword)) && !normalizedMessage.startsWith('action=')) {
-        replyMessage = flexMessages.userRoleSelector;
-    }
-
-    // B. Logic จัดการ Postback Data (Postback Handler)
-    if (normalizedMessage.startsWith('action=')) {
-        try {
-            const urlParams = new URLSearchParams(userMessage);
-            const action = urlParams.get('action');
-            const level = urlParams.get('level');
-            const category = urlParams.get('category');
-            const topic = urlParams.get('topic');
-            
-            if (action === 'show_level') {
-                if (level === 'beginner') {
-                    replyMessage = flexMessages.beginnerMenu;
-                } else if (level === 'advance') {
-                    replyMessage = flexMessages.mainMenu;
-                }
-            }
-            
-            if (action === 'show_menu' && category) {
-                // ตอบกลับด้วย Text ธรรมดา (Placeholder)
-                replyMessage = { type: 'text', text: `กำลังแสดงเมนูสำหรับหมวดหมู่: ${category} (Advance) โปรดเพิ่ม Logic เมนูย่อยในโค้ด` };
-            }
-
-            if (action === 'show_content' && topic) {
-                // ป้องกันการเข้าถึง undefined content
-                if(flexMessages.beginnerContent && flexMessages.beginnerContent[topic]) {
-                    replyMessage = flexMessages.beginnerContent[topic];
-                }
-            }
-        } catch (e) {
-            console.error("Postback Processing Error:", e);
-            replyMessage = { type: 'text', text: 'เกิดข้อผิดพลาดในการประมวลผลเมนู กรุณาลองใหม่' };
-        }
-    }
-
-
-    // C. Fallback Logic (ใช้ Fuse.js ค้นหา)
-    if (!replyMessage) {
-        try {
-            // 🚨 การเรียกใช้ถูกต้องแล้ว: เรียกใช้ matchCategory(userMessage)
-            const matchedCategory = matchCategory(userMessage); 
-            if (matchedCategory) {
-                if (matchedCategory !== 'คำถาม/ช่วยเหลือ') {
-                     replyMessage = flexMessages.mainMenu; 
-                } else {
-                    replyMessage = { type: 'text', text: 'ติดต่อเจ้าหน้าที่ หรือดูคำถามที่พบบ่อยได้ที่นี่ค่ะ' };
-                }
-            }
-        } catch (e) {
-             console.error("Fuse Search Error:", e);
-        }
-    }
-
-    // D. Default response
-    if (!replyMessage) {
-        replyMessage = { type: 'text', text: 'ขออภัยค่ะ ไม่พบคำตอบที่เกี่ยวข้อง ลองพิมพ์ "คู่มือ" เพื่อเริ่มต้นใช้งาน หรือระบุคำค้นหาให้ชัดเจนขึ้น' };
-    }
-
-    return replyMessage;
+// ตรวจสอบว่า .env ถูกโหลดมาหรือไม่
+if (!config.channelAccessToken || !config.channelSecret) {
+    console.error('FATAL ERROR: Environment variables (YOUR_CHANNEL_ACCESS_TOKEN, YOUR_CHANNEL_SECRET) are missing.');
+    // ใน Production, ควรใช้ process.exit(1) แต่เพื่อการดีบัก ให้แสดงค่า config
+    console.error('Current Config:', JSON.stringify(config));
+    // หากไม่ต้องการให้แอปทำงานต่อ ให้ uncomment บรรทัดล่าง
+    // process.exit(1); 
 }
 
+const client = new line.Client(config);
+const app = express();
 
 // ------------------------------------------------
-// 3. Line Bot Event Handler
+// 4. WEBHOOK ENDPOINTS
 // ------------------------------------------------
 
-const handleEvent = async (event) => {
-    if (event.type !== 'message' && event.type !== 'postback') {
-        return null;
-    }
-
-    let userMessage = '';
-    if (event.type === 'message' && event.message.type === 'text') {
-        userMessage = event.message.text;
-    } else if (event.type === 'postback') {
-        userMessage = event.postback.data;
-    } else {
-        return null;
-    }
-
-    const reply = handleUserMessage(userMessage);
-
-    if (reply) {
-        return client.replyMessage(event.replyToken, reply);
-    }
-};
-
-// ------------------------------------------------
-// 4. Server Setup
-// ------------------------------------------------
-
-app.post('/webhook', middleware(config), (req, res) => {
-    console.log(`Received ${req.body.events.length} event(s).`);
-
-    Promise.all(req.body.events.map(handleEvent))
-        .then((result) => res.json(result))
-        .catch((err) => {
-            console.error("LINE WEBHOOK CRASH (Unhandled):", err);
-            // ส่งสถานะ 200 กลับไปทันที เพื่อป้องกัน LINE แจ้งเตือน Error ซ้ำ
-            res.status(200).end(); 
-        });
+// Endpoint สำหรับ Ping (Uptime Monitor)
+app.get("/ping", (req, res) => {
+  console.log("Ping received!");
+  res.status(200).send("OK");
 });
 
-app.get('/', (req, res) => {
-    res.send('Line Webhook is running!');
+// Endpoint หลักสำหรับ LINE Webhook (/callback)
+app.post('/callback', line.middleware(config), (req, res) => {
+  Promise
+    .all(req.body.events.map(handleEvent))
+  	.then((result) => res.json(result))
+  	.catch((err) => {
+      console.error("Webhook Error (Outside handleEvent):", err);
+      // ตอบ 500 เพื่อให้ Line รู้ว่ามีปัญหา
+      res.status(500).end();
+    });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server running and listening on port ${PORT}`);
-});
+// ------------------------------------------------
+// 5. EVENT HANDLER (Core Logic)
+// ------------------------------------------------
+async function handleEvent(event) {
+    
+    // *** เพิ่ม Try...Catch เพื่อป้องกัน 500 Internal Server Error ***
+    try {
+        
+        // === 5.1: จัดการ Postback (เมื่อคลิกเมนู) ===
+        if (event.type === 'postback') {
+            const data = event.postback.data;
+            let replyContent;
+            
+            // ใช้ URLSearchParams (Node.js 10+) เพื่อแยก query string
+            const params = new URLSearchParams(data);
+            const action = params.get('action');
+            const categoryKey = params.get('category'); // สำหรับ action=show_menu
+            const level = params.get('level');         // สำหรับ action=show_level
+            const topic = params.get('topic');         // สำหรับ action=show_content
 
+            console.log(`[POSTBACK] Action: ${action}, Key: ${categoryKey || level || topic}`);
+            
+            if (action === 'show_menu' && categoryKey) {
+                // ตัวอย่าง: data: 'action=show_menu&category=การลา'
+                replyContent = categoryMenus[categoryKey];
+                
+            } else if (action === 'show_level' && level) {
+                // ตัวอย่าง: data: 'action=show_level&level=beginner'
+                const menuKey = level === 'advance' ? 'mainMenu' : 'beginnerMenu';
+                replyContent = flexMessages[menuKey];
+
+            } else if (action === 'show_content' && topic) {
+                // ตัวอย่าง: data: 'action=show_content&topic=leave'
+                replyContent = flexMessages.beginnerContent[topic];
+            }
+
+            // ตรวจสอบว่า replyContent ไม่ใช่ undefined
+            if (replyContent) {
+                return client.replyMessage(event.replyToken, replyContent);
+            } else {
+                console.warn(`[POSTBACK ERROR] ไม่พบเนื้อหาสำหรับ Action: ${data}`);
+                return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text: 'ขออภัยครับ ไม่พบเมนูที่ร้องขอ (Postback Failed)'
+                });
+            }
+        }
+
+        // === 5.2: จัดการ Message (ที่ User พิมพ์มา) ===
+        if (event.type === 'message' && event.message.type === 'text') {
+            const userText = event.message.text;
+            let replyContent;
+            
+            const categoryMatch = matchCategory(userText); 
+            
+            if (categoryMatch) {
+                console.log(`[TEXT INPUT] Match Success: "${userText}" -> "${categoryMatch}"`);
+                
+                if (categoryMatch === 'Level Selector') {
+                    // หากตรงกับคำทั่วไป (เช่น 'คู่มือ') ให้แสดงเมนูเลือกระดับ
+                    replyContent = flexMessages.levelSelectorMenu; 
+                } else {
+                    // หากตรงกับหมวดหมู่คู่มือปกติ (เช่น 'การลา') 
+                    replyContent = categoryMenus[categoryMatch];
+                }
+            }
+            
+            // ตรวจสอบว่า replyContent ไม่ใช่ undefined
+            if (replyContent) {
+                return client.replyMessage(event.replyToken, replyContent);
+            } else {
+                // Fallback หากไม่พบการจับคู่
+                console.warn(`[TEXT INPUT] Match Fail: ไม่พบหมวดหมู่ที่ตรงกับข้อความ: "${userText}"`);
+                return client.replyMessage(event.replyToken, {
+                    type: 'text',
+                    text: `ค้นหา "${userText}" ไม่พบ ลองพิมพ์คำอื่น หรือคลิกเมนูหลักได้เลยครับ/ค่ะ`
+                });
+            }
+        }
+
+        // หากเป็น Event อื่นๆ ที่เราไม่สนใจ (เช่น Follow, Unfollow)
+        return Promise.resolve(null);
+        
+    } catch (e) {
+        // === ดักจับ Runtime Error ที่เกิดขึ้นภายใน handleEvent ===
+        // นี่คือส่วนที่สำคัญที่สุดในการป้องกัน 500 Error
+        console.error(`🚨 RUNTIME ERROR in handleEvent:`, e);
+        
+        // ส่งข้อความหา User ว่ามีปัญหา (Optional, but good for UX)
+        // await client.replyMessage(event.replyToken, {
+        //     type: 'text',
+        //     text: 'ขออภัยค่ะ เกิดข้อผิดพลาดในระบบ กำลังแจ้งผู้ดูแลค่ะ'
+        // });
+
+        // คืนค่า null เพื่อให้ Promise.all ทำงานต่อได้
+        return Promise.resolve(null); 
+    }
+}
+
+// ------------------------------------------------
+// 6. SERVER START
+// ------------------------------------------------
+const port = process.env.PORT || 10000;
+app.listen(port, () => {
+  console.log(`Bot กำลังรันอยู่ที่ port ${port}`);
+});
