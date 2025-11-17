@@ -7,20 +7,20 @@ const manualDir = __dirname;
 // Mapping จากชื่อไฟล์ (ตัด 'manual' และ '.js') → ชื่อหมวดภาษาไทย
 const fileNameToThaiName = {
   UsageGeneral: 'การใช้งานระบบทั่วไป',
-  SystemSetting: 'ตั้งค่าระบบและนโยบาย',
+  SystemSetting: 'ตั้งค่าระบบ/นโยบาย',
   Personnel: 'ข้อมูลบุคลากร',
   Permission: 'สิทธิการใช้งาน',
   Leave: 'การลา',
   Structure: 'โครงสร้าง/ตำแหน่ง',
-  Command: 'คำสั่ง',
+  Command: 'คำสั่ง/บัญชีแนบท้าย',
   Report: 'รายงาน',
   Evaluation: 'การประเมินผล',
   ImportExport: 'นำเข้า/ส่งออกข้อมูล',
   Budget: 'บริหารวงเงิน',
   Other: 'อื่นๆ',
   Application: 'แอปพลิเคชัน',
-  Help: 'ช่วยเหลือ',
-  Update: 'การอัปเดตระบบ'
+  Help: 'คำถาม/ช่วยเหลือ',
+  Update: 'อัปเดตระบบ/การใช้งาน'
 };
 
 fs.readdirSync(manualDir).forEach(file => {

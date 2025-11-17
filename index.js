@@ -1,9 +1,12 @@
+// index.js
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios');
 const { mainMenu } = require('./flexMessages');
 const categoryMenus = require('./manual'); // โหลดทุกหมวดจาก manual/
 const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
+
+const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
 
 const app = express();
 app.use(bodyParser.json());
@@ -12,29 +15,30 @@ const PORT = process.env.PORT || 10000;
 const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN;
 
 if (!CHANNEL_ACCESS_TOKEN) {
-  console.error('❌ Environment variable CHANNEL_ACCESS_TOKEN is not set!');
-  process.exit(1);
+    console.error('❌ Environment variable CHANNEL_ACCESS_TOKEN is not set!');
+    process.exit(1);
 }
 
 // ฟังก์ชันส่งข้อความกลับไปยัง LINE
 async function replyToLine(replyToken, message) {
-  const url = 'https://api.line.me/v2/bot/message/reply';
-  const headers = {
-    'Content-Type': 'application/json',
-    'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
-  };
+    const url = 'https://api.line.me/v2/bot/message/reply';
+    const headers = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
+    };
 
-  const body = {
-    replyToken,
-    messages: [message]
-  };
+    const body = {
+        replyToken,
+        messages: [message]
+    };
 
-  try {
-    await axios.post(url, body, { headers });
-  } catch (error) {
-    console.error('LINE Reply Error:', error.response?.data || error.message);
-  }
+    try {
+        await axios.post(url, body, { headers });
+    } catch (error) {
+        console.error('LINE Reply Error:', error.response?.data || error.message);
+    }
 }
+
 
 // Webhook รับข้อความจาก LINE
 app.post('/line-webhook', async (req, res) => {
