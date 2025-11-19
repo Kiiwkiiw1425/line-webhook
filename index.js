@@ -11,15 +11,14 @@ const { levelSelectorMenu, beginnerMenu, beginnerContent } = flexMessages;
 const categoryMenus = require('./manual'); 
 
 // matchCategory: ฟังก์ชันจับคำใกล้เคียง (Fuzzy Search)
-// *** Path นี้อ้างอิงจากโครงสร้างไฟล์ปัจจุบัน: utils/fuseConfig.js ***
-const matchCategory = require('./utils/fuseConfig.js'); 
+// *** แก้ไข Path ให้ตรงกับชื่อไฟล์จริง: ./utils/matchCategory.js ***
+const matchCategory = require('./utils/matchCategory.js'); 
 
 // --- CONFIG ---
 const app = express();
 app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 10000;
-// ใช้ชื่อตัวแปรตามที่ LINE Messaging API กำหนด (CHANNEL_ACCESS_TOKEN)
 const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN; 
 
 if (!CHANNEL_ACCESS_TOKEN) {
@@ -29,6 +28,9 @@ if (!CHANNEL_ACCESS_TOKEN) {
 
 // --- GLOBAL VARIABLES ---
 const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
+// สร้าง Blacklist ที่เป็น Lowercase เพื่อการเปรียบเทียบที่แม่นยำ
+const blacklistLower = blacklist.map(item => item.toLowerCase()); 
+
 let isManualMode = false; // ตัวแปรเก็บสถานะโหมด Manual (เริ่มต้น: บอทตอบปกติ)
 
 // --- HELPER FUNCTIONS ---
@@ -87,7 +89,8 @@ app.post('/line-webhook', async (req, res) => {
                 }
 
                 // --- C. กรองคำใน Blacklist ---
-                if (blacklist.includes(userText.toLowerCase())) {
+                // ใช้ blacklistLower และแปลง userText เป็น lowercase เพื่อเปรียบเทียบ
+                if (blacklistLower.includes(userText.toLowerCase())) { 
                     console.log(`Ignored blacklist word: ${userText}`);
                     continue;
                 }
@@ -142,7 +145,8 @@ app.post('/line-webhook', async (req, res) => {
                     message = categoryMenus[categoryKey];
                 } else if (action === 'show_level' && level) {
                     // เมนู L1 (เลือก Beginner/Advance)
-                    message = (level === 'advance') ? mainMenu : beginnerMenu;
+                    // Note: ต้องมั่นใจว่า flexMessages.mainMenu และ flexMessages.beginnerMenu ถูก Export จาก flexMessages.js
+                    message = (level === 'advance') ? flexMessages.mainMenu : flexMessages.beginnerMenu; 
                 } else if (action === 'show_content' && topic) {
                     // เมนู L3 (เนื้อหาบทเรียนย่อย)
                     message = beginnerContent[topic];
