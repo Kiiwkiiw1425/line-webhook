@@ -11,7 +11,6 @@ const { levelSelectorMenu, beginnerMenu, beginnerContent } = flexMessages;
 const categoryMenus = require('./manual'); 
 
 // matchCategory: ฟังก์ชันจับคำใกล้เคียง (Fuzzy Search)
-// *** แก้ไข Path ให้ตรงกับชื่อไฟล์จริง: ./utils/matchCategory.js ***
 const matchCategory = require('./utils/matchCategory.js'); 
 
 // --- CONFIG ---
@@ -97,16 +96,25 @@ app.post('/line-webhook', async (req, res) => {
 
                 let message = null;
 
-                // --- D. Logic การตอบกลับ (ใช้ MatchCategory) ---
-                const matched = matchCategory(userText);
+                // --- D. Logic การตอบกลับ ---
                 
-                if (matched) {
-                    if (matched === 'Level Selector') {
-                         // หากตรงกับคำทั่วไป (เช่น 'คู่มือ') ให้แสดงเมนูเลือกระดับ
-                         message = levelSelectorMenu;
-                    } else if (categoryMenus[matched]) {
-                         // หากตรงกับหมวดหมู่คู่มือปกติ
-                         message = categoryMenus[matched];
+                // *** 1. HARDCODE EXACT MATCH FOR CORE KEYWORDS (GUARANTEE) ***
+                // บังคับให้คำเหล่านี้แสดง levelSelectorMenu เสมอ เพื่อแก้ปัญหา threshold
+                if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
+                    message = levelSelectorMenu;
+                } 
+                // *** 2. FALLBACK TO FUZZY SEARCH ***
+                else {
+                    const matched = matchCategory(userText);
+                    
+                    if (matched) {
+                        if (matched === 'Level Selector') {
+                             // Level Selector จะถูกใช้สำหรับคำอื่นๆ ที่ใกล้เคียง เช่น 'วิธีใช้'
+                             message = levelSelectorMenu;
+                        } else if (categoryMenus[matched]) {
+                             // หากตรงกับหมวดหมู่คู่มือปกติ
+                             message = categoryMenus[matched];
+                        }
                     }
                 }
 
@@ -145,7 +153,6 @@ app.post('/line-webhook', async (req, res) => {
                     message = categoryMenus[categoryKey];
                 } else if (action === 'show_level' && level) {
                     // เมนู L1 (เลือก Beginner/Advance)
-                    // Note: ต้องมั่นใจว่า flexMessages.mainMenu และ flexMessages.beginnerMenu ถูก Export จาก flexMessages.js
                     message = (level === 'advance') ? flexMessages.mainMenu : flexMessages.beginnerMenu; 
                 } else if (action === 'show_content' && topic) {
                     // เมนู L3 (เนื้อหาบทเรียนย่อย)
