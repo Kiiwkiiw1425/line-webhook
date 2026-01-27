@@ -13,6 +13,6 @@ const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ
   { label: '🔐 ตั้งค่า(LDAP)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eade9U6fhGlJpMkLyu1ssqIBwG38O0vBGkQ4UVhKJHzFFw?e=l0yOcG' },
   { label: '🔐 ตั้งค่า(Smart Card)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Edp_saUvNqBHpjpXr1HK0SoBHipNY3IZ6u5JgYV2aSNIDw?e=donLby' },
   { label: '🔐 ตั้งค่า(Username และ Password)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQroPfCb7LJNtRw7Y-f3EZoBzFAI72Lnfuaob5TkyEaiMw?e=IF3gzT' },
-  { label: '🔐 ตั้งค่า(ThaID)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EYes3ZQKCshBjDqqKvsNB7EBle5s17iU0VWplhZOen-jpg?e=0UbxI9'}
+  { label: '🔐 ตั้งค่า(ThaID)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/IQDZEp_v-SDPRZHhbiFrUwgbAcsnAuYrtnpnD99ZYuwbAJ8?e=HmLrRP'}
 ]);
 module.exports = systemSettingManual;
