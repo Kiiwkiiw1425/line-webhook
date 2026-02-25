@@ -1,84 +1,37 @@
-// index.js
-const express = require('express');
-const bodyParser = require('body-parser');
-const axios = require('axios');
-const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual'); // โหลดทุกหมวดจาก manual/
-const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
-
-const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
-
-const app = express();
-app.use(bodyParser.json());
-
-const PORT = process.env.PORT || 10000;
-const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN;
-
-if (!CHANNEL_ACCESS_TOKEN) {
-    console.error('❌ Environment variable CHANNEL_ACCESS_TOKEN is not set!');
-    process.exit(1);
-}
-
-// ฟังก์ชันส่งข้อความกลับไปยัง LINE
-async function replyToLine(replyToken, message) {
-    const url = 'https://api.line.me/v2/bot/message/reply';
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
-    };
-
-    const body = {
-        replyToken,
-        messages: [message]
-    };
-
-    try {
-        await axios.post(url, body, { headers });
-    } catch (error) {
-        console.error('LINE Reply Error:', error.response?.data || error.message);
+// ====== 1) Copilot Agent Callback (ให้ Copilot เรียกออกมา) ======
+app.post('/copilot', async (req, res) => {
+  try {
+    const { query } = req.body || {};
+    if (!query || typeof query !== 'string') {
+      return res.status(400).json({ error: 'Invalid payload. Expecting { query: string }' });
     }
-}
 
+    // TODO: ต่อเติม logic ตามต้องการ เช่น:
+    // - จับ intent เพื่อเลือกตอบจาก knowledge/manual เดิม
+    // - ค้นฐานข้อมูลภายใน
+    // - หรือแม้แต่ส่งข้อความเข้าห้อง/ผู้ใช้ใน LINE (กรณีจำเป็น)
 
-// Webhook รับข้อความจาก LINE
-app.post('/line-webhook', async (req, res) => {
-  console.log(JSON.stringify(req.body, null, 2));
-  const events = req.body.events || [];
-
-  for (const event of events) {
-    if (event.type === 'message' && event.message.type === 'text') {
-      const userText = event.message.text.trim();
-      const replyToken = event.replyToken;
-
-      let message;
-
-      if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
-        message = mainMenu;
-      } else if (categoryMenus[userText]) {
-        message = categoryMenus[userText];
+    // ตัวอย่างง่าย: ใช้ matcher เดิมของคุณเพื่อคืนเมนูที่เกี่ยวข้อง
+    let answerText = '';
+    const exactMenu = categoryMenus[query];
+    if (exactMenu) {
+      // กรณีต้องการแปลง Flex เป็นข้อความสั้น (ให้ Agent เข้าใจ/อ่านออก)
+      answerText = 'พบเมนูที่เกี่ยวข้อง: ลองพิมพ์ "คู่มือ" เพื่อดูเมนูหลัก หรือระบุหมวดให้ชัดเจนอีกครั้ง';
+    } else {
+      const matched = matchCategory(query);
+      if (matched && categoryMenus[matched]) {
+        answerText = `คำค้นของคุณใกล้เคียงกับหมวด: ${matched} \nลองพิมพ์ชื่อหมวด "${matched}" ใน LINE เพื่อดูรายละเอียด`;
       } else {
-        const matched = matchCategory(userText);
-        if (matched && categoryMenus[matched]) {
-          message = categoryMenus[matched];
-        } else {
-          message = null;
-        }
-      }
-
-      if (message) {
-        await replyToLine(replyToken, message);
+        // คำตอบเริ่มต้น (fallback) — คุณปรับให้เหมาะกับ DPIS6 ได้
+        answerText = 'ขอบคุณครับ/ค่ะ รับทราบคำถามแล้ว ขอนำไปประมวลผลต่อ หากต้องการดูเมนูหลักให้พิมพ์ "คู่มือ"';
       }
     }
+
+    // ส่งรูปแบบที่ Copilot Agent ต้องการ
+    return res.json({ answer: answerText });
+
+  } catch (err) {
+    console.error('[/copilot] error:', err.message);
+    return res.status(500).json({ error: 'Internal error' });
   }
-
-  res.sendStatus(200);
-});
-
-// ping endpoint
-app.get('/ping', (req, res) => {
-  res.send('pong');
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server is running on port ${PORT}`);
 });
