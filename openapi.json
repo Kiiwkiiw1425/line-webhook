@@ -1,0 +1,70 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Render Copilot API",
+    "version": "1.0.0",
+    "description": "API สำหรับ Copilot Studio Agent เรียกมายังเซิร์ฟเวอร์ Render ของคุณ"
+  },
+  "servers": [
+    {
+      "url": "https://line-webhook-qfb8.onrender.com",
+      "description": "Render production"
+    }
+  ],
+  "paths": {
+    "/copilot": {
+      "post": {
+        "summary": "รับคำถามจาก Copilot Agent และส่งคำตอบกลับ",
+        "operationId": "postCopilot",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["query"],
+                "properties": {
+                  "query": {
+                    "type": "string",
+                    "description": "ข้อความที่ผู้ใช้ถาม (จาก Agent)"
+                  }
+                }
+              },
+              "examples": {
+                "sample": {
+                  "value": { "query": "วิธีรีเซ็ตรหัสผ่าน DPIS6" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "คำตอบสำเร็จ",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["answer"],
+                  "properties": {
+                    "answer": {
+                      "type": "string",
+                      "description": "ข้อความคำตอบสุดท้ายที่ Agent จะนำไปพูดกับผู้ใช้"
+                    }
+                  }
+                },
+                "examples": {
+                  "ok": {
+                    "value": { "answer": "เข้าเมนู งานของฉัน → คำขอ → สร้างคำขอใหม่..." }
+                  }
+                }
+              }
+            }
+          },
+          "4XX": { "description": "คำขอไม่ถูกต้อง" },
+          "5XX": { "description": "ข้อผิดพลาดจากฝั่งเซิร์ฟเวอร์" }
+        }
+      }
+    }
+  }
+}
