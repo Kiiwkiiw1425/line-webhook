@@ -1,68 +1,53 @@
 {
-  "openapi": "3.0.1",
+  "swagger": "2.0",
   "info": {
     "title": "Render Copilot API",
     "version": "1.0.0",
-    "description": "API สำหรับ Copilot Studio Agent เรียกมายังเซิร์ฟเวอร์ Render ของคุณ"
+    "description": "API ให้ Copilot Studio Agent เรียกมายังเซิร์ฟเวอร์ Render ของคุณ"
   },
-  "servers": [
-    {
-      "url": "https://line-webhook-test-ai.onrender.com",
-      "description": "Render production"
-    }
-  ],
+  "host": "https://line-webhook-test-ai.onrender.com",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
   "paths": {
     "/copilot": {
       "post": {
-        "summary": "รับคำถามจาก Copilot Agent และส่งคำตอบกลับ",
+        "summary": "ส่งข้อความจาก Agent ไปยัง Render และรับคำตอบกลับ",
         "operationId": "postCopilot",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "required": ["query"],
-                "properties": {
-                  "query": {
-                    "type": "string",
-                    "description": "ข้อความที่ผู้ใช้ถาม (จาก Agent)"
-                  }
-                }
-              },
-              "examples": {
-                "sample": {
-                  "value": { "query": "วิธีรีเซ็ตรหัสผ่าน DPIS6" }
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["query"],
+              "properties": {
+                "query": {
+                  "type": "string",
+                  "description": "ข้อความที่ผู้ใช้ถาม (จาก Agent)"
                 }
               }
             }
           }
-        },
+        ],
         "responses": {
           "200": {
             "description": "คำตอบสำเร็จ",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": ["answer"],
-                  "properties": {
-                    "answer": {
-                      "type": "string",
-                      "description": "ข้อความคำตอบสุดท้ายที่ Agent จะนำไปพูดกับผู้ใช้"
-                    }
-                  }
-                },
-                "examples": {
-                  "ok": {
-                    "value": { "answer": "เข้าเมนู งานของฉัน → คำขอ → สร้างคำขอใหม่..." }
-                  }
+            "schema": {
+              "type": "object",
+              "required": ["answer"],
+              "properties": {
+                "answer": {
+                  "type": "string",
+                  "description": "ข้อความคำตอบสุดท้ายที่ Agent จะนำไปตอบผู้ใช้"
                 }
               }
             }
           },
-          "4XX": { "description": "คำขอไม่ถูกต้อง" },
-          "5XX": { "description": "ข้อผิดพลาดจากฝั่งเซิร์ฟเวอร์" }
+          "400": { "description": "Bad Request" },
+          "500": { "description": "Internal Server Error" }
         }
       }
     }
