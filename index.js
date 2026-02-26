@@ -20,7 +20,7 @@ const httpAgent = new https.Agent({ keepAlive: true });
 axios.defaults.timeout = 10000; // 10s
 axios.defaults.httpsAgent = httpAgent;
 
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 4000;
 const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN;
 const CHANNEL_SECRET = process.env.CHANNEL_SECRET;
 const COPILOT_KEY = process.env.COPILOT_KEY;
