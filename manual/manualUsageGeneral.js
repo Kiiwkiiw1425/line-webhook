@@ -13,6 +13,9 @@ const usageGeneralManual = createSubmenu('🔧 การใช้งานระ
   { label: '📧 จำรหัสผ่านและอีเมลไม่ได้', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EcOznyF3GF9Gqpt2cFRZS5IB8nHIaDuaX6hcrbeTaX9ssQ?e=ZbN7S6&web=1' },
   { label: '📵 ไม่ได้ OTP/ปิดหน้าต่าง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eekfaq8zHF1Ku21OO4o-PEgB07LsEX6kwRwcAhtOdAQm-A?e=GmssiL&web=1' },
   { label: '👤 จัดการโปรไฟล์', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eej0MVzCLWxIpJCWbVHPYtoBi2sfaMpl6nYUdHZOiptRoA?e=aBOQXh&web=1' },
-  { label: '🎭 เปลี่ยนบทบาท', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EZzuAvmxY_ZChEDS3QTuBo0B1IQ31UFkW2sz7xnG33-Vfg?e=NHUCop&web=1' }
+  { label: '🎭 เปลี่ยนบทบาท', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EZzuAvmxY_ZChEDS3QTuBo0B1IQ31UFkW2sz7xnG33-Vfg?e=NHUCop&web=1' },
+  { label: '⚙ ตั้งค่าปฏิทินวันหยุด', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/IQBj8omvEaPXTruQGhweDRO_AVC49Xk6BnTak0Xey08ITaY?e=4pQxm8&web=1' },
+  { label: '📂 จัดการข้อมูลพื้นฐาน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/IQC_3RqKALzRQqusLw4bjCxjAQh6W45V0Im1_mO4-VbpsFY?e=NKwFCA&web=1' }
+
 ]);
 module.exports = usageGeneralManual;
