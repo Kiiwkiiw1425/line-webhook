@@ -4,6 +4,7 @@ try { require('dotenv').config(); } catch (e) {}
 
 const express = require('express');
 const bodyParser = require('body-parser');
+const PORT = process.env.PORT || 10000;
 
 const { handleTextMessage } = require('./handlers/messageHandler');
 const { handlePostback } = require('./handlers/postbackHandler');
