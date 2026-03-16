@@ -1,7 +1,7 @@
 // handlers/messageHandler.js
 const { reply } = require('../services/lineClient');
 const { getState } = require('../services/stateStore');
-const { helpModePreset } = require('../quickreply/presets');
+const { helpModePreset, backToAIPreset } = require('../quickreply/presets'); // ⬅️ นำเข้า backToAIPreset ที่นี่
 const { mainMenu } = require('../flexMessages');
 const categoryMenus = require('../manual');
 const matchCategory = require('../utils/matchCategory');
@@ -23,7 +23,18 @@ async function handleTextMessage(event) {
 
   const state = getState(userId);
 
-  // 1) ทักทายทั่วไป → เสนอ Quick Reply พรีเซ็ต
+  // 0) คำสั่งลัดสลับกลับโหมด AI (กันเคส Quick Reply ไม่โผล่)
+  const switchToAICommands = ['กลับไป ai', 'ถาม ai', 'โหมด ai'];
+  if (switchToAICommands.includes(userText.toLowerCase())) {
+    // ปล่อยให้ postbackHandler เป็นคนเซ็ต state ก็ได้
+    // หรือถ้าต้องการสลับที่นี่ ให้เรียก setState แล้วตอบกลับ
+    return reply(replyToken, {
+      type: 'text',
+      text: 'กลับเข้าสู่โหมด AI แล้วครับ พิมพ์คำถามได้เลย'
+    });
+  }
+
+  // 1) ทักทายทั่วไป → เสนอ Quick Reply โหมดช่วยเหลือ
   if (blacklist.includes(userText)) {
     return reply(replyToken, helpModePreset('ถ้าต้องการความช่วยเหลือ เลือกโหมดด้านล่างได้เลยครับ'));
   }
@@ -44,29 +55,30 @@ async function handleTextMessage(event) {
     return reply(replyToken, categoryMenus[matched]);
   }
 
-  // 5) โหมด AI (ถ้ามีการเชื่อม AI จริงให้เรียก services/aiService.gemini.js หรือ openai.js)
-
+  // 5) โหมด AI
   if (state.mode === 'ai') {
     const { answer, failed } = await askAI(userText);
-  
+
     if (failed) {
       return reply(
         replyToken,
         helpModePreset('คำถามนี้อาจซับซ้อน ต้องการให้เจ้าหน้าที่ช่วยไหมครับ')
       );
     }
-  
+
     return reply(replyToken, {
       type: 'text',
       text: answer
     });
   }
 
-
-  // 6) โหมด human: เก็บข้อความเพิ่มเติมแล้วแจ้งเจ้าหน้าที่ได้ (ย้ายไป notifyHandler ถ้าต้องการ)
+  // 6) โหมด human → แสดงปุ่ม "กลับไปถาม AI"
   if (state.mode === 'human') {
-    // ที่จุดนี้คุณอาจเรียก notifyAgent อีกครั้งพร้อม userText
-    return reply(replyToken, { type: 'text', text: 'ผมบันทึกข้อความเพิ่มเติมให้เจ้าหน้าที่แล้วครับ' });
+    // ที่จุดนี้คุณอาจเรียก notifyAgent(event, { lastUserText: userText }) เพื่อส่งข้อความนี้ให้เจ้าหน้าที่ด้วย
+    return reply(
+      replyToken,
+      backToAIPreset('ผมบันทึกข้อความให้เจ้าหน้าที่แล้ว หากต้องการกลับไปถาม AI กดปุ่มด้านล่างได้ครับ')
+    );
   }
 
   // 7) ยังไม่เลือกโหมด → เสนอ Quick Reply ตามความซับซ้อน
