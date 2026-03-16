@@ -6,9 +6,6 @@ const { mainMenu } = require('../flexMessages');
 const categoryMenus = require('../manual');
 const matchCategory = require('../utils/matchCategory');
 const { askAI } = require('../services/aiService.gemini');
-const { helpModePreset } = require('../quickreply/presets');
-const { reply } = require('../services/lineClient');
-
 
 const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
 
