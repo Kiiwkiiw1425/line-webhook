@@ -1,6 +1,7 @@
 const createSubmenu = require('../utils/createSubmenu');
 const commandManual = createSubmenu('📄 คำสั่ง/บัญชีแนบท้าย', [
   {label: '📥 บรรจุ/แต่งตั้ง/รับโอน)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ece90tBH6XZBheUQuKRKv7gBu-1mqL9VnrXgMAceGoiAqQ?e=cPm4lX'},
+  {label: '📝 การบรรจุข้าราชการ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXOayl9HHalEte5rd_-RY0kBB4tMn9JXImfngsf-vVmpHw?e=V1lxwl'},
   {label: '⬆ เลื่อนระดับ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EZlzRhhGeydAo9arIXWo0-IBWgw5O2ypYIwQCod1qzN6SA?e=3Xdv5F'},
   {label: '🚪 ให้โอน/พ้นจากราชการ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EWFIwsokAWZBpvPmMLQHHW4Bd37JAFgp6NPD5Fs31wqIYQ?e=LGj3TD'},
   {label: '📊 ปรับเงินเดือนพรก.1พ.ค.67และ68', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ETh5oRGtjChBiIlvvPJfZqUBUEWyB641WdkgphYgBUqyGQ?e=Asm2jE'},
@@ -10,7 +11,6 @@ const commandManual = createSubmenu('📄 คำสั่ง/บัญชีแ�
   {label: '⚖ รักษาการแทน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eeg9dRrUqAxMr9me8X_X2LkB8n1M0NHA24nxFmqMCJ2B2w?e=iJMh6Z'},
   {label: '⚖ มอบหมายงาน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EQ1NK04ZG0hLsswPIz7gThEBvBih1r7NkUQerQasWhHCtA?e=mRjWPe'},
   {label: '💵 ปรับเงินเดือนตามคุณวุฒิ ว9/2567', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EUpCeWNf6IRFsUiPKhnJm7kBGRax8FJF1I7t-aXxyjAhwg?e=m8KSaZ'},
-  {label: '📝 ยกเลิก/แก้ไขคำสั่ง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXpwo3HG1YBOshHmDi0VZOoBa58I3CeiOo4_pZbhYcoTCg?e=mEghxZ'},
-  {label: '📝 การบรรจุข้าราชการ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXOayl9HHalEte5rd_-RY0kBB4tMn9JXImfngsf-vVmpHw?e=V1lxwl'}
+  {label: '📝 ยกเลิก/แก้ไขคำสั่ง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXpwo3HG1YBOshHmDi0VZOoBa58I3CeiOo4_pZbhYcoTCg?e=mEghxZ'}
 ]);
 module.exports = commandManual;
