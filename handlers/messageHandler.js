@@ -5,6 +5,10 @@ const { helpModePreset } = require('../quickreply/presets');
 const { mainMenu } = require('../flexMessages');
 const categoryMenus = require('../manual');
 const matchCategory = require('../utils/matchCategory');
+const { askAI } = require('../services/aiService.gemini');
+const { helpModePreset } = require('../quickreply/presets');
+const { reply } = require('../services/lineClient');
+
 
 const blacklist = ['โอเค', 'โอเคครับ', 'ค่ะ', 'ครับ', 'จ้า', 'ฮัลโหล', 'สวัสดีครับ', 'สวัสดีคับ', 'สวัสดีค่ะ'];
 
@@ -44,13 +48,23 @@ async function handleTextMessage(event) {
   }
 
   // 5) โหมด AI (ถ้ามีการเชื่อม AI จริงให้เรียก services/aiService.gemini.js หรือ openai.js)
+
   if (state.mode === 'ai') {
-    // TODO: เรียก askAI() ที่คุณใช้อยู่
+    const { answer, failed } = await askAI(userText);
+  
+    if (failed) {
+      return reply(
+        replyToken,
+        helpModePreset('คำถามนี้อาจซับซ้อน ต้องการให้เจ้าหน้าที่ช่วยไหมครับ')
+      );
+    }
+  
     return reply(replyToken, {
       type: 'text',
-      text: '⚙️ โหมด AI: (เดโม) ยังไม่ได้เชื่อม AI จริง — พร้อมต่อเมื่อคุณใส่ service ครับ'
+      text: answer
     });
   }
+
 
   // 6) โหมด human: เก็บข้อความเพิ่มเติมแล้วแจ้งเจ้าหน้าที่ได้ (ย้ายไป notifyHandler ถ้าต้องการ)
   if (state.mode === 'human') {
