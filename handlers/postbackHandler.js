@@ -13,25 +13,15 @@ async function handlePostback(event) {
   // ตัวอย่าง: โหมด AI / Human
   if (params.mode === 'ai') {
     setState(userId, { mode: 'ai' });
-    return reply(replyToken, {
-      type: 'text',
-      text: 'กลับเข้าสู่โหมด AI แล้วครับ พิมพ์คำถามได้เลย'
-    });
+    return reply(replyToken, { type: 'text', text: 'เข้าสู่โหมด AI แล้วครับ พิมพ์คำถามได้เลย' });
   }
-  
   if (params.mode === 'human') {
     setState(userId, { mode: 'human' });
-    const ref = await notifyAgent(event, { lastUserText: '[เลือกจาก Quick Reply]' });
+    // แจ้งเจ้าหน้าที่/สร้าง ticket ถ้าต้องการ
     return reply(replyToken, [
-      { type: 'text', text: `รับเรื่องเรียบร้อย (อ้างอิง ${ref})` },
-      { type: 'text', text: 'เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุดครับ' },
+      { type: 'text', text: 'รับเรื่องติดต่อเจ้าหน้าที่เรียบร้อยครับ' },
+      backToAIPreset('หากต้องการกลับไปถาม AI กดปุ่มด้านล่างได้ครับ')
     ]);
   }
-
-  // เพิ่มเคสอื่น ๆ ได้ เช่น cat=..., lang=..., confirm=...
-  return reply(replyToken, { type: 'text', text: 'รับทราบครับ' });
-}
-
-
 
 module.exports = { handlePostback };
