@@ -1,3 +1,4 @@
+// quickreply/presets.js
 const { textWithQuickReply, postbackAction } = require('./builder');
 
 function helpModePreset(text = 'ต้องการให้ผมช่วยแบบไหนครับ') {
@@ -8,4 +9,12 @@ function helpModePreset(text = 'ต้องการให้ผมช่วย
   return textWithQuickReply(text, items);
 }
 
-module.exports = { helpModePreset };
+function backToAIPreset(text = 'ต้องการกลับไปถาม AI หรือไม่') {
+  const items = [
+    postbackAction('กลับไปถาม AI', 'mode=ai', 'กลับไปถาม AI'),
+  ];
+  return textWithQuickReply(text, items);
+}
+
+// ⬇️ สำคัญ: export ครั้งเดียว ครบทุกฟังก์ชัน
+module.exports = { helpModePreset, backToAIPreset };
