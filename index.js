@@ -1,4 +1,10 @@
 // index.js
+
+try { require('dotenv').config(); } catch (e) {
+  // ถ้าเซิร์ฟเวอร์ไม่มีแพ็กเกจหรือไม่มี .env ก็ข้ามได้
+}
+
+
 require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
