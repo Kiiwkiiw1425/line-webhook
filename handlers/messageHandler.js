@@ -7,6 +7,10 @@ const { mainMenu } = require('../flexMessages');
 const categoryMenus = require('../manual');
 const matchCategory = require('../utils/matchCategory');
 const { askAI } = require('../services/aiService.gemini');
+const { retrieve } = require('../services/ragStore');
+
+// ข้อความมาตรฐาน
+const NO_DATA_REPLY = 'ไม่มีข้อมูล หรือไม่มีคำตอบ กรุณาติดต่อเจ้าหน้าที่';
 
 // คำทัก/คำทั่วไปที่ให้ขึ้น Quick Reply เลือกโหมด
 const blacklist = [
@@ -29,14 +33,19 @@ async function handleTextMessage(event) {
 
   const state = getState(userId);
 
-  // 0) คำสั่งลัด: ให้ผู้ใช้พิมพ์เพื่อ "กลับไป AI" ได้ทุกเมื่อ
-  //    ใช้ได้แม้อยู่ในโหมด human และกรณี Quick Reply ไม่ขึ้น
+  // 0) คำสั่งลัดสลับโหมด
+  // 0.1) กลับไป AI (กันกรณี Quick Reply ไม่ขึ้น)
   if (['กลับไป ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai' });
-    return reply(replyToken, {
-      type: 'text',
-      text: 'กลับเข้าสู่โหมด AI แล้วครับ พิมพ์คำถามได้เลย'
-    });
+    return reply(replyToken, { type: 'text', text: 'กลับเข้าสู่โหมด AI แล้วครับ พิมพ์คำถามได้เลย' });
+  }
+  // 0.2) เข้าสู่โหมดเจ้าหน้าที่ด้วยคำสั่งพิมพ์
+  if (['ติดต่อเจ้าหน้าที่', 'human', 'โหมดเจ้าหน้าที่'].includes(lowerText)) {
+    setState(userId, { mode: 'human' });
+    return reply(replyToken, [
+      { type: 'text', text: 'เข้าสู่โหมดเจ้าหน้าที่แล้วครับ พิมพ์รายละเอียดเพิ่มเติมได้เลย' },
+      backToAIPreset('หากต้องการกลับไปถาม AI กดปุ่มด้านล่างได้ครับ')
+    ]);
   }
 
   // 1) ทักทายทั่วไป → เสนอ Quick Reply โหมดช่วยเหลือ
@@ -45,39 +54,62 @@ async function handleTextMessage(event) {
   }
 
   // 2) คำว่า "คู่มือ"
+  //    ✅ ส่ง Flex ได้เฉพาะ human; หากไม่ใช่ human ให้ชวนเลือกโหมดแทน
   if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
-    return reply(replyToken, mainMenu);
+    if (state.mode === 'human') {
+      return reply(replyToken, mainMenu); // ✅ Flex เฉพาะ human
+    }
+    // ❌ ยังไม่ใช่ human → แจ้งผู้ใช้ + เสนอ Quick Reply
+    return reply(
+      replyToken,
+      helpModePreset('เมนูคู่มือแบบภาพเปิดดูได้เฉพาะโหมดเจ้าหน้าที่ หากต้องการดู กรุณาเลือก "ติดต่อเจ้าหน้าที่"')
+    );
   }
 
-  // 3) จับหมวดตรงตัว
+  // 3) จับหมวดตรงตัว (เช่น ผู้ใช้พิมพ์ชื่อหมวดใน manual/)
   if (categoryMenus[userText]) {
-    return reply(replyToken, categoryMenus[userText]);
+    if (state.mode === 'human') {
+      return reply(replyToken, categoryMenus[userText]); // ✅ Flex เฉพาะ human
+    }
+    return reply(
+      replyToken,
+      helpModePreset('เมนูนี้เปิดดูได้ในโหมดเจ้าหน้าที่ กด "ติดต่อเจ้าหน้าที่" เพื่อเปิดเมนูครับ')
+    );
   }
 
   // 4) จับใกล้เคียงด้วย matchCategory()
   const matched = matchCategory(userText);
   if (matched && categoryMenus[matched]) {
-    return reply(replyToken, categoryMenus[matched]);
+    if (state.mode === 'human') {
+      return reply(replyToken, categoryMenus[matched]); // ✅ Flex เฉพาะ human
+    }
+    return reply(
+      replyToken,
+      helpModePreset('เมนูนี้เปิดดูได้ในโหมดเจ้าหน้าที่ กด "ติดต่อเจ้าหน้าที่" เพื่อเปิดเมนูครับ')
+    );
   }
 
-  // 5) อยู่โหมด AI → เรียกโมดูล AI (รองรับ RAG ถ้าคุณส่ง hits เข้า askAI ภายนอก)
+  // 5) โหมด AI → ใช้ RAG ก่อนเสมอ (ไม่เจอ → ไม่เรียก AI)
   if (state.mode === 'ai') {
-    const { answer, failed } = await askAI(userText);
+    const hits = await retrieve(userText);
 
-    if (failed) {
-      // AI ไม่มั่นใจ/ไม่มีข้อมูล → เสนอคุยกับเจ้าหน้าที่
-      return reply(
-        replyToken,
-        helpModePreset('คำถามนี้อาจซับซ้อน ต้องการให้เจ้าหน้าที่ช่วยไหมครับ')
-      );
+    // ❌ ไม่พบข้อมูลใน RAG → ไม่เรียก AI
+    if (!hits || hits.length === 0) {
+      return reply(replyToken, { type: 'text', text: NO_DATA_REPLY });
     }
 
+    // ✅ มี knowledge → ส่งเข้าโมเดล
+    const { answer, failed } = await askAI(userText, [], hits);
+
+    if (failed) {
+      return reply(replyToken, { type: 'text', text: NO_DATA_REPLY });
+    }
     return reply(replyToken, { type: 'text', text: answer });
   }
 
-  // 6) อยู่โหมด human → ตีความเป็นข้อความถึงเจ้าหน้าที่ + โชว์ปุ่ม "กลับไปถาม AI"
+  // 6) โหมด human → ตีความเป็นข้อความถึงเจ้าหน้าที่ + โชว์ปุ่ม "กลับไปถาม AI"
   if (state.mode === 'human') {
-    // ตรงนี้คุณอาจเรียก notifyAgent(event, { lastUserText: userText }) เพื่อส่งต่อให้ทีมงานด้วย
+    // TODO: หากต้องการส่งต่อหาทีมงาน: notifyAgent(event, { lastUserText: userText })
     return reply(
       replyToken,
       backToAIPreset('ผมบันทึกข้อความให้เจ้าหน้าที่แล้ว หากต้องการกลับไปถาม AI กดปุ่มด้านล่างได้ครับ')
