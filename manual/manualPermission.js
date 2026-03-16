@@ -5,7 +5,6 @@ const permissionManual = createSubmenu('🔐 สิทธิการใช้�
   {label: '📚 จัดการข้อมูลพื้นฐาน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EUhQJAnxIedFg_ZFeXDWm2gBW8l9f2Zu9VlKdXfTOrKGkw?e=XlHIyf'},
   {label: '📝 จัดการข้อมูลลงทะเบียน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EbU3dIJmjaRAm9q9-zO3OpwB6xXV31OQkvbIvMX7Q3iUJw?e=j1LU14'},
   {label: '👁 ตั้งค่าสิทธิการมองเห็น', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EacaKpNjTh1NuNjF3rYSrv0BFYb8WoRnkZgtfU02eGljog?e=SWTS6q'},
-  {label: '➕ เพิ่มกลุ่มผู้ใช้งาน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX_d1XF7IHRLiCqt3nF8x1sBI0wPNnxHWxLtoPCYIr9-Iw?e=mjXQz1'},
-  {label: '➕ การเพิ่มแอดมินสูงสุด', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/IQAnsxYmleM5SYkcBx1qa4UTAbh70wmhDCjhRhEGKHLXYss?e=Y12YfF'}
+  {label: '➕ เพิ่มกลุ่มผู้ใช้งาน', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EX_d1XF7IHRLiCqt3nF8x1sBI0wPNnxHWxLtoPCYIr9-Iw?e=mjXQz1'}
 ]);
 module.exports = permissionManual;
