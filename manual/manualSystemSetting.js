@@ -10,6 +10,7 @@ const systemSettingManual = createSubmenu('⚙ ตั้งค่าระบบ
   { label: '🧹 ลบไฟล์ Back Up', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eb_nifk3pItFti6lPXZ_54kBhoeATNtBtt47_DSMURd1lA?e=FGrHG3' },
   { label: '⚙ ตั้งค่าตัวแปรระบบ', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ES02TRgtHwVOuVN2B9oemDABsCSn3ZS2BVOyLBHK4lPwDQ?e=HvDcKU' },
   { label: '⚙ ตั้งค่าการใช้งานคำสั่ง', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/IQBRx7DymzVJSoMTvk0RxsiOAQB-Bb_d2fkRcXqtR0Mmc3c?e=OeSFKp' },
+  {label: '✍ ตั้งค่าผู้ลงนาม', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EWee543ftyxLl5sXcjjWCiwBblLVMVKReAiwZLMDG4cF_A?e=tTSJRn'},
   { label: '🔐 ตั้งค่า(Email/ID Card)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/ETwgTtbDg4RPrFi17YEDaNMB-yv0px0wBfYaa20WixK0lg?e=mvHDgk' },
   { label: '🔐 ตั้งค่า(LDAP)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Eade9U6fhGlJpMkLyu1ssqIBwG38O0vBGkQ4UVhKJHzFFw?e=l0yOcG' },
   { label: '🔐 ตั้งค่า(Smart Card)', uri: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Edp_saUvNqBHpjpXr1HK0SoBHipNY3IZ6u5JgYV2aSNIDw?e=donLby' },
