@@ -1,22 +1,27 @@
 // services/ragStore.js
-const fs = require('fs');
-const path = require('path');
 
-const INDEX_PATH = process.env.RAG_INDEX_PATH || './data/rag-index.json';
+const documents = require('../data/knowledge.json');
 
-let index = null;
-
-function loadIndex() {
-  if (!index) {
-    index = JSON.parse(fs.readFileSync(INDEX_PATH, 'utf-8'));
-  }
-  return index;
+function score(text, query) {
+  let s = 0;
+  query.split(' ').forEach(q => {
+    if (text.includes(q)) s += 1;
+  });
+  return s;
 }
 
-function retrieve(query) {
-  const { items } = loadIndex();
-  // (ในระบบจริง จะมี embedding + similarity)
-  return items.slice(0, 3); // ทดสอบเบื้องต้น
+async function retrieve(query, topK = 3) {
+  const scored = documents
+    .map(doc => ({
+      ...doc,
+      score: score(doc.text, query)
+    }))
+    .filter(d => d.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topK);
+
+  return scored;
 }
 
 module.exports = { retrieve };
+``
