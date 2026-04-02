@@ -31,9 +31,12 @@ async function handleTextMessage(event) {
   const userText = (event.message.text || '').trim();
   const lowerText = userText.toLowerCase();
 
+  // ✅ default เป็น AI
   const state = getState(userId) || { mode: 'ai' };
 
-  // ---- switch mode ----
+  // -----------------
+  // Switch mode
+  // -----------------
   if (['กลับไป ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai' });
     return reply(replyToken, { type: 'text', text: 'กลับเข้าสู่โหมด AI แล้วครับ' });
@@ -44,12 +47,16 @@ async function handleTextMessage(event) {
     return reply(replyToken, backToAIPreset('เข้าสู่โหมดเจ้าหน้าที่แล้วครับ'));
   }
 
-  // ---- greeting ----
+  // -----------------
+  // Greeting
+  // -----------------
   if (blacklist.includes(userText)) {
     return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานได้เลยครับ'));
   }
 
-  // ---- category match (manual menu) ----
+  // -----------------
+  // Category / manual
+  // -----------------
   const matched = matchCategory(userText);
   if (matched && categoryMenus[matched]) {
     if (state.mode === 'human') {
@@ -58,56 +65,10 @@ async function handleTextMessage(event) {
     return reply(replyToken, helpModePreset('เมนูนี้เปิดได้ในโหมดเจ้าหน้าที่'));
   }
 
-  // =========================
-  // ✅ AI MODE (RAG FIRST)
-  // =========================
+  // ==================================
+  // ✅ AI MODE (RAG ONLY – ONE BLOCK)
+  // ==================================
   if (state.mode === 'ai') {
+    console.log('🤖 AI MODE:', userText);
 
-    // 1) คำถามกว้าง → ชวนถามให้ชัด
     if (isBroadQuestion(userText)) {
-      return reply(replyToken, {
-        type: 'text',
-        text:
-          'คุณต้องการสอบถามเรื่องใดเกี่ยวกับหัวข้อนี้ครับ เช่น ขั้นตอนการลงทะเบียน หรือการตั้งรหัสผ่าน'
-      });
-    }
-
-    // 2) Retrieve จาก RAG
-    const hits = await retrieve(userText);
-
-    // ❌ ไม่เจออะไรเลย
-    if (!hits || hits.length === 0) {
-      return reply(replyToken, {
-        type: 'text',
-        text: NO_DATA_REPLY
-      });
-    }
-
-    // ✅ มีอย่างน้อย 1 chunk → ให้ AI ตอบ
-    const { answer, failed } = await askAI(userText, hits);
-
-    if (failed || !answer) {
-      return reply(replyToken, { type: 'text', text: NO_DATA_REPLY });
-    }
-
-    return reply(replyToken, [
-      { type: 'text', text: answer },
-      backToAIPreset('หากต้องการสอบถามเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้')
-    ]);
-  }
-
-  // =========================
-  // HUMAN MODE
-  // =========================
-  if (state.mode === 'human') {
-    return reply(
-      replyToken,
-      backToAIPreset('ผมบันทึกข้อความให้เจ้าหน้าที่แล้ว หากต้องการกลับไปถาม AI กดปุ่มด้านล่าง')
-    );
-  }
-
-  // fallback
-  return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานได้เลยครับ'));
-}
-
-module.exports = { handleTextMessage };
