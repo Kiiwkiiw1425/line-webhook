@@ -114,3 +114,73 @@ async function askAI(question, knowledge = [], context = []) {
     const hadKnowledge = Array.isArray(knowledge) && knowledge.length > 0;
 
     // ✅ ไม่มี knowledge → ไม่เรียก LLM แต่ตอบข้อความมาตรฐาน
+    if (!hadKnowledge) {
+      return {
+        answer: 'ไม่มีข้อมูล หรือไม่มีคำตอบ กรุณาติดต่อเจ้าหน้าที่',
+        failed: false
+      };
+    }
+
+    const knowledgeText = knowledgeToText(knowledge);
+
+    const contents = [
+      // System Prompt
+      {
+        role: 'user',
+        parts: [{ text: SYSTEM_PROMPT }]
+      },
+
+      // Knowledge จาก RAG
+      {
+        role: 'user',
+        parts: [{ text: knowledgeText }]
+      },
+
+      // Context เดิม (ถ้ามี)
+      ...context,
+
+      // คำถามผู้ใช้
+      {
+        role: 'user',
+        parts: [{ text: question }]
+      }
+    ];
+
+    const response = await axios.post(
+      `${ENDPOINT}?key=${GEMINI_API_KEY}`,
+      {
+        contents,
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: MAX_OUTPUT_TOKENS
+        }
+      },
+      {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 15000
+      }
+    );
+
+    const answer =
+      response.data?.candidates?.[0]?.content?.parts
+        ?.map(p => p.text)
+        .join('') || '';
+
+    const cleaned = safeText(answer);
+    const failed = aiFailed(cleaned);
+
+    return {
+      answer: failed ? 'ไม่มีข้อมูล หรือไม่มีคำตอบ กรุณาติดต่อเจ้าหน้าที่' : cleaned,
+      failed: false
+    };
+  } catch (err) {
+    console.error('❌ Gemini API Error:', err.response?.data || err.message);
+    return {
+      answer: 'ไม่มีข้อมูล หรือไม่มีคำตอบ กรุณาติดต่อเจ้าหน้าที่',
+      failed: true,
+      error: err.message
+    };
+  }
+}
+
+module.exports = { askAI };
