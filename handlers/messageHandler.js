@@ -11,6 +11,7 @@ const { retrieve } = require('../services/ragStore');
 // =====================
 // CONFIG
 // =====================
+
 const NO_DATA_REPLY =
   'ไม่พบข้อมูลที่ตรงกับคำถามนี้ในคู่มือ หากต้องการสอบถามเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ';
 
@@ -31,6 +32,8 @@ const blacklist = [
 // =====================
 // HELPERS
 // =====================
+
+// คำถามกว้าง ยังไม่ actionable
 function isBroadQuestion(text) {
   return (
     text.length <= 30 &&
@@ -43,6 +46,7 @@ function isBroadQuestion(text) {
 // =====================
 // MAIN HANDLER
 // =====================
+
 async function handleTextMessage(event) {
   const replyToken = event.replyToken;
   const userId = event.source.userId;
@@ -52,14 +56,15 @@ async function handleTextMessage(event) {
 
   const state = getState(userId) || { mode: 'ai' };
 
-  // update last activity
+  // อัปเดตเวลา activity ทุกครั้งที่มีข้อความเข้า
   setState(userId, { lastActivity: now });
 
   // =====================
   // SWITCH MODE (คำสั่ง)
   // =====================
+
   if (['กลับไป ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
-    setState(userId, { mode: 'ai' });
+    setState(userId, { mode: 'ai', promptedAfterInactive: false });
     return reply(replyToken, {
       type: 'text',
       text: 'กลับเข้าสู่โหมด AI แล้วครับ'
@@ -74,32 +79,37 @@ async function handleTextMessage(event) {
   // =========
   // GREETING
   // =========
+
   if (blacklist.includes(userText)) {
     return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานได้เลยครับ'));
   }
 
   // =========================================
-  //  AI MODE (RAG-first)
+  // ✅ AI MODE (RAG-first / no fallback speak)
   // =========================================
+
   if (state.mode === 'ai') {
     console.log('🤖 AI MODE:', userText);
 
+    // คำถามกว้าง → ชวนถามให้ชัด
     if (isBroadQuestion(userText)) {
       return reply(replyToken, {
         type: 'text',
         text:
-          'คุณต้องการสอบถามเรื่องใดครับ เช่น ขั้นตอนการลงทะเบียน หรือการตั้งรหัสผ่าน'
+          'คุณต้องการสอบถามเรื่องใดครับ'
       });
     }
 
+    // Retrieve จาก RAG
     const hits = await retrieve(userText);
     console.log('📦 RAG HITS:', hits.length);
 
-    // 🔕 ไม่มีข้อมูล → นิ่ง
+    // ❌ ไม่มีข้อมูล → นิ่ง (ตาม policy)
     if (!hits || hits.length === 0) {
-      return;
+      return; // intentionally silent
     }
 
+    // ✅ มี knowledge → ให้ AI ตอบ
     const { answer } = await askAI(userText, hits);
 
     return reply(replyToken, [
@@ -111,6 +121,7 @@ async function handleTextMessage(event) {
   // ==================================
   // CATEGORY / MANUAL (เฉพาะ human)
   // ==================================
+
   const matched = matchCategory(userText);
   if (matched && categoryMenus[matched]) {
     if (state.mode === 'human') {
@@ -123,18 +134,19 @@ async function handleTextMessage(event) {
   }
 
   // =====================
-  // HUMAN MODE (เงียบ)
+  // HUMAN MODE (silent by design)
   // =====================
+
   if (state.mode === 'human') {
     const lastActivity = state.lastActivity || now;
     const inactiveMs = now - lastActivity;
 
-    //  ยัง active → เงียบ
+    // ✅ ยังไม่เกินเวลานิ่ง → เงียบ
     if (inactiveMs < INACTIVE_LIMIT_MS) {
       return;
     }
 
-    //  idle เกิน 30 นาที → ถามครั้งเดียว
+    // ✅ เกินเวลานิ่ง → ถามครั้งเดียว
     if (!state.promptedAfterInactive) {
       setState(userId, { promptedAfterInactive: true });
 
@@ -164,13 +176,14 @@ async function handleTextMessage(event) {
       });
     }
 
-    // ถามไปแล้ว → เงียบ
+    // ✅ เคยถามแล้ว → เงียบ
     return;
   }
 
   // =========
-  // FALLBACK
+  // FALLBACK (ยังไม่เลือกโหมด)
   // =========
+
   return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานครับ'));
 }
 
