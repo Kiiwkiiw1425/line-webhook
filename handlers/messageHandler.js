@@ -23,6 +23,7 @@ const blacklist = [
   'สวัสดีค่ะ'
 ];
 
+// คำถามกว้าง ๆ (ยังไม่ชัดเจน)
 function isBroadQuestion(text) {
   return (
     text.length <= 30 &&
@@ -38,10 +39,10 @@ async function handleTextMessage(event) {
   const userText = (event.message.text || '').trim();
   const lowerText = userText.toLowerCase();
 
-  // default เป็น AI
+  // default โหมด AI
   const state = getState(userId) || { mode: 'ai' };
 
-  // ===== switch mode =====
+  // ===== สลับโหมด =====
   if (['กลับไป ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai' });
     return reply(replyToken, {
@@ -55,12 +56,12 @@ async function handleTextMessage(event) {
     return reply(replyToken, backToAIPreset('เข้าสู่โหมดเจ้าหน้าที่แล้วครับ'));
   }
 
-  // ===== greeting =====
+  // ===== ทักทาย =====
   if (blacklist.includes(userText)) {
     return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานได้เลยครับ'));
   }
 
-  // ===== category/manual =====
+  // ===== เมนูคู่มือ =====
   const matched = matchCategory(userText);
   if (matched && categoryMenus[matched]) {
     if (state.mode === 'human') {
@@ -73,6 +74,7 @@ async function handleTextMessage(event) {
   if (state.mode === 'ai') {
     console.log('🤖 AI MODE:', userText);
 
+    // คำถามกว้าง → ชวนถามให้ชัด
     if (isBroadQuestion(userText)) {
       return reply(replyToken, {
         type: 'text',
@@ -81,9 +83,11 @@ async function handleTextMessage(event) {
       });
     }
 
+    // ค้นจาก RAG
     const hits = await retrieve(userText);
     console.log('📦 RAG HITS:', hits.length);
 
+    // ✅ ไม่มีข้อมูลในคู่มือ
     if (!hits || hits.length === 0) {
       return reply(replyToken, {
         type: 'text',
@@ -91,6 +95,7 @@ async function handleTextMessage(event) {
       });
     }
 
+    // ✅ มีข้อมูล → ให้ AI ตอบจาก knowledge
     const { answer } = await askAI(userText, hits);
 
     return reply(replyToken, [
