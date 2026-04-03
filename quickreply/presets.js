@@ -1,43 +1,29 @@
-// quickreply/presets.js
+
 const { textWithQuickReply, postbackAction } = require('./builder');
 
-/**
- * ✅ ปุ่มสลับโหมด (AI / เจ้าหน้าที่)
- * ใช้เป็นแกนกลางของทุก Quick Reply
- */
 function modeSwitchItems() {
   return [
-    postbackAction('🤖 ถามตอบด้วย AI', 'mode=ai', 'ถามตอบด้วย AI'),
-    postbackAction('👩‍💼 ติดต่อเจ้าหน้าที่', 'mode=human', 'ติดต่อเจ้าหน้าที่')
+    postbackAction('🤖 ถามตอบด้วย AI', 'mode=ai'),
+    postbackAction('👩‍💼 ติดต่อเจ้าหน้าที่', 'mode=human')
   ];
 }
 
-/**
- * ✅ ใช้เวลาอยาก "แนบปุ่มโหมด" ไปกับข้อความใดก็ตาม
- */
 function withModeSwitch(text) {
   return textWithQuickReply(text, modeSwitchItems());
 }
 
-/**
- * ✅ ใช้ตอนบอทยังไม่แน่ใจ / อยากให้ผู้ใช้เลือกเอง
- */
-function helpModePreset(text = 'กรุณาเลือกโหมดการใช้งาน') {
-  return textWithQuickReply(text, modeSwitchItems());
-}
-
-/**
- * ✅ ใช้เฉพาะตอนอยู่ human mode
- * เพื่อให้มีปุ่ม "กลับไปถาม AI"
- */
-function backToAIPreset(text = 'ต้องการกลับไปถาม AI หรือไม่') {
+function backToAIPreset(text) {
   return textWithQuickReply(text, [
-    postbackAction('🤖 กลับไปถาม AI', 'mode=ai', 'กลับไปถาม AI')
+    postbackAction('🤖 กลับไปถาม AI', 'mode=ai')
   ]);
 }
 
+function helpModePreset(text) {
+  return textWithQuickReply(text, modeSwitchItems());
+}
+
 module.exports = {
-  helpModePreset,
+  withModeSwitch,
   backToAIPreset,
-  withModeSwitch // ⭐ ตัวหลักที่เราจะใช้
+  helpModePreset
 };
