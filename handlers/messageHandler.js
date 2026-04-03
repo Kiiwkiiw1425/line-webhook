@@ -11,6 +11,7 @@ const { retrieve } = require('../services/ragStore');
 const NO_DATA_REPLY =
   'ไม่พบข้อมูลที่ตรงกับคำถามนี้ในคู่มือ หากต้องการสอบถามเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ';
 
+// คำทัก/คำพูดสั้น ๆ
 const blacklist = [
   'โอเค',
   'โอเคครับ',
@@ -23,7 +24,7 @@ const blacklist = [
   'สวัสดีค่ะ'
 ];
 
-// คำถามกว้าง ๆ (ยังไม่ชัดเจน)
+// คำถามกว้าง ยังไม่ชัดเจน
 function isBroadQuestion(text) {
   return (
     text.length <= 30 &&
@@ -39,10 +40,12 @@ async function handleTextMessage(event) {
   const userText = (event.message.text || '').trim();
   const lowerText = userText.toLowerCase();
 
-  // default โหมด AI
+  // ค่าเริ่มต้น: โหมด AI
   const state = getState(userId) || { mode: 'ai' };
 
-  // ===== สลับโหมด =====
+  // =====================
+  // Switch Mode (คำสั่ง)
+  // =====================
   if (['กลับไป ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai' });
     return reply(replyToken, {
@@ -56,21 +59,16 @@ async function handleTextMessage(event) {
     return reply(replyToken, backToAIPreset('เข้าสู่โหมดเจ้าหน้าที่แล้วครับ'));
   }
 
-  // ===== ทักทาย =====
+  // =========
+  // Greeting
+  // =========
   if (blacklist.includes(userText)) {
     return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานได้เลยครับ'));
   }
 
-  // ===== เมนูคู่มือ =====
-  const matched = matchCategory(userText);
-  if (matched && categoryMenus[matched]) {
-    if (state.mode === 'human') {
-      return reply(replyToken, categoryMenus[matched]);
-    }
-    return reply(replyToken, helpModePreset('เมนูนี้เปิดได้ในโหมดเจ้าหน้าที่'));
-  }
-
-  // ===== AI MODE (RAG) =====
+  // =========================================
+  // ✅ AI MODE (RAG ต้องได้ตอบเป็นอันดับแรก)
+  // =========================================
   if (state.mode === 'ai') {
     console.log('🤖 AI MODE:', userText);
 
@@ -83,11 +81,11 @@ async function handleTextMessage(event) {
       });
     }
 
-    // ค้นจาก RAG
+    // ดึงข้อมูลจาก RAG
     const hits = await retrieve(userText);
     console.log('📦 RAG HITS:', hits.length);
 
-    // ✅ ไม่มีข้อมูลในคู่มือ
+    // ❌ ไม่มีข้อมูล
     if (!hits || hits.length === 0) {
       return reply(replyToken, {
         type: 'text',
@@ -95,16 +93,32 @@ async function handleTextMessage(event) {
       });
     }
 
-    // ✅ มีข้อมูล → ให้ AI ตอบจาก knowledge
+    // ✅ มีข้อมูล → ให้ AI ตอบ
     const { answer } = await askAI(userText, hits);
 
     return reply(replyToken, [
       { type: 'text', text: answer || NO_DATA_REPLY },
-      backToAIPreset('หากต้องการสอบถามเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้')
+      backToAIPreset('หากต้องการดูเมนูหรือติดต่อเจ้าหน้าที่ กดปุ่มด้านล่าง')
     ]);
   }
 
-  // ===== HUMAN MODE =====
+  // ==================================
+  // Category / Manual Menu (รองจาก AI)
+  // ==================================
+  const matched = matchCategory(userText);
+  if (matched && categoryMenus[matched]) {
+    if (state.mode === 'human') {
+      return reply(replyToken, categoryMenus[matched]);
+    }
+    return reply(
+      replyToken,
+      helpModePreset('เมนูนี้เปิดดูได้ในโหมดเจ้าหน้าที่')
+    );
+  }
+
+  // =============
+  // HUMAN MODE
+  // =============
   if (state.mode === 'human') {
     return reply(
       replyToken,
@@ -114,7 +128,9 @@ async function handleTextMessage(event) {
     );
   }
 
-  // ===== fallback =====
+  // =========
+  // fallback
+  // =========
   return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานครับ'));
 }
 
