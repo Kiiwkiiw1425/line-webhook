@@ -11,20 +11,21 @@ function normalize(text='') {
 const raw = JSON.parse(fs.readFileSync(RAG_PATH, 'utf8'));
 documents = raw.items || [];
 
+// services/ragStore.js
 async function retrieve(query) {
-  const nq = normalize(query);
+  const q = query.replace(/\s+/g, '');
 
-  const scored = documents.map(d => {
-    const text = normalize(d.content || '');
-    let score = 0;
-    if (text.includes(nq) || nq.includes(text)) score += 3;
-    if (nq.includes('ขั้นตอน') && text.includes('ขั้นตอน')) score += 2;
-    return { ...d, score };
-  })
-  .filter(d => d.score > 0)
-  .sort((a,b) => b.score - a.score);
+  // ถ้าถามเรื่อง "ขั้นตอน" หรือ "วิธี"
+  if (/ขั้นตอน|วิธี|ลงทะเบียน/.test(q)) {
+    // ✅ ดึงทั้ง flow ตาม id
+    return documents
+      .filter(d => d.category === 'DPIS6-Registration')
+      .sort((a, b) => a.id.localeCompare(b.id)); // reg-01 → reg-04
+  }
 
-  return scored.slice(0,1); // ✅ top‑1
+  // fallback: ดึง item เดียว
+  return documents.filter(d =>
+    d.content.replace(/\s+/g,'').includes(q)
+  ).slice(0,1);
 }
-
 module.exports = { retrieve };
