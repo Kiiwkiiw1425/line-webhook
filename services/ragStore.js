@@ -2,19 +2,20 @@
 const fs = require('fs');
 const path = require('path');
 
-// ✅ path ไปยังไฟล์ที่คุณมีจริง
 const RAG_INDEX_PATH = path.join(__dirname, '..', 'data', 'rag-index.json');
 
 let documents = [];
 
-/**
- * โหลด RAG index ตอน start server
- */
+// โหลด RAG index ตอน start
 try {
   if (fs.existsSync(RAG_INDEX_PATH)) {
     const raw = fs.readFileSync(RAG_INDEX_PATH, 'utf8');
-    documents = JSON.parse(raw);
-    console.log(`✅ Loaded ${documents.length} RAG knowledge chunks`);
+    const parsed = JSON.parse(raw);
+
+    // ✅ จุดสำคัญ: ใช้ parsed.items
+    documents = Array.isArray(parsed.items) ? parsed.items : [];
+
+    console.log(`✅ Loaded ${documents.length} RAG knowledge items`);
   } else {
     console.warn('⚠️ rag-index.json not found – RAG disabled');
   }
@@ -23,9 +24,7 @@ try {
 }
 
 /**
- * ✅ Simple RAG Retrieval
- * @param {string} query
- * @param {number} topK
+ * Simple keyword-based retrieval
  */
 async function retrieve(query, topK = 3) {
   console.log('🔍 retrieve query =', query);
@@ -37,8 +36,7 @@ async function retrieve(query, topK = 3) {
 
   const scored = documents
     .map(doc => {
-      // ✅ รองรับทั้ง content และ text กันพลาด
-      const text = doc.content || doc.text || '';
+      const text = doc.content || '';
       const score = tokens.reduce(
         (sum, t) => (text.includes(t) ? sum + 1 : sum),
         0
