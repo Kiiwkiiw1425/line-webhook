@@ -8,10 +8,14 @@ const matchCategory = require('../utils/matchCategory');
 const { askAI } = require('../services/aiService.gemini');
 const { retrieve } = require('../services/ragStore');
 
+// =====================
+// CONFIG
+// =====================
 const NO_DATA_REPLY =
   'ไม่พบข้อมูลที่ตรงกับคำถามนี้ในคู่มือ หากต้องการสอบถามเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ';
 
-// คำทัก/คำพูดสั้น ๆ
+const INACTIVE_LIMIT_MS = 30 * 60 * 1000; // 30 นาที
+
 const blacklist = [
   'โอเค',
   'โอเคครับ',
@@ -24,7 +28,9 @@ const blacklist = [
   'สวัสดีค่ะ'
 ];
 
-// คำถามกว้าง ยังไม่ชัดเจน
+// =====================
+// HELPERS
+// =====================
 function isBroadQuestion(text) {
   return (
     text.length <= 30 &&
@@ -34,17 +40,23 @@ function isBroadQuestion(text) {
   );
 }
 
+// =====================
+// MAIN HANDLER
+// =====================
 async function handleTextMessage(event) {
   const replyToken = event.replyToken;
   const userId = event.source.userId;
   const userText = (event.message.text || '').trim();
   const lowerText = userText.toLowerCase();
+  const now = Date.now();
 
-  // ค่าเริ่มต้น: โหมด AI
   const state = getState(userId) || { mode: 'ai' };
 
+  // update last activity
+  setState(userId, { lastActivity: now });
+
   // =====================
-  // Switch Mode (คำสั่ง)
+  // SWITCH MODE (คำสั่ง)
   // =====================
   if (['กลับไป ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai' });
@@ -55,24 +67,23 @@ async function handleTextMessage(event) {
   }
 
   if (['ติดต่อเจ้าหน้าที่', 'human', 'โหมดเจ้าหน้าที่'].includes(lowerText)) {
-    setState(userId, { mode: 'human' });
+    setState(userId, { mode: 'human', promptedAfterInactive: false });
     return reply(replyToken, backToAIPreset('เข้าสู่โหมดเจ้าหน้าที่แล้วครับ'));
   }
 
   // =========
-  // Greeting
+  // GREETING
   // =========
   if (blacklist.includes(userText)) {
     return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานได้เลยครับ'));
   }
 
   // =========================================
-  // ✅ AI MODE (RAG ต้องได้ตอบเป็นอันดับแรก)
+  //  AI MODE (RAG-first)
   // =========================================
   if (state.mode === 'ai') {
     console.log('🤖 AI MODE:', userText);
 
-    // คำถามกว้าง → ชวนถามให้ชัด
     if (isBroadQuestion(userText)) {
       return reply(replyToken, {
         type: 'text',
@@ -81,19 +92,14 @@ async function handleTextMessage(event) {
       });
     }
 
-    // ดึงข้อมูลจาก RAG
     const hits = await retrieve(userText);
     console.log('📦 RAG HITS:', hits.length);
 
-    // ❌ ไม่มีข้อมูล
+    // 🔕 ไม่มีข้อมูล → นิ่ง
     if (!hits || hits.length === 0) {
-      return reply(replyToken, {
-        type: 'text',
-        text: 'ไม่พบข้อมูลในคู่มือสำหรับคำถามนี้'
-      });
+      return;
     }
 
-    // ✅ มีข้อมูล → ให้ AI ตอบ
     const { answer } = await askAI(userText, hits);
 
     return reply(replyToken, [
@@ -103,7 +109,7 @@ async function handleTextMessage(event) {
   }
 
   // ==================================
-  // Category / Manual Menu (รองจาก AI)
+  // CATEGORY / MANUAL (เฉพาะ human)
   // ==================================
   const matched = matchCategory(userText);
   if (matched && categoryMenus[matched]) {
@@ -116,20 +122,54 @@ async function handleTextMessage(event) {
     );
   }
 
-  // =============
-  // HUMAN MODE
-  // =============
+  // =====================
+  // HUMAN MODE (เงียบ)
+  // =====================
   if (state.mode === 'human') {
-    return reply(
-      replyToken,
-      backToAIPreset(
-        'ผมบันทึกข้อความให้เจ้าหน้าที่แล้ว หากต้องการกลับไปถาม AI กดปุ่มด้านล่าง'
-      )
-    );
+    const lastActivity = state.lastActivity || now;
+    const inactiveMs = now - lastActivity;
+
+    //  ยัง active → เงียบ
+    if (inactiveMs < INACTIVE_LIMIT_MS) {
+      return;
+    }
+
+    //  idle เกิน 30 นาที → ถามครั้งเดียว
+    if (!state.promptedAfterInactive) {
+      setState(userId, { promptedAfterInactive: true });
+
+      return reply(replyToken, {
+        type: 'text',
+        text: 'ยังต้องการคุยต่อหรือไม่ครับ',
+        quickReply: {
+          items: [
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: 'คุยต่อ',
+                data: 'conv=continue'
+              }
+            },
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: 'จบการสนทนา',
+                data: 'conv=end'
+              }
+            }
+          ]
+        }
+      });
+    }
+
+    // ถามไปแล้ว → เงียบ
+    return;
   }
 
   // =========
-  // fallback
+  // FALLBACK
   // =========
   return reply(replyToken, helpModePreset('เลือกโหมดการใช้งานครับ'));
 }
