@@ -2,7 +2,6 @@
 
 const { reply } = require('../services/lineClient');
 const { getState, setState } = require('../services/stateStore');
-const { modeSwitchQuickReply } = require('../quickreply/modeSwitch');
 const { askAI } = require('../services/aiService.gemini');
 const { retrieve } = require('../services/ragStore');
 
