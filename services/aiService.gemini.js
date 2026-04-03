@@ -2,10 +2,6 @@
 
 const axios = require('axios');
 
-// =====================
-// CONFIG
-// =====================
-
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL =
   process.env.GEMINI_MODEL || 'gemini-1.5-flash-001';
@@ -15,43 +11,44 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
-
-// =====================
-// MAIN FUNCTION
-// =====================
+const ENDPOINT =
+  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
- * ✅ ถาม Gemini โดยใช้ข้อมูลจาก RAG (strict / closed-book)
- * @param {string} question
- * @param {Array<{ content: string }>} hits
+ * ✅ ถาม Gemini โดยรวม knowledge ทุก chunk แล้วสรุปครั้งเดียว
  */
 async function askAI(question, hits) {
-  // ❌ ไม่มี knowledge → ไม่ควรเรียก AI
   if (!hits || hits.length === 0) {
     return {
       answer: 'ไม่พบข้อมูลที่เกี่ยวข้องในระบบ'
     };
   }
 
-  // ใช้ chunk แรกเป็น context
-  const context = hits[0].content;
+  // ✅ รวมทุกขั้นตอนจาก RAG ให้ AI เห็นทั้งหมด
+  const combinedContext = hits
+    .map((h, i) => `ขั้นตอนที่ ${i + 1}: ${h.content}`)
+    .join('\n');
 
   const prompt = `
-คุณเป็นผู้ช่วยระบบ
+คุณเป็นผู้ช่วยระบบ DPIS6
 
-กติกา:
-- ตอบคำถามโดยใช้ข้อมูลด้านล่างเท่านั้น
-- ห้ามเดา
-- ห้ามใช้ความรู้ภายนอก
-- ห้ามเพิ่มข้อมูลเอง
+คำสั่ง:
+- ใช้ข้อมูลด้านล่างเท่านั้น
+- สรุปขั้นตอนทั้งหมดให้ครบ
+- เรียงลำดับขั้นตอนให้เข้าใจง่าย
+- ตอบเป็นคำตอบเดียว ห้ามแยกหลายข้อความ
+- ห้ามเดา ห้ามเพิ่มข้อมูล
 
-ข้อมูล:
-${context}
+ข้อมูลจากคู่มือ:
+${combinedContext}
 
 คำถาม:
 ${question}
-`;
+
+รูปแบบคำตอบ:
+- ใช้ bullet หรือเลขลำดับ
+- เขียนเป็นภาษาไทยสุภาพ
+`.trim();
 
   try {
     const response = await axios.post(
@@ -65,7 +62,7 @@ ${question}
         ],
         generationConfig: {
           temperature: 0.2,
-          maxOutputTokens: 512
+          maxOutputTokens: 1024
         }
       },
       {
