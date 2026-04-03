@@ -16,21 +16,24 @@ async function handlePostback(event) {
   touch(userId);
 
   // ========= สลับโหมด =========
-  if (params.mode === 'ai') {
-    setState(userId, { mode: 'ai' });
-    return reply(replyToken, {
-      type: 'text',
-      text: 'กลับเข้าสู่โหมด AI แล้วครับ'
-    });
-  }
+      if (params.mode === 'ai') {
+      setState(userId, { mode: 'ai' });
+      return reply(replyToken, {
+        type: 'text',
+        text: 'กลับเข้าสู่โหมด AI แล้วครับ พิมพ์คำถามได้เลย'
+      });
+    }
 
-  if (params.mode === 'human') {
-    const prev = getState(userId);
-    setState(userId, { mode: 'human' });
-
-    if (shouldNotify(prev)) {
-      await notifyAgent(event, { lastUserText: '[เลือกติดต่อเจ้าหน้าที่]' });
-      setState(userId, { notifiedAt: Date.now() });
+    if (params.mode === 'human') {
+      setState(userId, { mode: 'human' });
+    
+      return reply(replyToken, [
+        {
+          type: 'text',
+          text: 'เจ้าหน้าที่กำลังดูแลคุณอยู่ครับ กรุณาพิมพ์รายละเอียด'
+        },
+        backToAIPreset('หากต้องการกลับไปถาม AI กดปุ่มด้านล่าง')
+      ]);
     }
 
     return reply(replyToken, [
