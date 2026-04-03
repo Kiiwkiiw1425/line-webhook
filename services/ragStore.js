@@ -1,54 +1,30 @@
-// services/ragStore.js
 const fs = require('fs');
 const path = require('path');
 
-const RAG_INDEX_PATH = path.join(__dirname, '..', 'data', 'rag-index.json');
-
+const RAG_PATH = path.join(__dirname, '..', 'data', 'rag-index.json');
 let documents = [];
 
-// โหลด RAG index ตอน start
-try {
-  if (fs.existsSync(RAG_INDEX_PATH)) {
-    const raw = fs.readFileSync(RAG_INDEX_PATH, 'utf8');
-    const parsed = JSON.parse(raw);
-
-    // ✅ จุดสำคัญ: ใช้ parsed.items
-    documents = Array.isArray(parsed.items) ? parsed.items : [];
-
-    console.log(`✅ Loaded ${documents.length} RAG knowledge items`);
-  } else {
-    console.warn('⚠️ rag-index.json not found – RAG disabled');
-  }
-} catch (err) {
-  console.error('❌ Failed to load rag-index.json:', err.message);
+function normalize(text='') {
+  return text.replace(/\s+/g,'').toLowerCase();
 }
 
-/**
- * Simple keyword-based retrieval
- */
-async function retrieve(query, topK = 3) {
-  console.log('🔍 retrieve query =', query);
-  console.log('📚 documents loaded =', documents.length);
+const raw = JSON.parse(fs.readFileSync(RAG_PATH, 'utf8'));
+documents = raw.items || [];
 
-  if (!query || documents.length === 0) return [];
+async function retrieve(query) {
+  const nq = normalize(query);
 
-  const tokens = query.split(/\s+/);
+  const scored = documents.map(d => {
+    const text = normalize(d.content || '');
+    let score = 0;
+    if (text.includes(nq) || nq.includes(text)) score += 3;
+    if (nq.includes('ขั้นตอน') && text.includes('ขั้นตอน')) score += 2;
+    return { ...d, score };
+  })
+  .filter(d => d.score > 0)
+  .sort((a,b) => b.score - a.score);
 
-  const scored = documents
-    .map(doc => {
-      const text = doc.content || '';
-      const score = tokens.reduce(
-        (sum, t) => (text.includes(t) ? sum + 1 : sum),
-        0
-      );
-      return { ...doc, score };
-    })
-    .filter(d => d.score > 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, topK);
-
-  console.log('✅ RAG hits =', scored.length);
-  return scored;
+  return scored.slice(0,1); // ✅ top‑1
 }
 
 module.exports = { retrieve };
