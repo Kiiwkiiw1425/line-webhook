@@ -15,10 +15,7 @@ const ENDPOINT =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
- * ✅ AI สรุปจาก RAG (Summary Only)
- * - ใช้ทุก chunk
- * - สรุปสั้น 4–6 bullet
- * - ไม่ลงรายละเอียด (ไว้กดอ่านต่อ)
+ * ✅ ถาม Gemini โดยรวม knowledge ทุก chunk แล้วสรุปครั้งเดียว
  */
 async function askAI(question, hits) {
   if (!hits || hits.length === 0) {
@@ -27,7 +24,7 @@ async function askAI(question, hits) {
     };
   }
 
-  // ✅ รวมทุกขั้นตอนจาก RAG
+  // ✅ รวมทุกขั้นตอนจาก RAG ให้ AI เห็นทั้งหมด
   const combinedContext = hits
     .map((h, i) => `ขั้นตอนที่ ${i + 1}: ${h.content}`)
     .join('\n');
@@ -35,16 +32,12 @@ async function askAI(question, hits) {
   const prompt = `
 คุณเป็นผู้ช่วยระบบ DPIS6
 
-บทบาท:
-- สรุปภาพรวมขั้นตอนจากคู่มือ
-- ตอบสั้น กระชับ ชัดเจน
-- ไม่ลงรายละเอียดเชิงลึก
-- ไม่เกิน 4–6 bullet หรือ 5–7 บรรทัด
-
-ข้อห้าม:
-- ห้ามเดา
-- ห้ามเพิ่มข้อมูลนอกเหนือจากข้อมูลด้านล่าง
-- ห้ามอธิบายละเอียด (ผู้ใช้จะกด "อ่านต่อ" เอง)
+คำสั่ง:
+- ใช้ข้อมูลด้านล่างเท่านั้น
+- สรุปขั้นตอนทั้งหมดให้ครบ
+- เรียงลำดับขั้นตอนให้เข้าใจง่าย
+- ตอบเป็นคำตอบเดียว ห้ามแยกหลายข้อความ
+- ห้ามเดา ห้ามเพิ่มข้อมูล
 
 ข้อมูลจากคู่มือ:
 ${combinedContext}
@@ -54,8 +47,7 @@ ${question}
 
 รูปแบบคำตอบ:
 - ใช้ bullet หรือเลขลำดับ
-- ภาษาไทยสุภาพ
-- อ่านง่ายบน LINE
+- เขียนเป็นภาษาไทยสุภาพ
 `.trim();
 
   try {
@@ -69,24 +61,24 @@ ${question}
           }
         ],
         generationConfig: {
-          temperature: 0.15,
-          maxOutputTokens: 400
+          temperature: 0.2,
+          maxOutputTokens: 1024
         }
       },
       {
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
     );
 
     const answer =
       response.data?.candidates?.[0]?.content?.parts
         ?.map(p => p.text)
-        .join('')
-        ?.trim() ||
+        .join('') ||
       'ไม่สามารถประมวลผลคำตอบได้';
 
     return { answer };
-
   } catch (err) {
     console.error(
       '❌ Gemini API Error:',
