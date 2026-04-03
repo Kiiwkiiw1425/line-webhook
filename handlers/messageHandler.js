@@ -85,7 +85,10 @@ async function handleTextMessage(event) {
     console.log('📦 RAG HITS:', hits.length);
 
     if (!hits || hits.length === 0) {
-      return reply(replyToken, { type: 'text', text: NO_DATA_REPLY });
+      return reply(replyToken, {
+        type: 'text',
+        text: 'ไม่พบข้อมูลในคู่มือสำหรับคำถามนี้'
+      });
     }
 
     const { answer } = await askAI(userText, hits);
