@@ -2,9 +2,9 @@
 
 const { reply } = require('../services/lineClient');
 const { getState, setState } = require('../services/stateStore');
-const { modeSwitchQuickReply } = require('../quickreply/modeSwitch');
 const { askAI } = require('../services/aiService.gemini');
 const { retrieve } = require('../services/ragStore');
+const { withModeSwitch } = require('../quickreply/presets'); // ✅ เพิ่ม
 
 const INACTIVE_LIMIT_MS = 30 * 60 * 1000;
 
@@ -17,18 +17,17 @@ async function handleTextMessage(event) {
   let state = getState(userId) || {};
 
   // =====================
-  // ✅ คำสั่งพิมพ์สลับโหมด (เผื่อ desktop)
+  // ✅ พิมพ์สลับโหมด (เผื่อ Desktop)
   // =====================
-  if (['ai','ถาม ai','โหมด ai'].includes(lowerText)) {
+  if (['ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai' });
-    return reply(replyToken, {
-      type: 'text',
-      text: 'เข้าสู่โหมด AI แล้วครับ',
-      ...modeSwitchQuickReply()
-    });
+    return reply(
+      replyToken,
+      withModeSwitch('เข้าสู่โหมด AI แล้วครับ')
+    );
   }
 
-  if (['เจ้าหน้าที่','human','ติดต่อเจ้าหน้าที่'].includes(lowerText)) {
+  if (['เจ้าหน้าที่', 'human', 'ติดต่อเจ้าหน้าที่'].includes(lowerText)) {
     setState(userId, { mode: 'human' });
     return reply(replyToken, {
       type: 'text',
@@ -44,10 +43,12 @@ async function handleTextMessage(event) {
     const lastActivity = state.lastActivity || now;
     const inactiveMs = now - lastActivity;
 
+    // ยังไม่เกิน 30 นาที → เงียบ
     if (inactiveMs < INACTIVE_LIMIT_MS) {
-      return; // เงียบ
+      return;
     }
 
+    // เกิน 30 นาที → ถามครั้งเดียว
     if (!state.promptedAfterInactive) {
       setState(userId, { promptedAfterInactive: true });
       return reply(replyToken, {
@@ -55,8 +56,22 @@ async function handleTextMessage(event) {
         text: 'ยังต้องการคุยต่อหรือไม่ครับ',
         quickReply: {
           items: [
-            { type: 'action', action: { type: 'postback', label: 'คุยต่อ', data: 'conv=continue' }},
-            { type: 'action', action: { type: 'postback', label: 'จบการสนทนา', data: 'conv=end' }}
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: 'คุยต่อ',
+                data: 'conv=continue'
+              }
+            },
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: 'จบการสนทนา',
+                data: 'conv=end'
+              }
+            }
           ]
         }
       });
@@ -66,27 +81,30 @@ async function handleTextMessage(event) {
   }
 
   // =====================
-  // ✅ AI MODE (ค่า default)
+  // ✅ AI MODE (default)
   // =====================
-  setState(userId, { mode: 'ai' });
+  if (!state.mode) {
+    setState(userId, { mode: 'ai' });
+  }
 
   const hits = await retrieve(userText);
 
+  // ✅ มีข้อมูลใน RAG → ตอบเลย
   if (hits.length > 0) {
     const { answer } = await askAI(userText, hits);
-    return reply(replyToken, {
-      type: 'text',
-      text: answer,
-      ...modeSwitchQuickReply()
-    });
+    return reply(
+      replyToken,
+      withModeSwitch(answer)
+    );
   }
 
-  // ❌ ไม่มีข้อมูลจริง ๆ → ค่อยถามให้ชัด
-  return reply(replyToken, {
-    type: 'text',
-    text: 'ไม่พบข้อมูลในคู่มือ หากต้องการสอบถามเพิ่มเติม กรุณาระบุรายละเอียดเพิ่ม หรือเลือกโหมดด้านล่าง',
-    ...modeSwitchQuickReply()
-  });
+  // ❌ ไม่มีข้อมูลจริง ๆ
+  return reply(
+    replyToken,
+    withModeSwitch(
+      'ไม่พบข้อมูลในคู่มือ หากต้องการสอบถามเพิ่มเติม กรุณาระบุรายละเอียดเพิ่ม หรือเลือกโหมดด้านล่าง'
+    )
+  );
 }
 
 module.exports = { handleTextMessage };
