@@ -1,37 +1,66 @@
-// handlers/messageHandler.js
-const { reply } = require('../services/lineClient');
-const { getState, setState } = require('../services/stateStore');
-const { retrieve } = require('../services/ragStore');
-const { askAI } = require('../services/aiService.gemini');
-const { withModeSwitch } = require('../quickreply/presets');
-const { readMoreQuickReply } = require('../quickreply/readMore');
+// services/aiService.gemini.js
 
-async function handleTextMessage(event) {
-  const replyToken = event.replyToken;
-  const userId = event.source.userId;
-  const text = (event.message.text || '').trim();
+const axios = require('axios');
 
-  const state = getState(userId) || {};
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+const GEMINI_MODEL = 'gemini-1.5-flash';
 
-  // ✅ ถ้าอยู่ human → เงียบ
-  if (state.mode === 'human') return;
-
-  setState(userId, { mode: 'ai' });
-
-  const hits = await retrieve(text);
-
-  if (hits.length > 0) {
-    const { answer } = await askAI(text, hits);
-
-    return reply(replyToken, {
-      type: 'text',
-      text: answer,
-      ...withModeSwitch(''),
-      ...readMoreQuickReply('DPIS6-Registration')
-    });
-  }
-
-  return reply(replyToken, withModeSwitch('ไม่พบข้อมูลที่เกี่ยวข้อง'));
+if (!GEMINI_API_KEY) {
+  console.error('❌ GEMINI_API_KEY is missing');
 }
 
-module.exports = { handleTextMessage };
+const ENDPOINT =
+  `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+/**
+ * ✅ ถาม Gemini โดยใช้ context จาก RAG เพียง 1 chunk
+ */
+async function askAI(question, hits) {
+  const context = hits[0].content;
+
+  const prompt = `
+คุณเป็นผู้ช่วยระบบ
+ตอบคำถามโดยใช้ข้อมูลด้านล่างเท่านั้น
+ห้ามเดา ห้ามเพิ่มข้อมูลนอกเหนือจากนี้
+
+ข้อมูล:
+${context}
+
+คำถาม:
+${question}
+`;
+
+  try {
+    const response = await axios.post(
+      ENDPOINT,
+      {
+        contents: [
+          {
+            role: 'user',
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 512
+        }
+      },
+      {
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
+
+    const answer =
+      response.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      'ไม่สามารถประมวลผลคำตอบได้';
+
+    return { answer };
+  } catch (err) {
+    console.error('❌ Gemini API Error:', err.response?.data || err.message);
+    return {
+      answer: 'ขออภัย ระบบไม่สามารถตอบคำถามได้ในขณะนี้'
+    };
+  }
+}
+
+module.exports = { askAI };
