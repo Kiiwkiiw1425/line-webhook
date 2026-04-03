@@ -12,20 +12,20 @@ function normalize(text = '') {
 }
 
 async function retrieve(query) {
-  const q = normalize(query);
+  const q = query.replace(/\s+/g, '');
 
-  // ✅ คำถามเชิง "ขั้นตอน / วิธี" → ดึงทั้ง flow
+  // ถ้าถามเรื่อง "ขั้นตอน" หรือ "วิธี"
   if (/ขั้นตอน|วิธี|ลงทะเบียน/.test(q)) {
+    // ✅ ดึงทั้ง flow ตาม id
     return documents
       .filter(d => d.category === 'DPIS6-Registration')
-      .sort((a, b) => a.id.localeCompare(b.id));
+      .sort((a, b) => a.id.localeCompare(b.id)); // reg-01 → reg-04
   }
 
-  // ✅ คำถามเจาะจุด → เอา item เดียว
-  return documents
-    .map(d => ({ ...d, score: normalize(d.content).includes(q) ? 1 : 0 }))
-    .filter(d => d.score > 0)
-    .slice(0, 1);
+  // fallback: ดึง item เดียว
+  return documents.filter(d =>
+    d.content.replace(/\s+/g,'').includes(q)
+  ).slice(0,1);
 }
 
 module.exports = { retrieve };
