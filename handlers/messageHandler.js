@@ -7,7 +7,7 @@ const { askAI } = require('../services/aiService.gemini');
 const { getQuickReplyByMode } = require('../quickreply/presets');
 const manualCommand = require('../manual/manualCommand');
 
-const INACTIVE_LIMIT_MS = 30 * 60 * 1000; // 30 นาที
+const INACTIVE_LIMIT_MS = 20 * 60 * 1000; // 20 นาที
 
 async function handleTextMessage(event) {
   const replyToken = event.replyToken;
