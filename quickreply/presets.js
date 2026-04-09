@@ -11,7 +11,7 @@ function quickReplyForAI() {
         type: 'action',
         action: {
           type: 'postback',
-          label: '👩‍💼 ติดต่อเจ้าหน้าที่',
+          label: 'ติดต่อเจ้าหน้าที่',
           data: 'mode=human',
           displayText: 'ติดต่อเจ้าหน้าที่'
         }
@@ -31,7 +31,7 @@ function quickReplyForHuman() {
         type: 'action',
         action: {
           type: 'postback',
-          label: '🤖 ถามตอบด้วย AI',
+          label: 'ถามตอบด้วย AI',
           data: 'mode=ai',
           displayText: 'ถามตอบด้วย AI'
         }
