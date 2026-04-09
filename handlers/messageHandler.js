@@ -20,7 +20,7 @@ async function handleTextMessage(event) {
   // =========================
   // 1) สลับโหมดเป็น Human (ต้องตอบทันที 1 ครั้ง)
   // =========================
-  if (['เจ้าหน้าที่', 'human', 'ติดต่อเจ้าหน้าที่'].includes(lowerText)) {
+  if (['ติดต่อเจ้าหน้าที่', 'human', 'เจ้าหน้าที่'].includes(lowerText)) {
     setState(userId, { mode: 'human', lastActivity: Date.now() });
 
     return reply(replyToken, {
