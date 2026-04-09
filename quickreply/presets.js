@@ -1,5 +1,4 @@
 // quickreply/presets.js
-const { textWithQuickReply, postbackAction } = require('./builder');
 
 /**
  * Quick Reply สำหรับโหมด AI
@@ -13,7 +12,8 @@ function quickReplyForAI() {
         action: {
           type: 'postback',
           label: '👩‍💼 ติดต่อเจ้าหน้าที่',
-          data: 'mode=human'
+          data: 'mode=human',
+          displayText: 'ติดต่อเจ้าหน้าที่'
         }
       }
     ]
@@ -32,7 +32,8 @@ function quickReplyForHuman() {
         action: {
           type: 'postback',
           label: '🤖 ถามตอบด้วย AI',
-          data: 'mode=ai'
+          data: 'mode=ai',
+          displayText: 'ถามตอบด้วย AI'
         }
       }
     ]
@@ -40,11 +41,11 @@ function quickReplyForHuman() {
 }
 
 /**
- * ฟังก์ชันกลาง — เลือกปุ่มตามโหมด
+ * เลือก Quick Reply ตามโหมด
  */
 function getQuickReplyByMode(mode) {
   if (mode === 'human') return quickReplyForHuman();
-  return quickReplyForAI(); // default เป็น AI mode
+  return quickReplyForAI(); // default = AI mode
 }
 
 module.exports = {
