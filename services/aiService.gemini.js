@@ -15,49 +15,32 @@ const ENDPOINT =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
- * ✅ AI สรุปจาก RAG (Summary Only)
- * - ใช้หลาย chunk
- * - สรุปภาพรวม 4–6 bullet
- * - ไม่ขยายรายละเอียด (ไว้กดอ่านต่อ)
+ * ✅ AI อธิบายแบบมนุษย์ (RAG-assisted generative)
  */
 async function askAI(question, hits) {
-  if (!hits || hits.length === 0) {
-    return { answer: 'ไม่พบข้อมูลที่เกี่ยวข้องในระบบ' };
-  }
-
-  // ✅ รวมทุก step จาก RAG
-  const combinedContext = hits
-    .map((h, i) => `ขั้นตอนที่ ${i + 1}: ${h.content}`)
-    .join('\n');
+  const context =
+    hits && hits.length > 0
+      ? hits.map((h, i) => `ข้อมูลที่ ${i + 1}: ${h.content}`).join('\n')
+      : 'ยังไม่มีข้อมูลจากคู่มือในหัวข้อนี้';
 
   const prompt = `
+คุณเป็นผู้ช่วยแนะนำการใช้งานระบบ DPIS6
 
-บทบาทของคุณคือผู้ช่วยแนะนำการใช้งานระบบ DPIS6
+ลักษณะการตอบ:
+- สุภาพ เป็นกันเอง เหมือนเจ้าหน้าที่พูดกับผู้ใช้งาน
+- เรียบเรียงใหม่ได้ ไม่ต้องใช้คำเหมือนเอกสาร
+- อธิบายให้เข้าใจง่าย
 
-แนวทางการตอบ:
-- ใช้ข้อมูลจากคู่มือเป็นหลัก
-- สามารถเรียบเรียง ขยายความ และอธิบายเพิ่มเติม
-- เขียนให้เข้าใจง่าย เหมือนเจ้าหน้าที่แนะนำผู้ใช้งาน
-- ไม่จำเป็นต้องใช้ถ้อยคำเหมือนเอกสารต้นฉบับ
-- อธิบายขั้นตอนให้ต่อเนื่อง อ่านแล้วเห็นภาพการใช้งานจริง
+ข้อมูลอ้างอิง:
+${context}
 
-บทบาท:
-- สรุปภาพรวมขั้นตอนจากคู่มือ
-- ตอบสั้น กระชับ เข้าใจง่าย
-- ไม่เกิน 4–6 bullet
-- ไม่ลงรายละเอียดเชิงลึก
-- ไม่เพิ่มข้อมูลนอกเหนือจากนี้
-
-ข้อมูลจากคู่มือ:
-${combinedContext}
-
-คำถาม:
+คำถามของผู้ใช้:
 ${question}
 
 รูปแบบคำตอบ:
-- ใช้ bullet หรือเลขลำดับ
-- ภาษาไทยสุภาพ
-- อ่านง่ายบน LINE
+- เริ่มต้นด้วยประโยคสุภาพ
+- อธิบายสิ่งที่พอช่วยได้จากข้อมูลที่มี
+- ลงท้ายด้วยการเสนอความช่วยเหลือเพิ่มเติม
 `.trim();
 
   try {
@@ -65,14 +48,11 @@ ${question}
       ENDPOINT,
       {
         contents: [
-          {
-            role: 'user',
-            parts: [{ text: prompt }]
-          }
+          { role: 'user', parts: [{ text: prompt }] }
         ],
         generationConfig: {
-          temperature: 0.15,
-          maxOutputTokens: 300
+          temperature: 0.25,
+          maxOutputTokens: 400
         }
       },
       {
@@ -85,18 +65,14 @@ ${question}
         ?.map(p => p.text)
         .join('')
         .trim() ||
-      'ไม่สามารถประมวลผลคำตอบได้';
+      'ขออภัยครับ ระบบยังไม่สามารถให้คำตอบได้ในขณะนี้';
 
     return { answer };
 
   } catch (err) {
-    console.error(
-      '❌ Gemini API Error:',
-      err.response?.data || err.message
-    );
-
+    console.error('❌ Gemini API Error:', err.response?.data || err.message);
     return {
-      answer: 'ขออภัย ระบบไม่สามารถตอบคำถามได้ในขณะนี้'
+      answer: 'ขออภัยครับ ระบบขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง'
     };
   }
 }
