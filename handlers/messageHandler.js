@@ -4,11 +4,7 @@ const { reply } = require('../services/lineClient');
 const { getState, setState } = require('../services/stateStore');
 const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
-
-// ✅ Quick Reply ตามโหมด
 const { getQuickReplyByMode } = require('../quickreply/presets');
-
-// ✅ เมนูคู่มือจริง (SharePoint / PDF)
 const manualCommand = require('../manual/manualCommand');
 
 const INACTIVE_LIMIT_MS = 30 * 60 * 1000; // 30 นาที
@@ -21,11 +17,9 @@ async function handleTextMessage(event) {
 
   const state = getState(userId) || {};
 
-  /* =================================================
-   * ✅ 1) คำสั่งสลับโหมด — ต้อง reply ทันที
-   * ================================================= */
-
-  // 👉 เข้าสู่โหมดเจ้าหน้าที่ (ต้องพูด 1 ครั้ง)
+  // =========================
+  // 1) สลับโหมดเป็น Human (ต้องตอบทันที 1 ครั้ง)
+  // =========================
   if (['เจ้าหน้าที่', 'human', 'ติดต่อเจ้าหน้าที่'].includes(lowerText)) {
     setState(userId, { mode: 'human', lastActivity: Date.now() });
 
@@ -36,7 +30,9 @@ async function handleTextMessage(event) {
     });
   }
 
-  // 👉 กลับไปโหมด AI
+  // =========================
+  // 2) สลับกลับเป็น AI
+  // =========================
   if (['ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
     setState(userId, { mode: 'ai', lastActivity: Date.now() });
 
@@ -47,14 +43,14 @@ async function handleTextMessage(event) {
     });
   }
 
-  /* =================================================
-   * ✅ 2) HUMAN MODE = บอทเงียบ
-   * ================================================= */
+  // =========================
+  // 3) Human mode = บอทเงียบ
+  // =========================
   if (state.mode === 'human') {
     const now = Date.now();
-    const inactiveMs = now - (state.lastActivity || now);
+    const last = state.lastActivity || now;
+    const inactiveMs = now - last;
 
-    // inactivity 30 นาที → ถามครั้งเดียว
     if (inactiveMs >= INACTIVE_LIMIT_MS && !state.promptedAfterInactive) {
       setState(userId, {
         promptedAfterInactive: true,
@@ -87,21 +83,38 @@ async function handleTextMessage(event) {
       });
     }
 
-    // ✅ กรณีปกติ human mode = เงียบ
     return;
   }
 
-  /* =================================================
-   * ✅ 3) AI MODE (default)
-   * ================================================= */
+  // =========================
+  // 4) AI mode (default)
+  // =========================
   setState(userId, { mode: 'ai', lastActivity: Date.now() });
 
   const hits = await retrieve(userText);
 
-  // ✅ RAG เจอข้อมูล → AI สรุป + แนบคู่มือ
   if (hits && hits.length > 0) {
     const { answer } = await askAI(userText, hits);
 
     return reply(replyToken, [
       {
         type: 'text',
+        text: answer,
+        quickReply: getQuickReplyByMode('ai')
+      },
+      manualCommand
+    ]);
+  }
+
+  // =========================
+  // 5) ไม่พบข้อมูล → ตอบเลี่ยง
+  // =========================
+  return reply(replyToken, {
+    type: 'text',
+    text:
+      'ขณะนี้ยังไม่พบข้อมูลที่ตรงกับคำถามนี้ หากต้องการข้อมูลเพิ่มเติมสามารถติดต่อเจ้าหน้าที่ได้ครับ',
+    quickReply: getQuickReplyByMode('ai')
+  });
+}
+
+module.exports = { handleTextMessage };
