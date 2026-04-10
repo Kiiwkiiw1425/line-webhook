@@ -8,12 +8,14 @@ module.exports = {
     {
       key: 'appoint',
       label: '📥 บรรจุ / แต่งตั้ง / รับโอน',
-      url: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ece90tBH6XZBheUQuKRKv7gBu-1mqL9VnrXgMAceGoiAqQ'
+      url: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/Ece90tBH6XZBheUQuKRKv7gBu-1mqL9VnrXgMAceGoiAqQ',
+      keywords: ['บรรจุ', 'แต่งตั้ง', 'รับโอน', 'การบรรจุข้าราชการ']
     },
     {
       key: 'civil-register',
       label: '📝 การบรรจุข้าราชการ',
-      url: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXOayl9HHalEte5rd_-RY0kBB4tMn9JXImfngsf-vVmpHw'
+      url: 'https://ocscthailand.sharepoint.com/:b:/s/ictUnit-DPIS/EXOayl9HHalEte5rd_-RY0kBB4tMn9JXImfngsf-vVmpHw',
+      keywords: ['บรรจุ', 'แต่งตั้ง', 'รับโอน', 'การบรรจุข้าราชการ']
     },
     {
       key: 'promote',
