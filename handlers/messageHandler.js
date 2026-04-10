@@ -7,114 +7,132 @@ const { askAI } = require('../services/aiService.gemini');
 const { getQuickReplyByMode } = require('../quickreply/presets');
 const manualCommand = require('../manual/manualCommand');
 
-const INACTIVE_LIMIT_MS = 20 * 60 * 1000; // 20 นาที
-
 async function handleTextMessage(event) {
   const replyToken = event.replyToken;
   const userId = event.source.userId;
   const userText = (event.message.text || '').trim();
-  const lowerText = userText.toLowerCase();
+  const normalizedText = userText.toLowerCase();
 
   const state = getState(userId) || {};
+  const mode = state.mode || 'ai';
 
-  // =========================
-  // 1) สลับโหมดเป็น Human (ต้องตอบทันที 1 ครั้ง)
-  // =========================
-  if (['ติดต่อเจ้าหน้าที่', 'human', 'เจ้าหน้าที่'].includes(lowerText)) {
-    setState(userId, { mode: 'human', lastActivity: Date.now() });
-
-    return reply(replyToken, {
-      type: 'text',
-      text: 'เจ้าหน้าที่กำลังดูแลคุณอยู่ครับ กรุณาพิมพ์รายละเอียดเพิ่มเติม',
-      quickReply: getQuickReplyByMode('human')
+  /** ---------------------------
+   *  SWITCH MODE (พิมพ์คำสั่ง)
+   *  ---------------------------
+   */
+  if (['ai', 'ถาม ai'].includes(normalizedText)) {
+    setState(userId, {
+      mode: 'ai',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
     });
-  }
-
-  // =========================
-  // 2) สลับกลับเป็น AI
-  // =========================
-  if (['ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
-    setState(userId, { mode: 'ai', lastActivity: Date.now() });
 
     return reply(replyToken, {
       type: 'text',
-      text: 'เข้าสู่โหมด AI แล้วครับ สามารถพิมพ์คำถามได้เลย',
+      text: 'เรียบร้อยครับ ตอนนี้กลับมาอยู่ในโหมด AI แล้ว มีเรื่องไหนให้ผมช่วยต่อได้เลยครับ 😊',
       quickReply: getQuickReplyByMode('ai')
     });
   }
 
-  // =========================
-  // 3) Human mode = บอทเงียบ
-  // =========================
-  if (state.mode === 'human') {
-    const now = Date.now();
-    const last = state.lastActivity || now;
-    const inactiveMs = now - last;
+  if (['เจ้าหน้าที่', 'ติดต่อเจ้าหน้าที่', 'human'].includes(normalizedText)) {
+    setState(userId, {
+      mode: 'human',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
+    });
 
-    if (inactiveMs >= INACTIVE_LIMIT_MS && !state.promptedAfterInactive) {
-      setState(userId, {
-        promptedAfterInactive: true,
-        lastActivity: now
-      });
+    return reply(replyToken, {
+      type: 'text',
+      text: 'ผมกำลังโอนให้เจ้าหน้าที่ช่วยดูแลคุณต่อนะครับ กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลย',
+      quickReply: getQuickReplyByMode('human')
+    });
+  }
 
-      return reply(replyToken, {
-        type: 'text',
-        text: 'ยังต้องการคุยต่อหรือไม่ครับ',
-        quickReply: {
-          items: [
-            {
-              type: 'action',
-              action: {
-                type: 'postback',
-                label: 'คุยต่อ',
-                data: 'conv=continue'
-              }
-            },
-            {
-              type: 'action',
-              action: {
-                type: 'postback',
-                label: '🤖 ถามตอบด้วย AI',
-                data: 'mode=ai'
-              }
-            }
-          ]
-        }
-      });
-    }
-
+  /** ---------------------------
+   *  HUMAN MODE → บอทเงียบ
+   *  ---------------------------
+   */
+  if (mode === 'human') {
     return;
   }
 
-  // =========================
-  // 4) AI mode (default)
-  // =========================
-  setState(userId, { mode: 'ai', lastActivity: Date.now() });
+  /** ---------------------------
+   *  AI MODE
+   *  ---------------------------
+   */
 
   const hits = await retrieve(userText);
 
+  /**
+   * ✅ CASE 1 — มีข้อมูลใน RAG
+   * ตอบ + แนบคู่มือจริง
+   */
   if (hits && hits.length > 0) {
     const { answer } = await askAI(userText, hits);
+
+    // reset counter เมื่อเจอคำตอบ
+    setState(userId, {
+      mode: 'ai',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
+    });
 
     return reply(replyToken, [
       {
         type: 'text',
-        text: answer,
+        text:
+          `เดี๋ยวผมสรุปให้แบบเข้าใจง่ายนะครับ\n\n${answer}\n\n` +
+          `📘 หากต้องการอ่านรายละเอียดแบบเต็ม สามารถดูจากคู่มือจริงได้ที่เมนูด้านล่างครับ`,
         quickReply: getQuickReplyByMode('ai')
       },
+      // ✅ แนบเมนูคู่มือจริงของคุณ
       manualCommand
     ]);
   }
 
-  // =========================
-  // 5) ไม่พบข้อมูล → ตอบเลี่ยง
-  // =========================
-  return reply(replyToken, {
-    type: 'text',
-    text:
-      'ขณะนี้ยังไม่พบข้อมูลที่ตรงกับคำถามนี้ หากต้องการข้อมูลเพิ่มเติมสามารถติดต่อเจ้าหน้าที่ได้ครับ',
-    quickReply: getQuickReplyByMode('ai')
-  });
+  /**
+   * 🟡 CASE 2 — ไม่พบข้อมูล (ครั้งแรก)
+   * ตอบเลี่ยงแบบมนุษย์
+   */
+  const lastQ = state.lastUnansweredQuestion;
+  const count = state.unansweredCount || 0;
+
+  if (!lastQ || lastQ !== normalizedText) {
+    setState(userId, {
+      mode: 'ai',
+      lastUnansweredQuestion: normalizedText,
+      unansweredCount: 1
+    });
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'คำถามนี้เป็นข้อมูลเฉพาะพอสมควรครับ ตอนนี้ผมยังไม่เจอข้อมูลตรงนี้ในระบบ\n\n' +
+        'ถ้าสะดวก รบกวนช่วยอธิบายรายละเอียดเพิ่มเติมอีกนิดได้ไหมครับ ' +
+        'หรือหากต้องการให้เจ้าหน้าที่ช่วยตรวจสอบ ผมสามารถประสานให้ได้ครับ',
+      quickReply: getQuickReplyByMode('ai')
+    });
+  }
+
+  /**
+   * 🔴 CASE 3 — ถามซ้ำเรื่องเดิม แล้วยังไม่มีข้อมูล
+   * ส่งต่อเจ้าหน้าที่
+   */
+  if (count >= 1) {
+    setState(userId, {
+      mode: 'human',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
+    });
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'ผมลองตรวจสอบข้อมูลเพิ่มเติมให้แล้วครับ แต่เรื่องนี้ต้องให้เจ้าหน้าที่ผู้ดูแลระบบช่วยดูรายละเอียดโดยตรง\n\n' +
+        'เดี๋ยวผมประสานให้เจ้าหน้าที่ช่วยรับเรื่องต่อให้นะครับ',
+      quickReply: getQuickReplyByMode('human')
+    });
+  }
 }
 
 module.exports = { handleTextMessage };
