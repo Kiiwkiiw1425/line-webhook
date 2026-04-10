@@ -6,6 +6,7 @@ const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
 const { getQuickReplyByMode } = require('../quickreply/presets');
 const manuals = require('../manual');
+const usageGeneralManual = require('../manual/manualUsageGeneral');
 
 const INACTIVE_LIMIT_MS = 30 * 60 * 1000;
 
