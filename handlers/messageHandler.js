@@ -5,27 +5,25 @@ const { getState, setState } = require('../services/stateStore');
 const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
 const { getQuickReplyByMode } = require('../quickreply/presets');
-const manuals = require('../manual');
-const usageGeneralManual = require('../manual/manualUsageGeneral');
 
-const INACTIVE_LIMIT_MS = 30 * 60 * 1000;
+// ✅ ใช้ไฟล์เดียวที่รวมคู่มือทั้งหมด
+const manuals = require('../manual/manualCommand');
 
-// ===== keyword groups =====
-const GREETING_WORDS = ['สวัสดี', 'hello', 'hi'];
-const THANK_WORDS = ['ขอบคุณ', 'ขอบคุณครับ', 'thanks', 'ok', 'โอเค', 'เข้าใจแล้ว'];
-
-const HUMAN_KEYWORDS = [
-  'เจ้าหน้าที่',
-  'ติดต่อเจ้าหน้าที่',
-  'ขอคุยกับคน',
-  'คุยกับคน',
-  'สอบถามเจ้าหน้าที่',
-  'ขอเจ้าหน้าที่',
-  'human'
-];
-
-function containsAny(text, list) {
-  return list.some(k => text.includes(k));
+/**
+ * ตรวจ intent เพื่อตัดสินใจว่าใช้คู่มือชุดไหน
+ * (Human-like Intent Detection)
+ */
+function detectManualCategory(text = '') {
+  if (/ลงทะเบียน|login|เข้าใช้งาน|password|otp/.test(text)) return 'usageGeneral';
+  if (/คำร้อง|ยื่น/.test(text)) return 'application';
+  if (/งบประมาณ|เบิก/.test(text)) return 'budget';
+  if (/ประเมิน/.test(text)) return 'evaluation';
+  if (/นำเข้า|ส่งออก/.test(text)) return 'importExport';
+  if (/ลา/.test(text)) return 'leave';
+  if (/สิทธิ/.test(text)) return 'permission';
+  if (/บุคลากร|เจ้าหน้าที่/.test(text)) return 'personnel';
+  if (/ช่วยเหลือ|help/.test(text)) return 'help';
+  return 'other';
 }
 
 async function handleTextMessage(event) {
@@ -33,129 +31,111 @@ async function handleTextMessage(event) {
   const userId = event.source.userId;
   const userText = (event.message.text || '').trim();
   const lowerText = userText.toLowerCase();
+
   const state = getState(userId) || {};
+  const mode = state.mode || 'ai';
 
   /* =================================================
-   * 0) คำทัก / คำขอบคุณ (social signal)
+   * 1) คำสั่งพิมพ์เปลี่ยนโหมด
    * ================================================= */
-  if (containsAny(lowerText, GREETING_WORDS)) {
+  if (['ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
+    setState(userId, {
+      mode: 'ai',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
+    });
+
     return reply(replyToken, {
       type: 'text',
-      text: 'สวัสดีครับ 😊 ผมสามารถช่วยตอบคำถามหรือแนะนำการใช้งานระบบให้ได้นะครับ',
+      text: 'เรียบร้อยครับ ตอนนี้กลับมาอยู่ในโหมด AI แล้ว มีเรื่องไหนให้ผมช่วยต่อได้เลยครับ',
       quickReply: getQuickReplyByMode('ai')
     });
   }
 
-  if (containsAny(lowerText, THANK_WORDS) && state.mode !== 'human') {
-    return reply(replyToken, {
-      type: 'text',
-      text: 'ยินดีมากครับ 😊 หากมีคำถามเพิ่มเติมสามารถพิมพ์มาได้ทุกเมื่อเลยนะครับ',
-      quickReply: getQuickReplyByMode('ai')
+  if (['เจ้าหน้าที่', 'ติดต่อเจ้าหน้าที่', 'human'].includes(lowerText)) {
+    setState(userId, {
+      mode: 'human',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
     });
-  }
-
-  /* =================================================
-   * 1) ผู้ใช้พิมพ์เพื่อ “ติดต่อเจ้าหน้าที่”
-   * ================================================= */
-  if (containsAny(lowerText, HUMAN_KEYWORDS)) {
-    setState(userId, { mode: 'human', lastActivity: Date.now() });
 
     return reply(replyToken, {
       type: 'text',
-      text: 'ได้เลยครับ ผมจะประสานงานให้เจ้าหน้าที่ช่วยดูแลนะครับ กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
+      text: 'ผมกำลังโอนให้เจ้าหน้าที่ช่วยดูแลต่อครับ กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลย',
       quickReply: getQuickReplyByMode('human')
     });
   }
 
   /* =================================================
-   * 2) คำสั่งกลับ AI
+   * 2) โหมดเจ้าหน้าที่ → บอทเงียบ
    * ================================================= */
-  if (['ai', 'ถาม ai', 'โหมด ai'].includes(lowerText)) {
-    setState(userId, { mode: 'ai', lastActivity: Date.now() });
+  if (mode === 'human') {
+    return;
+  }
+
+  /* =================================================
+   * 3) โหมด AI
+   * ================================================= */
+  const hits = await retrieve(userText);
+
+  /* ---------- CASE A: มีข้อมูลใน RAG ---------- */
+  if (hits && hits.length > 0) {
+    const { answer } = await askAI(userText, hits);
+
+    const category = detectManualCategory(lowerText);
+    const manualMenu = manuals[category] || manuals.other;
+
+    // reset state
+    setState(userId, {
+      mode: 'ai',
+      lastUnansweredQuestion: null,
+      unansweredCount: 0
+    });
+
+    return reply(replyToken, [
+      {
+        type: 'text',
+        text:
+          `เดี๋ยวผมสรุปให้แบบเข้าใจง่ายนะครับ\n\n${answer}\n\n` +
+          `📘 หากต้องการอ่านรายละเอียดแบบเต็ม สามารถเปิดคู่มือจริงได้จากเมนูด้านล่างครับ`,
+        quickReply: getQuickReplyByMode('ai')
+      },
+      manualMenu
+    ]);
+  }
+
+  /* ---------- CASE B: ไม่พบข้อมูล (ครั้งแรก) ---------- */
+  if (state.lastUnansweredQuestion !== lowerText) {
+    setState(userId, {
+      mode: 'ai',
+      lastUnansweredQuestion: lowerText,
+      unansweredCount: 1
+    });
 
     return reply(replyToken, {
       type: 'text',
-      text: 'กลับเข้าสู่โหมด AI แล้วครับ 🙂 สามารถพิมพ์คำถามได้เลยครับ',
+      text:
+        'คำถามนี้เป็นข้อมูลเฉพาะพอสมควรครับ ตอนนี้ผมยังไม่เจอข้อมูลตรงนี้ในระบบ\n\n' +
+        'ถ้าสะดวก รบกวนช่วยอธิบายรายละเอียดเพิ่มเติมอีกนิดได้ไหมครับ ' +
+        'หรือหากต้องการให้เจ้าหน้าที่ช่วยตรวจสอบ ผมสามารถประสานให้ได้ครับ',
       quickReply: getQuickReplyByMode('ai')
     });
   }
 
-  /* =================================================
-   * 3) HUMAN MODE = bot เงียบ (ยกเว้น inactivity)
-   * ================================================= */
-  if (state.mode === 'human') {
-    const now = Date.now();
-    const inactiveMs = now - (state.lastActivity || now);
-
-    if (inactiveMs >= INACTIVE_LIMIT_MS && !state.promptedAfterInactive) {
-      setState(userId, { promptedAfterInactive: true, lastActivity: now });
-
-      return reply(replyToken, {
-        type: 'text',
-        text: 'ขออนุญาตสอบถามนะครับ ตอนนี้ยังต้องการพูดคุยต่อหรือไม่ครับ 🙂',
-        quickReply: {
-          items: [
-            { type: 'action', action: { type: 'postback', label: 'คุยต่อ', data: 'conv=continue' }},
-            { type: 'action', action: { type: 'postback', label: '🤖 ถามตอบด้วย AI', data: 'mode=ai' }}
-          ]
-        }
-      });
-    }
-
-    return; // ✅ human mode = เงียบ
-  }
-
-  /* =================================================
-   * 4) AI MODE (default)
-   * ================================================= */
-  setState(userId, { mode: 'ai', lastActivity: Date.now() });
-
-  const hits = await retrieve(userText);
-  const { answer } = await askAI(userText, hits);
-
-  const messages = [];
-
-  // ✅ AI answer (ต้องมีเสมอ)
-  messages.push({
-    type: 'text',
-    text: answer,
-    quickReply: getQuickReplyByMode('ai')
+  /* ---------- CASE C: ถามซ้ำ → ส่งต่อเจ้าหน้าที่ ---------- */
+  setState(userId, {
+    mode: 'human',
+    lastUnansweredQuestion: null,
+    unansweredCount: 0
   });
 
-  /* =================================================
-   * 5) แนบคู่มือ (ถ้าเดาได้ว่าเกี่ยวกับหมวดใด)
-   * ================================================= */
-  let manualSection;
-
-  // ตัวอย่าง mapping พื้นฐาน (คุณขยายต่อได้)
-  if (/ลงทะเบียน|บรรจุ|แต่งตั้ง|รับโอน/.test(lowerText)) {
-    manualSection = manuals.command;
-  }
-
-  if (manualSection && manualSection.items?.length) {
-    let manualText = `📘 ${manualSection.title}\n`;
-
-    manualSection.items.forEach(item => {
-      manualText += `\n🔗 ${item.label}\n${item.url}\n`;
-    });
-
-    messages.push({
-      type: 'text',
-      text: manualText
-    });
-  }
-
-  /* =================================================
-   * 6) Safety net (กัน messages ว่าง)
-   * ================================================= */
-  if (messages.length === 0) {
-    messages.push({
-      type: 'text',
-      text: 'ขออภัยครับ ระบบกำลังประมวลผล กรุณาลองใหม่อีกครั้ง'
-    });
-  }
-
-  return reply(replyToken, messages);
+  return reply(replyToken, {
+    type: 'text',
+    text:
+      'ผมลองตรวจสอบข้อมูลเพิ่มเติมให้แล้วครับ แต่เรื่องนี้ต้องให้เจ้าหน้าที่ผู้ดูแลระบบช่วยดูรายละเอียดโดยตรง\n\n' +
+      'เดี๋ยวผมโอนให้เจ้าหน้าที่ช่วยรับเรื่องต่อให้นะครับ',
+    quickReply: getQuickReplyByMode('human')
+  });
 }
 
 module.exports = { handleTextMessage };
