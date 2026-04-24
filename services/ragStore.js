@@ -3,90 +3,117 @@
 const fs = require('fs');
 const path = require('path');
 
-// ✅ ใช้ไฟล์ RAG ตัวใหม่
-const RAG_INDEX_PATH = path.join(
+/* =================================================
+ * Load RAG Data (Password / Register etc.)
+ * ================================================= */
+
+const RAG_PASSWORD_PATH = path.join(
   __dirname,
   '..',
   'data',
-  'rag-registration.json'
+  'rag-password.json'
 );
 
-// โหลด RAG data
-const raw = JSON.parse(fs.readFileSync(RAG_INDEX_PATH, 'utf8'));
+const raw = JSON.parse(fs.readFileSync(RAG_PASSWORD_PATH, 'utf8'));
 const documents = raw.items || [];
 
 /* =================================================
- * Utility
+ * Utils
  * ================================================= */
 
 /**
- * normalize ภาษาไทย/อังกฤษ (ตัดช่องว่าง + lower)
+ * normalize ข้อความ
+ * - ตัดช่องว่าง
+ * - lower case
  */
 function normalize(text = '') {
   return text.replace(/\s+/g, '').toLowerCase();
 }
 
 /**
- * ตรวจว่าเป็นคำถามเชิงขั้นตอน/วิธีการไหม
+ * คำถามเชิงขั้นตอน
  */
 function isProcessQuestion(text) {
   return /ขั้นตอน|วิธี|ทำยังไง|อย่างไร|ยังไง/.test(text);
 }
 
 /**
- * ตรวจ category จากคำถามตรง ๆ
+ * ตรวจ category จากข้อความ
+ * ✅ ครอบคำที่ผู้ใช้พิมพ์จริง
  */
 function detectCategory(text) {
   if (/ลงทะเบียน|สมัคร|register/.test(text)) return 'Register';
-  if (/รหัส|รหัสผ่าน|password|otp/.test(text)) return 'Password';
+
+  if (
+    /รหัส|รหัสผ่าน|password|otp|ลืมรหัส|รีเซ็ตรหัส|กรอกไม่ได้|ไม่ได้otp/.test(
+      text
+    )
+  ) {
+    return 'Password';
+  }
+
   return null;
 }
 
 /* =================================================
- * MAIN: retrieve (Context‑aware)
+ * MAIN: retrieve (Context‑aware + RAG‑first)
  * ================================================= */
 
 /**
  * retrieve(query, context)
- * @param {string} query   ข้อความจากผู้ใช้
- * @param {object} context state ผู้ใช้ (เช่น lastTopic)
+ * @param {string} query   ข้อความผู้ใช้
+ * @param {object} context state (เช่น lastTopic)
  */
 async function retrieve(query, context = {}) {
   const q = normalize(query);
 
-  // ✅ พยายามจับ category จากคำถาม
+  // 1) จับ category จากคำถาม
   let category = detectCategory(q);
 
-  // ✅ ถ้าคำถามสั้น/คลุมเครือ (follow‑up) → ใช้ topic เดิม
+  // 2) ถ้าไม่เจอ แต่มี context → ใช้ context
   if (!category && context.lastTopic) {
     category = context.lastTopic;
   }
 
-  // ✅ กรณีเป็นคำถามเชิง "ขั้นตอน/วิธี" และรู้ category
+  // -------------------------------------------------
+  // ✅ CASE 1: คำถามเชิงขั้นตอน → คืนทั้ง flow
+  // -------------------------------------------------
   if (isProcessQuestion(q) && category) {
     return documents
       .filter(d => d.category === category)
       .sort((a, b) => a.id.localeCompare(b.id));
   }
 
-  // ✅ กรณีถามสั้น ๆ เช่น "otp", "ลืมรหัส", "กรอกไม่ได้"
+  // -------------------------------------------------
+  // ✅ CASE 2: คำถามสั้น / follow‑up
+  // เช่น "otp", "กรอกไม่ได้", "ลืมรหัส"
+  // -------------------------------------------------
   if (category) {
-    // หาคำที่ match ใน content ก่อน
     const hits = documents.filter(
       d =>
         d.category === category &&
         normalize(d.content).includes(q)
     );
 
-    // ถ้าเจออย่างน้อย 1 → คืนทั้ง flow ของเรื่องนั้น
+    // ถ้าเจออย่างน้อย 1 → คืนทั้งเรื่อง (ไม่ตัดบท)
     if (hits.length > 0) {
+      return documents
+        .filter(d => d.category === category)
+        .sort((a, b) => a.id.localeCompare(b.id));
+    }
+
+    // ถ้าไม่เจอ keyword ตรง ๆ แต่ยังอยู่ topic เดิม
+    // → คืนทั้ง flow เพื่อไม่ให้ fallback
+    if (context.lastTopic === category) {
       return documents
         .filter(d => d.category === category)
         .sort((a, b) => a.id.localeCompare(b.id));
     }
   }
 
-  // ✅ fallback ระดับสุดท้าย: keyword match ทั่วไป
+  // -------------------------------------------------
+  // ✅ CASE 3: fallback keyword match (กันหลุด)
+  // -------------------------------------------------
   const keywordHits = documents.filter(d =>
     normalize(d.content).includes(q)
   );
