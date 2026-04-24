@@ -5,10 +5,10 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 
 const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual');          // โหลดทุกหมวดจาก manual/
+const categoryMenus = require('./manual');              // โหลดทุกหมวดจาก manual/
 const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
 
-// ✅ คำพูดเชิงสนทนา (social words)
+// ✅ คำพูดเชิงสนทนา (social replies) ที่ไม่ควร trigger menu
 const blacklist = [
   'โอเค',
   'โอเคครับ',
@@ -76,7 +76,7 @@ app.post('/line-webhook', async (req, res) => {
           type: 'text',
           text: 'ยินดีครับ 😊 หากมีคำถามเพิ่มเติมสามารถสอบถามได้เลยนะครับ'
         });
-        continue; // ⛔ หยุด ไม่ให้ไหลไป matchCategory
+        continue; // ⛔ หยุด ไม่ให้ไหลไป matchCategory หรือเมนู
       }
 
       let message = null;
@@ -89,7 +89,7 @@ app.post('/line-webhook', async (req, res) => {
       } else if (categoryMenus[userText]) {
         message = categoryMenus[userText];
 
-      // ✅ 4) fuzzy match (เฉพาะคำถามจริง)
+      // ✅ 4) fuzzy match (สำหรับคำถามจริง)
       } else {
         const matched = matchCategory(userText);
         if (matched && categoryMenus[matched]) {
