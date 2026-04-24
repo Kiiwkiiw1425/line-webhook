@@ -1,116 +1,72 @@
 // services/ragStore.js
-
 const fs = require('fs');
 const path = require('path');
 
-/**
- * --------------------------------------------------
- * 1) LOAD ALL RAG FILES (rag-*.json)
- * --------------------------------------------------
- */
+const RAG_INDEX_PATH = path.join(
+  __dirname,
+  '..',
+  'data',
+  'rag-registration.json'
+);
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
-
-// โหลดทุกไฟล์ที่ขึ้นต้นด้วย rag- และลงท้าย .json
-function loadAllRagFiles() {
-  const files = fs
-    .readdirSync(DATA_DIR)
-    .filter(name => name.startsWith('rag-') && name.endsWith('.json'));
-
-  let items = [];
-
-  for (const file of files) {
-    try {
-      const filePath = path.join(DATA_DIR, file);
-      const json = require(filePath);
-
-      if (Array.isArray(json.items)) {
-        items = items.concat(json.items);
-      }
-    } catch (err) {
-      console.error(`❌ Failed to load RAG file: ${file}`, err.message);
-    }
-  }
-
-  return items;
-}
-
-// โหลดครั้งเดียวตอน start server
-const RAG_ITEMS = loadAllRagFiles();
-
-console.log(`✅ RAG loaded: ${RAG_ITEMS.length} items`);
+// โหลด RAG data
+const raw = JSON.parse(fs.readFileSync(RAG_INDEX_PATH, 'utf8'));
+const documents = raw.items || [];
 
 /**
- * --------------------------------------------------
- * 2) NORMALIZE TEXT (สำคัญมากสำหรับภาษาไทย)
- * --------------------------------------------------
+ * normalize ภาษาไทย/อังกฤษแบบเบา
  */
-
 function normalize(text = '') {
-  return text
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[^\wก-๙]/g, '');
+  return text.replace(/\s+/g, '').toLowerCase();
 }
 
 /**
- * --------------------------------------------------
- * 3) KEYWORD-BASED SEARCH (robust)
- * --------------------------------------------------
+ * ตรวจว่าเป็นคำถามเชิง "ขั้นตอน/วิธี" ไหม
  */
+function isProcessQuestion(text) {
+  return /ขั้นตอน|วิธี|ทำยังไง|อย่างไร/.test(text);
+}
 
-function keywordMatch(query, text) {
+/**
+ * ตรวจ category จากคำถาม (simple rule-based)
+ */
+function detectCategory(text) {
+  if (/ลงทะเบียน|สมัคร|register/.test(text)) return 'Register';
+  if (/รหัส|รหัสผ่าน|password|otp/.test(text)) return 'Password';
+  return null;
+}
+
+async function retrieve(query) {
   const q = normalize(query);
-  const t = normalize(text);
-  return t.includes(q);
-}
+  const category = detectCategory(q);
 
-/**
- * --------------------------------------------------
- * 4) RETRIEVE FUNCTION (MAIN API)
- * --------------------------------------------------
- */
-
-function retrieve(query, options = {}) {
-  if (!query || typeof query !== 'string') {
-    return [];
+  // ✅ กรณีเป็นคำถามเชิงขั้นตอน + รู้ category
+  if (isProcessQuestion(q) && category) {
+    return documents
+      .filter(d => d.category === category)
+      .sort((a, b) => a.id.localeCompare(b.id));
   }
 
-  const {
-    category = null,      // optional filter by category
-    limit = 6             // default limit
-  } = options;
+  // ✅ กรณีถามสั้น ๆ เช่น "ลืมรหัส" / "เปลี่ยนรหัส"
+  if (category) {
+    const hits = documents.filter(
+      d =>
+        d.category === category &&
+        normalize(d.content).includes(q)
+    );
 
-  const results = [];
-
-  for (const item of RAG_ITEMS) {
-    if (category && item.category !== category) {
-      continue;
-    }
-
-    if (
-      keywordMatch(query, item.title) ||
-      keywordMatch(query, item.content)
-    ) {
-      results.push(item);
+    // ถ้าเจออย่างน้อย 1 chunk → คืนทั้ง flow
+    if (hits.length > 0) {
+      return documents
+        .filter(d => d.category === category)
+        .sort((a, b) => a.id.localeCompare(b.id));
     }
   }
 
-  // ลบซ้ำด้วย id
-  const unique = Array.from(
-    new Map(results.map(item => [item.id, item])).values()
-  );
-
-  return unique.slice(0, limit);
+  // ✅ fallback: keyword match (คืนได้หลาย item)
+  return documents
+    .filter(d => normalize(d.content).includes(q))
+    .slice(0, 3);
 }
 
-/**
- * --------------------------------------------------
- * 5) EXPORT
- * --------------------------------------------------
- */
-
-module.exports = {
-  retrieve,
-  RAG_ITEMS
-};
+module.exports = { retrieve };
