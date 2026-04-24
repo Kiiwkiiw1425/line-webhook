@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const RAG_INDEX_PATH = path.join(__dirname, '..', 'data', 'rag-index.json');
+const RAG_INDEX_PATH = path.join(__dirname, '..', 'data', 'rag-registration.json');
 
 const raw = JSON.parse(fs.readFileSync(RAG_INDEX_PATH, 'utf8'));
 const documents = raw.items || [];
