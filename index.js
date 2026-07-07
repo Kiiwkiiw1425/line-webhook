@@ -9,7 +9,7 @@ const categoryMenus = require('./manual');              // โหลดทุก
 const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
 
 // ✅ คำพูดเชิงสนทนา (social replies) ที่ไม่ควร trigger menu
-const blacklist = [
+/*const blacklist = [
   'โอเค',
   'โอเคครับ',
   'ค่ะ',
@@ -24,7 +24,7 @@ const blacklist = [
   'เข้าใจแล้ว',
   'ได้ครับ',
   'ได้ค่ะ'
-];
+];*/
 
 const app = express();
 app.use(bodyParser.json());
