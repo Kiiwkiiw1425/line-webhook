@@ -1,8 +1,7 @@
 // quickreply/presets.js
 
 /**
- * Quick Reply สำหรับโหมด AI
- * แสดงปุ่ม "ติดต่อเจ้าหน้าที่"
+ * AI Mode
  */
 function quickReplyForAI() {
   return {
@@ -11,7 +10,7 @@ function quickReplyForAI() {
         type: 'action',
         action: {
           type: 'postback',
-          label: 'ติดต่อเจ้าหน้าที่',
+          label: '👨‍💼 ติดต่อเจ้าหน้าที่',
           data: 'mode=human',
           displayText: 'ติดต่อเจ้าหน้าที่'
         }
@@ -21,8 +20,7 @@ function quickReplyForAI() {
 }
 
 /**
- * Quick Reply สำหรับโหมด Human
- * แสดงปุ่ม "ถามตอบด้วย AI"
+ * Human Mode
  */
 function quickReplyForHuman() {
   return {
@@ -31,7 +29,7 @@ function quickReplyForHuman() {
         type: 'action',
         action: {
           type: 'postback',
-          label: 'ถามตอบด้วย AI',
+          label: '🤖 ถามตอบด้วย AI',
           data: 'mode=ai',
           displayText: 'ถามตอบด้วย AI'
         }
@@ -41,19 +39,8 @@ function quickReplyForHuman() {
 }
 
 /**
- * เลือก Quick Reply ตามโหมด
+ * AI หาไม่เจอ → ถามผู้ใช้ก่อน
  */
-function getQuickReplyByMode(mode) {
-  if (mode === 'human') return quickReplyForHuman();
-  return quickReplyForAI(); // default = AI mode
-}
-
-module.exports = {
-  getQuickReplyByMode,
-  quickReplyForAI,
-  quickReplyForHuman
-};
-
 function quickReplyConfirmHuman() {
   return {
     items: [
@@ -70,7 +57,7 @@ function quickReplyConfirmHuman() {
         type: 'action',
         action: {
           type: 'postback',
-          label: '🤖 ถามต่อ',
+          label: '🤖 ถามคำถามอื่น',
           data: 'action=cancel_human',
           displayText: 'ถามคำถามอื่น'
         }
@@ -78,3 +65,32 @@ function quickReplyConfirmHuman() {
     ]
   };
 }
+
+/**
+ * ใช้ใน postbackHandler เดิม
+ */
+function backToAIPreset(
+  text = 'หากต้องการกลับไปถาม AI กดปุ่มด้านล่าง'
+) {
+  return {
+    type: 'text',
+    text,
+    quickReply: quickReplyForHuman()
+  };
+}
+
+function getQuickReplyByMode(mode) {
+  if (mode === 'human') {
+    return quickReplyForHuman();
+  }
+
+  return quickReplyForAI();
+}
+
+module.exports = {
+  getQuickReplyByMode,
+  quickReplyForAI,
+  quickReplyForHuman,
+  quickReplyConfirmHuman,
+  backToAIPreset
+};
