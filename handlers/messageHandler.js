@@ -10,7 +10,11 @@ const {
 const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
 const { notifyAgent } = require('../services/notifyAgent');
-const { getQuickReplyByMode } = require('../quickreply/presets');
+
+const {
+  getQuickReplyByMode,
+  quickReplyConfirmHuman
+} = require('../quickreply/presets');
 
 /* =====================================
  * Utils
@@ -52,7 +56,7 @@ function humanPrefix(text) {
 }
 
 /* =====================================
- * Main
+ * Main Handler
  * ===================================== */
 
 async function handleTextMessage(event) {
@@ -73,9 +77,9 @@ async function handleTextMessage(event) {
   const state =
     getState(userId) || {};
 
-  /* ========================
-   * Switch Human
-   * ======================== */
+  /* =========================
+   * Manual Switch to Human
+   * ========================= */
 
   if (
     lowerText === '#admin' ||
@@ -83,6 +87,7 @@ async function handleTextMessage(event) {
     lowerText === 'ติดต่อเจ้าหน้าที่' ||
     lowerText === 'คุยกับเจ้าหน้าที่'
   ) {
+
     setState(userId, {
       mode: 'human'
     });
@@ -101,16 +106,15 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text: humanPrefix(
-        'เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\nระหว่างนี้ระบบ AI จะหยุดตอบชั่วคราว'
+        'เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\nกรุณารอเจ้าหน้าที่ตอบกลับ'
       ),
-      quickReply:
-        getQuickReplyByMode('human')
+      quickReply: getQuickReplyByMode('human')
     });
   }
 
-  /* ========================
-   * Switch AI
-   * ======================== */
+  /* =========================
+   * Manual Switch to AI
+   * ========================= */
 
   if (lowerText === '#bot') {
 
@@ -123,41 +127,34 @@ async function handleTextMessage(event) {
       text: aiPrefix(
         'กลับเข้าสู่โหมด AI แล้วครับ\n\nสามารถสอบถามข้อมูลได้เลย'
       ),
-      quickReply:
-        getQuickReplyByMode('ai')
+      quickReply: getQuickReplyByMode('ai')
     });
   }
 
-  /* ========================
-   * HUMAN MODE
-   * ======================== */
+  /* =========================
+   * Human Mode
+   * ========================= */
 
-if (state.mode === 'human') {
+  if (state.mode === 'human') {
+    return;
+  }
 
-  // อนุญาตเฉพาะคำสั่งกลับ AI
+  /* =========================
+   * Waiting Confirm Mode
+   * ========================= */
+
   if (
-    lowerText === '#bot'
+    state.mode === 'waiting_human_confirm'
   ) {
 
     setState(userId, {
       mode: 'ai'
     });
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        '🤖 กลับเข้าสู่โหมด AI แล้วครับ',
-      quickReply: getQuickReplyByMode('ai')
-    });
   }
 
-  // นอกนั้นเงียบ
-  return;
-}
-
-  /* ========================
+  /* =========================
    * ACK
-   * ======================== */
+   * ========================= */
 
   if (isAckOnly(lowerText)) {
 
@@ -166,14 +163,13 @@ if (state.mode === 'human') {
       text: aiPrefix(
         'ยินดีให้บริการครับ 😊'
       ),
-      quickReply:
-        getQuickReplyByMode('ai')
+      quickReply: getQuickReplyByMode('ai')
     });
   }
 
-  /* ========================
-   * RAG
-   * ======================== */
+  /* =========================
+   * RAG Search
+   * ========================= */
 
   const hits =
     await retrieve(userText, state);
@@ -199,6 +195,7 @@ if (state.mode === 'human') {
         result.answer &&
         !result.failed
       ) {
+
         return reply(replyToken, {
           type: 'text',
           text: aiPrefix(
@@ -221,7 +218,7 @@ if (state.mode === 'human') {
     } catch (err) {
 
       console.error(
-        'Gemini Error:',
+        '[Gemini Error]',
         err.message
       );
 
@@ -236,9 +233,9 @@ if (state.mode === 'human') {
     }
   }
 
-  /* ========================
-   * Gemini Only
-   * ======================== */
+  /* =========================
+   * Gemini Fallback
+   * ========================= */
 
   try {
 
@@ -267,37 +264,27 @@ if (state.mode === 'human') {
   } catch (err) {
 
     console.error(
-      'Gemini Fallback:',
+      '[Gemini Fallback]',
       err.message
     );
   }
 
-  /* ========================
-   * Fail => Human
-   * ======================== */
+  /* =========================
+   * Ask Before Human
+   * ========================= */
 
   setState(userId, {
-    mode: 'human'
+    mode: 'waiting_human_confirm'
   });
-
-  if (shouldNotify(state)) {
-
-    await notifyAgent(event, {
-      lastUserText: userText
-    });
-
-    setState(userId, {
-      notifiedAt: Date.now()
-    });
-  }
 
   return reply(replyToken, {
     type: 'text',
-    text: humanPrefix(
-      'AI ยังไม่สามารถตอบคำถามนี้ได้\n\nระบบได้ส่งเรื่องต่อให้เจ้าหน้าที่แล้ว'
-    ),
+    text:
+      '🤖 AI Assistant\n\n' +
+      'ขออภัยครับ ผมยังไม่พบข้อมูลในหัวข้อนี้\n\n' +
+      'ต้องการติดต่อเจ้าหน้าที่เพื่อช่วยตรวจสอบเพิ่มเติมหรือไม่ครับ',
     quickReply:
-      getQuickReplyByMode('human')
+      quickReplyConfirmHuman()
   });
 }
 
