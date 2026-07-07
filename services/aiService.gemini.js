@@ -3,6 +3,7 @@
 const axios = require('axios');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 const GEMINI_MODEL =
   process.env.GEMINI_MODEL || 'gemini-1.5-flash-001';
 
@@ -14,49 +15,114 @@ if (!GEMINI_API_KEY) {
 const ENDPOINT =
   `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
-/**
- * ✅ AI อธิบายแบบมนุษย์ (RAG-assisted generative)
- */
-async function askAI(question, hits) {
-  const context =
-    hits && hits.length > 0
-      ? hits.map((h, i) => `ข้อมูลที่ ${i + 1}: ${h.content}`).join('\n')
-      : 'ยังไม่มีข้อมูลจากคู่มือในหัวข้อนี้';
+/* =================================================
+ * AI Confidence Check
+ * ================================================= */
 
-  const prompt = `
-คุณเป็นผู้ช่วยแนะนำการใช้งานระบบ DPIS6
+const FAIL_PHRASES = [
+  'ไม่ทราบ',
+  'ไม่มีข้อมูล',
+  'ไม่สามารถระบุ',
+  'ไม่แน่ใจ',
+  'ขออภัย',
+  'ไม่พบข้อมูล'
+];
 
-ลักษณะการตอบ:
-- สุภาพ เป็นกันเอง เหมือนเจ้าหน้าที่พูดกับผู้ใช้งาน
-- เรียบเรียงใหม่ได้ ไม่ต้องใช้คำเหมือนเอกสาร
-- อธิบายให้เข้าใจง่าย
+function isFailedAnswer(text = '') {
 
-ข้อมูลอ้างอิง:
-${context}
+  const answer = text.toLowerCase();
 
-คำถามของผู้ใช้:
+  if (!answer) return true;
+
+  if (answer.length < 15) return true;
+
+  return FAIL_PHRASES.some(word =>
+    answer.includes(word.toLowerCase())
+  );
+}
+
+/* =================================================
+ * Build Prompt
+ * ================================================= */
+
+function buildPrompt(question, hits = []) {
+
+  const hasKnowledge =
+    Array.isArray(hits) &&
+    hits.length > 0;
+
+  const knowledge = hasKnowledge
+    ? hits
+        .map((h, i) =>
+          `ข้อมูลที่ ${i + 1}\nหัวข้อ: ${h.title}\nเนื้อหา: ${h.content}`
+        )
+        .join('\n\n')
+    : 'ไม่มีข้อมูลจากคู่มือ';
+
+  return `
+คุณคือผู้ช่วยระบบ DPIS6
+
+หลักการตอบ:
+
+1. ถ้ามีข้อมูลจากคู่มือ ให้ใช้ข้อมูลจากคู่มือเป็นหลัก
+2. สามารถเรียบเรียงใหม่ให้เข้าใจง่ายได้
+3. หากไม่มีข้อมูลจากคู่มือ สามารถตอบจากความรู้ทั่วไปได้
+4. ห้ามคาดเดาฟังก์ชันเฉพาะของระบบ DPIS6
+5. ถ้าไม่มั่นใจ ให้ตอบว่า
+   "ไม่มีข้อมูลเพียงพอ กรุณาติดต่อเจ้าหน้าที่"
+
+ข้อมูลจากคู่มือ:
+
+${knowledge}
+
+คำถาม:
+
 ${question}
 
-รูปแบบคำตอบ:
-- เริ่มต้นด้วยประโยคสุภาพ
-- อธิบายสิ่งที่พอช่วยได้จากข้อมูลที่มี
-- ลงท้ายด้วยการเสนอความช่วยเหลือเพิ่มเติม
+รูปแบบการตอบ:
+
+- สุภาพ
+- ภาษาไทย
+- กระชับ
+- เน้นขั้นตอนการใช้งาน
+- ถ้าเป็นวิธีดำเนินการให้ตอบเป็นลำดับขั้นตอน
 `.trim();
+}
+
+/* =================================================
+ * Ask Gemini
+ * ================================================= */
+
+async function askAI(question, context = [], hits = []) {
 
   try {
+
+    const prompt =
+      buildPrompt(question, hits);
+
     const response = await axios.post(
       ENDPOINT,
       {
         contents: [
-          { role: 'user', parts: [{ text: prompt }] }
+          {
+            role: 'user',
+            parts: [
+              {
+                text: prompt
+              }
+            ]
+          }
         ],
         generationConfig: {
-          temperature: 0.25,
-          maxOutputTokens: 400
+          temperature: 0.2,
+          maxOutputTokens: 800
         }
       },
       {
-        headers: { 'Content-Type': 'application/json' }
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        timeout: 15000
       }
     );
 
@@ -64,17 +130,27 @@ ${question}
       response.data?.candidates?.[0]?.content?.parts
         ?.map(p => p.text)
         .join('')
-        .trim() ||
-      'ขออภัยครับ ระบบยังไม่สามารถให้คำตอบได้ในขณะนี้';
+        .trim() || '';
 
-    return { answer };
+    return {
+      answer,
+      failed: isFailedAnswer(answer)
+    };
 
   } catch (err) {
-    console.error('❌ Gemini API Error:', err.response?.data || err.message);
+
+    console.error(
+      '❌ Gemini API Error:',
+      err.response?.data || err.message
+    );
+
     return {
-      answer: 'ขออภัยครับ ระบบขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง'
+      answer: null,
+      failed: true
     };
   }
 }
 
-module.exports = { askAI };
+module.exports = {
+  askAI
+};
