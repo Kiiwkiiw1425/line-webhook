@@ -37,12 +37,27 @@ const fuse = new Fuse(fuseData, {
 // --- 3. ฟังก์ชัน matchCategory
 function matchCategory(text) {
   if (!text) return null;
+
+  text = text.trim();
+
+  // ข้อความสั้นเกินไป ไม่ตอบ
+  if (text.length <= 3) {
+    return null;
+  }
+
+  // ข้อความยาวเกินไป มักเป็นการคุยกับเจ้าหน้าที่
+  if (text.length > 30) {
+    return null;
+  }
+
   const results = fuse.search(text.toLowerCase());
 
-  if (results.length > 0) {
+  if (
+    results.length > 0 &&
+    results[0].score < 0.15
+  ) {
     return results[0].item.category;
   }
+
   return null;
 }
-
-module.exports = matchCategory;
