@@ -1,27 +1,32 @@
 // handlers/messageHandler.js
 
 const { reply } = require('../services/lineClient');
-const { getState, setState } = require('../services/stateStore');
+const { getState, setState, shouldNotify } = require('../services/stateStore');
 const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
+const { notifyAgent } = require('../services/notifyAgent');
 const { getQuickReplyByMode } = require('../quickreply/presets');
 
 /* =================================================
  * Utils
  * ================================================= */
 
-// คำตอบรับเฉย ๆ → เงียบ (เหมือนมนุษย์)
 const ACK_WORDS = [
-  'ครับ', 'ค่ะ', 'โอเค', 'ok',
-  'เข้าใจแล้ว', 'ได้ครับ',
-  'ขอบคุณ', 'ขอบคุณครับ', 'thanks'
+  'ครับ',
+  'ค่ะ',
+  'โอเค',
+  'ok',
+  'เข้าใจแล้ว',
+  'ได้ครับ',
+  'ขอบคุณ',
+  'ขอบคุณครับ',
+  'thanks'
 ];
 
 function isAckOnly(text = '') {
   return ACK_WORDS.includes(text.trim().toLowerCase());
 }
 
-// สรุปจาก RAG ตรง ๆ (ใช้เมื่อ Gemini error)
 function summarizeFromRag(hits) {
   return hits
     .map(h => `• ${h.title}\n${h.content}`)
@@ -34,31 +39,89 @@ function summarizeFromRag(hits) {
 
 async function handleTextMessage(event) {
   const replyToken = event.replyToken;
-  const userId = event.source.userId;
+  const userId =
+    event.source.userId ||
+    event.source.groupId ||
+    event.source.roomId;
+
   const userText = (event.message.text || '').trim();
   const lowerText = userText.toLowerCase();
+
   const state = getState(userId) || {};
 
-  /* 0) ตอบรับเฉย ๆ → ไม่ต้องตอบ */
+  // ==========================
+  // Manual Switch Command
+  // ==========================
+
+  if (
+    lowerText === '#admin' ||
+    lowerText === 'เจ้าหน้าที่' ||
+    lowerText === 'ติดต่อเจ้าหน้าที่' ||
+    lowerText === 'คุยกับเจ้าหน้าที่'
+  ) {
+
+    setState(userId, {
+      mode: 'human'
+    });
+
+    if (shouldNotify(state)) {
+      await notifyAgent(event, {
+        lastUserText: userText
+      });
+
+      setState(userId, {
+        notifiedAt: Date.now()
+      });
+    }
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        '✅ เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        'ระหว่างนี้ระบบจะหยุดตอบอัตโนมัติ กรุณารอเจ้าหน้าที่ตอบกลับ',
+      quickReply: getQuickReplyByMode('human')
+    });
+  }
+
+  if (lowerText === '#bot') {
+
+    setState(userId, {
+      mode: 'ai'
+    });
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        '✅ กลับเข้าสู่โหมด AI แล้วครับ\n\n' +
+        'สามารถพิมพ์คำถามได้ทันที',
+      quickReply: getQuickReplyByMode('ai')
+    });
+  }
+
+  // ==========================
+  // ACK ONLY
+  // ==========================
+
   if (isAckOnly(lowerText)) {
     return;
   }
 
-  /* 1) โหมดเจ้าหน้าที่ → บอทเงียบ */
+  // ==========================
+  // HUMAN MODE
+  // ==========================
+
   if (state.mode === 'human') {
     return;
   }
 
-  /* 2) RAG ต้องมาก่อนเสมอ (พร้อม context) */
+  // ==========================
+  // RAG SEARCH
+  // ==========================
+
   const hits = await retrieve(userText, state);
 
-  /**
-   * ✅ RULE สำคัญที่สุด
-   * ถ้ามี RAG data → ต้องตอบ
-   */
   if (hits.length > 0) {
 
-    // จดจำหัวข้อสนทนา (เช่น Password / Register)
     setState(userId, {
       mode: 'ai',
       lastTopic: hits[0].category
@@ -67,33 +130,75 @@ async function handleTextMessage(event) {
     let finalAnswer;
 
     try {
-      // พยายามให้ Gemini เรียบเรียง
-      const { answer } = await askAI(userText, hits);
-      finalAnswer = answer;
+
+      const result = await askAI(
+        userText,
+        [],
+        hits
+      );
+
+      if (
+        result.failed ||
+        !result.answer
+      ) {
+
+        finalAnswer =
+          'จากคู่มือของระบบ พบข้อมูลที่เกี่ยวข้องดังนี้\n\n' +
+          summarizeFromRag(hits);
+
+      } else {
+
+        finalAnswer = result.answer;
+      }
+
     } catch (err) {
-      // Gemini ล่ม (503) → ใช้ RAG ตรง ๆ
-      console.warn('[Gemini Error] fallback to RAG:', err.message);
+
+      console.warn(
+        '[Gemini Error]',
+        err.message
+      );
+
       finalAnswer =
-        'จากคู่มือของระบบ พบข้อมูลที่เกี่ยวข้องดังนี้นะครับ\n\n' +
+        'จากคู่มือของระบบ พบข้อมูลที่เกี่ยวข้องดังนี้\n\n' +
         summarizeFromRag(hits);
     }
 
     return reply(replyToken, {
       type: 'text',
-      text:
-        `เดี๋ยวผมสรุปข้อมูลให้แบบเข้าใจง่ายนะครับ\n\n${finalAnswer}`,
+      text: finalAnswer,
       quickReply: getQuickReplyByMode('ai')
     });
   }
 
-  /* 3) ไม่มี RAG จริง ๆ เท่านั้น ค่อยส่งเจ้าหน้าที่ */
+  // ==========================
+  // NOT FOUND
+  // AUTO SWITCH TO HUMAN
+  // ==========================
+
+  setState(userId, {
+    mode: 'human'
+  });
+
+  if (shouldNotify(state)) {
+
+    await notifyAgent(event, {
+      lastUserText: userText
+    });
+
+    setState(userId, {
+      notifiedAt: Date.now()
+    });
+  }
+
   return reply(replyToken, {
     type: 'text',
     text:
-      'ขออภัยครับ ตอนนี้ยังไม่พบข้อมูลในหัวข้อนี้ในระบบ\n' +
-      'หากต้องการให้เจ้าหน้าที่ช่วยตรวจสอบ สามารถพิมพ์ว่า “ติดต่อเจ้าหน้าที่” ได้เลยนะครับ',
-    quickReply: getQuickReplyByMode('ai')
+      'ขออภัยครับ ไม่พบข้อมูลในคู่มือระบบ\n\n' +
+      'ระบบได้ส่งเรื่องต่อให้เจ้าหน้าที่แล้ว กรุณารอสักครู่',
+    quickReply: getQuickReplyByMode('human')
   });
 }
 
-module.exports = { handleTextMessage };
+module.exports = {
+  handleTextMessage
+};
