@@ -132,17 +132,28 @@ async function handleTextMessage(event) {
    * HUMAN MODE
    * ======================== */
 
-  if (state.mode === 'human') {
+if (state.mode === 'human') {
+
+  // อนุญาตเฉพาะคำสั่งกลับ AI
+  if (
+    lowerText === '#bot'
+  ) {
+
+    setState(userId, {
+      mode: 'ai'
+    });
 
     return reply(replyToken, {
       type: 'text',
-      text: humanPrefix(
-        'ขณะนี้กำลังอยู่ในโหมดเจ้าหน้าที่\n\nหากต้องการกลับไปใช้ AI กดปุ่มด้านล่าง'
-      ),
-      quickReply:
-        getQuickReplyByMode('human')
+      text:
+        '🤖 กลับเข้าสู่โหมด AI แล้วครับ',
+      quickReply: getQuickReplyByMode('ai')
     });
   }
+
+  // นอกนั้นเงียบ
+  return;
+}
 
   /* ========================
    * ACK
