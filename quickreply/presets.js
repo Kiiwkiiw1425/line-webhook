@@ -53,3 +53,28 @@ module.exports = {
   quickReplyForAI,
   quickReplyForHuman
 };
+
+function quickReplyConfirmHuman() {
+  return {
+    items: [
+      {
+        type: 'action',
+        action: {
+          type: 'postback',
+          label: '👨‍💼 ติดต่อเจ้าหน้าที่',
+          data: 'action=confirm_human',
+          displayText: 'ติดต่อเจ้าหน้าที่'
+        }
+      },
+      {
+        type: 'action',
+        action: {
+          type: 'postback',
+          label: '🤖 ถามต่อ',
+          data: 'action=cancel_human',
+          displayText: 'ถามคำถามอื่น'
+        }
+      }
+    ]
+  };
+}
