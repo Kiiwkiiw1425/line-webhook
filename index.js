@@ -5,26 +5,8 @@ const bodyParser = require('body-parser');
 const axios = require('axios');
 
 const { mainMenu } = require('./flexMessages');
-const categoryMenus = require('./manual');              // โหลดทุกหมวดจาก manual/
-const matchCategory = require('./utils/matchCategory'); // ฟังก์ชันจับคำใกล้เคียง
-
-// ✅ คำพูดเชิงสนทนา (social replies) ที่ไม่ควร trigger menu
-/*const blacklist = [
-  'โอเค',
-  'โอเคครับ',
-  'ค่ะ',
-  'ครับ',
-  'จ้า',
-  'ฮัลโหล',
-  'สวัสดีครับ',
-  'สวัสดีคับ',
-  'สวัสดีค่ะ',
-  'ขอบคุณ',
-  'ขอบคุณครับ',
-  'เข้าใจแล้ว',
-  'ได้ครับ',
-  'ได้ค่ะ'
-];*/
+const categoryMenus = require('./manual');
+const matchCategory = require('./utils/matchCategory');
 
 const app = express();
 app.use(bodyParser.json());
@@ -42,6 +24,7 @@ if (!CHANNEL_ACCESS_TOKEN) {
 // =====================================================
 async function replyToLine(replyToken, message) {
   const url = 'https://api.line.me/v2/bot/message/reply';
+
   const headers = {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
@@ -55,7 +38,10 @@ async function replyToLine(replyToken, message) {
   try {
     await axios.post(url, body, { headers });
   } catch (error) {
-    console.error('LINE Reply Error:', error.response?.data || error.message);
+    console.error(
+      'LINE Reply Error:',
+      error.response?.data || error.message
+    );
   }
 }
 
@@ -66,38 +52,42 @@ app.post('/line-webhook', async (req, res) => {
   const events = req.body.events || [];
 
   for (const event of events) {
-    if (event.type === 'message' && event.message.type === 'text') {
+    if (
+      event.type === 'message' &&
+      event.message &&
+      event.message.type === 'text'
+    ) {
       const userText = event.message.text.trim();
       const replyToken = event.replyToken;
 
-      // ✅ 1) SOCIAL WORD GUARD (สำคัญที่สุด)
-      if (blacklist.includes(userText)) {
-        await replyToLine(replyToken, {
-          type: 'text',
-          text: 'ยินดีครับ 😊 หากมีคำถามเพิ่มเติมสามารถสอบถามได้เลยนะครับ'
-        });
-        continue; // ⛔ หยุด ไม่ให้ไหลไป matchCategory หรือเมนู
-      }
-
       let message = null;
 
-      // ✅ 2) เมนูหลัก
-      if (userText === 'คู่มือ' || userText === 'คู่มือการใช้งาน') {
+      // ✅ เมนูหลัก
+      if (
+        userText === 'คู่มือ' ||
+        userText === 'คู่มือการใช้งาน'
+      ) {
         message = mainMenu;
+      }
 
-      // ✅ 3) ชื่อหมวดตรงตัว
-      } else if (categoryMenus[userText]) {
+      // ✅ ชื่อหมวดตรงตัว
+      else if (categoryMenus[userText]) {
         message = categoryMenus[userText];
+      }
 
-      // ✅ 4) fuzzy match (สำหรับคำถามจริง)
-      } else {
+      // ✅ Fuzzy Match
+      else {
         const matched = matchCategory(userText);
-        if (matched && categoryMenus[matched]) {
+
+        if (
+          matched &&
+          categoryMenus[matched]
+        ) {
           message = categoryMenus[matched];
         }
       }
 
-      // ✅ 5) ส่งข้อความกลับ (ถ้ามี)
+      // ✅ ส่งข้อความตอบกลับ
       if (message) {
         await replyToLine(replyToken, message);
       }
