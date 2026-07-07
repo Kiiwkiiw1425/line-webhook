@@ -1,42 +1,109 @@
 // index.js
 
-// โหลด .env แบบ optional (กันพังบน Render)
-try { require('dotenv').config(); } catch (e) {}
-
 const express = require('express');
 const bodyParser = require('body-parser');
+const axios = require('axios');
 
-const { handleTextMessage } = require('./handlers/messageHandler');
-const { handlePostback } = require('./handlers/postbackHandler');
+const { mainMenu } = require('./flexMessages');
+const categoryMenus = require('./manual');
+const matchCategory = require('./utils/matchCategory');
 
 const app = express();
 app.use(bodyParser.json());
 
-// ✅ ประกาศครั้งเดียวพอ
 const PORT = process.env.PORT || 10000;
+const CHANNEL_ACCESS_TOKEN = process.env.CHANNEL_ACCESS_TOKEN;
 
+if (!CHANNEL_ACCESS_TOKEN) {
+  console.error('❌ Environment variable CHANNEL_ACCESS_TOKEN is not set!');
+  process.exit(1);
+}
+
+// =====================================================
+// helper: reply to LINE
+// =====================================================
+async function replyToLine(replyToken, message) {
+  const url = 'https://api.line.me/v2/bot/message/reply';
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${CHANNEL_ACCESS_TOKEN}`
+  };
+
+  const body = {
+    replyToken,
+    messages: Array.isArray(message) ? message : [message]
+  };
+
+  try {
+    await axios.post(url, body, { headers });
+  } catch (error) {
+    console.error(
+      'LINE Reply Error:',
+      error.response?.data || error.message
+    );
+  }
+}
+
+// =====================================================
+// LINE Webhook
+// =====================================================
 app.post('/line-webhook', async (req, res) => {
   const events = req.body.events || [];
+
   for (const event of events) {
-    try {
-      if (event.type === 'message' && event.message.type === 'text') {
-        await handleTextMessage(event);
-        continue;
+    if (
+      event.type === 'message' &&
+      event.message &&
+      event.message.type === 'text'
+    ) {
+      const userText = event.message.text.trim();
+      const replyToken = event.replyToken;
+
+      let message = null;
+
+      // ✅ เมนูหลัก
+      if (
+        userText === 'คู่มือ' ||
+        userText === 'คู่มือการใช้งาน'
+      ) {
+        message = mainMenu;
       }
-      if (event.type === 'postback') {
-        await handlePostback(event);
-        continue;
+
+      // ✅ ชื่อหมวดตรงตัว
+      else if (categoryMenus[userText]) {
+        message = categoryMenus[userText];
       }
-    } catch (err) {
-      console.error('Event Error:', err);
+
+      // ✅ Fuzzy Match
+      else {
+        const matched = matchCategory(userText);
+
+        if (
+          matched &&
+          categoryMenus[matched]
+        ) {
+          message = categoryMenus[matched];
+        }
+      }
+
+      // ✅ ส่งข้อความตอบกลับ
+      if (message) {
+        await replyToLine(replyToken, message);
+      }
     }
   }
+
   res.sendStatus(200);
 });
 
-app.get('/ping', (req, res) => res.send('pong'));
+// =====================================================
+// health check
+// =====================================================
+app.get('/ping', (req, res) => {
+  res.send('pong');
+});
 
-// ✅ สำคัญสำหรับ Render: bind 0.0.0.0 และใช้พอร์ตจาก ENV
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
 });
