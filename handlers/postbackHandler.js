@@ -27,6 +27,61 @@ async function handlePostback(event) {
 
   touch(userId);
 
+  /* =====================================
+   * Confirm Human
+   * ===================================== */
+
+  if (params.action === 'confirm_human') {
+
+    const prev = getState(userId);
+
+    setState(userId, {
+      mode: 'human'
+    });
+
+    if (shouldNotify(prev)) {
+
+      await notifyAgent(event, {
+        lastUserText: '[ผู้ใช้เลือกติดต่อเจ้าหน้าที่]'
+      });
+
+      setState(userId, {
+        notifiedAt: Date.now()
+      });
+    }
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        '👨‍💼 โหมดเจ้าหน้าที่\n\n' +
+        'เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
+        'กรุณารอสักครู่'
+    });
+  }
+
+  /* =====================================
+   * Cancel Human
+   * ===================================== */
+
+  if (params.action === 'cancel_human') {
+
+    setState(userId, {
+      mode: 'ai'
+    });
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        '🤖 AI Assistant\n\n' +
+        'กลับเข้าสู่โหมด AI แล้วครับ\n' +
+        'สามารถถามคำถามอื่นได้เลย'
+    });
+  }
+
+  /* =====================================
+   * AI Mode
+   * ===================================== */
+
   if (params.mode === 'ai') {
 
     setState(userId, {
@@ -35,19 +90,25 @@ async function handlePostback(event) {
 
     return reply(replyToken, {
       type: 'text',
-      text: '✅ กลับเข้าสู่โหมด AI แล้วครับ'
+      text:
+        '🤖 AI Assistant\n\n' +
+        'กลับเข้าสู่โหมด AI แล้วครับ'
     });
   }
 
+  /* =====================================
+   * Human Mode
+   * ===================================== */
+
   if (params.mode === 'human') {
 
-    const prevState = getState(userId);
+    const prev = getState(userId);
 
     setState(userId, {
       mode: 'human'
     });
 
-    if (shouldNotify(prevState)) {
+    if (shouldNotify(prev)) {
 
       await notifyAgent(event, {
         lastUserText: '[เลือกติดต่อเจ้าหน้าที่]'
@@ -62,14 +123,18 @@ async function handlePostback(event) {
       {
         type: 'text',
         text:
-          '✅ เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
+          '👨‍💼 โหมดเจ้าหน้าที่\n\n' +
+          'เจ้าหน้าที่กำลังดูแลคุณอยู่ครับ กรุณาพิมพ์รายละเอียดเพิ่มเติม'
       },
       backToAIPreset(
         'หากต้องการกลับไปถาม AI กดปุ่มด้านล่าง'
       )
     ]);
   }
+
+  /* =====================================
+   * Continue Conversation
+   * ===================================== */
 
   if (params.conv === 'continue') {
 
@@ -84,6 +149,10 @@ async function handlePostback(event) {
       )
     );
   }
+
+  /* =====================================
+   * End Conversation
+   * ===================================== */
 
   if (params.conv === 'end') {
 
