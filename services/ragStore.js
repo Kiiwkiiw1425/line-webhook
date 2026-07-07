@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 /* =================================================
- * Load RAG Data (Password / Register etc.)
+ * Load RAG Data
  * ================================================= */
 
 const RAG_PASSWORD_PATH = path.join(
@@ -14,111 +14,118 @@ const RAG_PASSWORD_PATH = path.join(
   'rag-password.json'
 );
 
-const raw = JSON.parse(fs.readFileSync(RAG_PASSWORD_PATH, 'utf8'));
+const raw = JSON.parse(
+  fs.readFileSync(RAG_PASSWORD_PATH, 'utf8')
+);
+
 const documents = raw.items || [];
 
 /* =================================================
  * Utils
  * ================================================= */
 
-/**
- * normalize ข้อความ
- * - ตัดช่องว่าง
- * - lower case
- */
 function normalize(text = '') {
-  return text.replace(/\s+/g, '').toLowerCase();
+  return text
+    .replace(/\s+/g, '')
+    .toLowerCase();
 }
 
-/**
- * คำถามเชิงขั้นตอน
- */
-function isProcessQuestion(text) {
-  return /ขั้นตอน|วิธี|ทำยังไง|อย่างไร|ยังไง/.test(text);
+function isProcessQuestion(text = '') {
+  return /ขั้นตอน|วิธี|ทำยังไง|อย่างไร|ยังไง|เปลี่ยน|ลืม/.test(text);
 }
 
-/**
- * ตรวจ category จากข้อความ
- * ✅ ครอบคำที่ผู้ใช้พิมพ์จริง
- */
 function detectCategory(text) {
-  if (/ลงทะเบียน|สมัคร|register/.test(text)) return 'Register';
 
   if (
-    /รหัส|รหัสผ่าน|password|otp|ลืมรหัส|รีเซ็ตรหัส|กรอกไม่ได้|ไม่ได้otp/.test(
+    /เปลี่ยนรหัสผ่าน|ลืมรหัสผ่าน|รีเซ็ตรหัส|otp|password|รหัสผ่าน|รหัส|เข้าไม่ได้|ไม่ได้otp/.test(
       text
     )
   ) {
     return 'Password';
   }
 
+  if (
+    /ลงทะเบียน|สมัคร|register/.test(text)
+  ) {
+    return 'Register';
+  }
+
   return null;
 }
 
 /* =================================================
- * MAIN: retrieve (Context‑aware + RAG‑first)
+ * Main
  * ================================================= */
 
-/**
- * retrieve(query, context)
- * @param {string} query   ข้อความผู้ใช้
- * @param {object} context state (เช่น lastTopic)
- */
 async function retrieve(query, context = {}) {
+
   const q = normalize(query);
 
-  // 1) จับ category จากคำถาม
   let category = detectCategory(q);
 
-  // 2) ถ้าไม่เจอ แต่มี context → ใช้ context
   if (!category && context.lastTopic) {
     category = context.lastTopic;
   }
 
-  // -------------------------------------------------
-  // ✅ CASE 1: คำถามเชิงขั้นตอน → คืนทั้ง flow
-  // -------------------------------------------------
-  if (isProcessQuestion(q) && category) {
-    return documents
-      .filter(d => d.category === category)
-      .sort((a, b) => a.id.localeCompare(b.id));
-  }
+  // =========================
+  // category match
+  // =========================
 
-  // -------------------------------------------------
-  // ✅ CASE 2: คำถามสั้น / follow‑up
-  // เช่น "otp", "กรอกไม่ได้", "ลืมรหัส"
-  // -------------------------------------------------
   if (category) {
-    const hits = documents.filter(
-      d =>
-        d.category === category &&
-        normalize(d.content).includes(q)
+
+    const categoryDocs = documents.filter(
+      d => d.category === category
     );
 
-    // ถ้าเจออย่างน้อย 1 → คืนทั้งเรื่อง (ไม่ตัดบท)
-    if (hits.length > 0) {
-      return documents
-        .filter(d => d.category === category)
-        .sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    // ถ้าไม่เจอ keyword ตรง ๆ แต่ยังอยู่ topic เดิม
-    // → คืนทั้ง flow เพื่อไม่ให้ fallback
-    if (context.lastTopic === category) {
-      return documents
-        .filter(d => d.category === category)
-        .sort((a, b) => a.id.localeCompare(b.id));
+    if (categoryDocs.length > 0) {
+      return categoryDocs;
     }
   }
 
-  // -------------------------------------------------
-  // ✅ CASE 3: fallback keyword match (กันหลุด)
-  // -------------------------------------------------
-  const keywordHits = documents.filter(d =>
-    normalize(d.content).includes(q)
+  // =========================
+  // title match
+  // =========================
+
+  const titleHits = documents.filter(doc =>
+    normalize(doc.title).includes(q)
   );
 
-  return keywordHits.slice(0, 3);
+  if (titleHits.length > 0) {
+    return titleHits;
+  }
+
+  // =========================
+  // content match
+  // =========================
+
+  const contentHits = documents.filter(doc =>
+    normalize(doc.content).includes(q)
+  );
+
+  if (contentHits.length > 0) {
+    return contentHits;
+  }
+
+  // =========================
+  // keyword fallback
+  // =========================
+
+  const words = q.split(/[,\s]+/);
+
+  const keywordHits = documents.filter(doc => {
+
+    const source =
+      normalize(doc.title) +
+      normalize(doc.content);
+
+    return words.some(word =>
+      source.includes(word)
+    );
+  });
+
+  return keywordHits.slice(0, 5);
 }
 
-module.exports = { retrieve };
+module.exports = {
+  retrieve
+};
