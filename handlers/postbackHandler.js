@@ -103,19 +103,32 @@ async function handlePostback(event) {
     });
   }
 
-  if (params.mode === 'ai') {
-
-    setState(userId, {
-      mode: 'ai',
-      lastTopic: null
-    });
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊'
-    });
-  }
+    if (params.mode === 'ai') {
+    
+      setState(userId, {
+        mode: 'ai',
+        lastTopic: null
+      });
+    
+      return reply(replyToken, {
+        type: 'text',
+        text:
+          'สามารถสอบถามคำถามอื่นได้เลยครับ 😊',
+        quickReply: {
+          items: [
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: '👨‍💼 ติดต่อเจ้าหน้าที่',
+                data: 'mode=human',
+                displayText: 'ติดต่อเจ้าหน้าที่'
+              }
+            }
+          ]
+        }
+      });
+    }
 
   if (params.conv === 'end') {
 
