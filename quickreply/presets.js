@@ -1,7 +1,7 @@
 // quickreply/presets.js
 
 /**
- * AI Mode
+ * โหมด D6 Assistant
  */
 function quickReplyForAI() {
   return {
@@ -20,7 +20,7 @@ function quickReplyForAI() {
 }
 
 /**
- * Human Mode
+ * โหมดเจ้าหน้าที่
  */
 function quickReplyForHuman() {
   return {
@@ -29,9 +29,9 @@ function quickReplyForHuman() {
         type: 'action',
         action: {
           type: 'postback',
-          label: '🤖 ถามตอบด้วย AI',
+          label: '🤖 กลับไปใช้ D6 Assistant',
           data: 'mode=ai',
-          displayText: 'ถามตอบด้วย AI'
+          displayText: 'กลับไปใช้ D6 Assistant'
         }
       }
     ]
@@ -39,7 +39,7 @@ function quickReplyForHuman() {
 }
 
 /**
- * AI หาไม่เจอ → ถามผู้ใช้ก่อน
+ * AI ตอบไม่ได้
  */
 function quickReplyConfirmHuman() {
   return {
@@ -57,7 +57,7 @@ function quickReplyConfirmHuman() {
         type: 'action',
         action: {
           type: 'postback',
-          label: '🤖 ถามคำถามอื่น',
+          label: '❓ ถามคำถามอื่น',
           data: 'action=cancel_human',
           displayText: 'ถามคำถามอื่น'
         }
@@ -67,10 +67,10 @@ function quickReplyConfirmHuman() {
 }
 
 /**
- * ใช้ใน postbackHandler เดิม
+ * ใช้ตอนอยู่ Human Mode
  */
 function backToAIPreset(
-  text = 'หากต้องการกลับไปถาม AI กดปุ่มด้านล่าง'
+  text = 'หากต้องการกลับไปใช้ D6 Assistant กดปุ่มด้านล่าง'
 ) {
   return {
     type: 'text',
@@ -80,6 +80,7 @@ function backToAIPreset(
 }
 
 function getQuickReplyByMode(mode) {
+
   if (mode === 'human') {
     return quickReplyForHuman();
   }
