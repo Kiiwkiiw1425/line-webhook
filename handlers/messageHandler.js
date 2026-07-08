@@ -167,6 +167,45 @@ async function handleTextMessage(event) {
     });
   }
 
+const GREETING_WORDS = [
+  'สวัสดี',
+  'สวัสดีครับ',
+  'สวัสดีค่ะ',
+  'ดีครับ',
+  'ดีค่ะ',
+  'hello',
+  'hi',
+  'hey'
+];
+
+const THANK_WORDS = [
+  'ขอบคุณ',
+  'ขอบคุณครับ',
+  'ขอบคุณค่ะ',
+  'thank you',
+  'thanks'
+];
+
+const GOODBYE_WORDS = [
+  'บาย',
+  'ลาก่อน',
+  'ขอบคุณมาก',
+  'โอเคครับ ขอบคุณ',
+  'โอเค ขอบคุณ'
+];
+
+function isGreeting(text = '') {
+  return GREETING_WORDS.includes(text.trim().toLowerCase());
+}
+
+function isThank(text = '') {
+  return THANK_WORDS.includes(text.trim().toLowerCase());
+}
+
+function isGoodbye(text = '') {
+  return GOODBYE_WORDS.includes(text.trim().toLowerCase());
+}
+  
   /* =========================
    * RAG Search
    * ========================= */
