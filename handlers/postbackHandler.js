@@ -10,19 +10,21 @@ const {
   touch
 } = require('../services/stateStore');
 
-const { notifyAgent } =
-  require('../services/notifyAgent');
+const {
+  notifyAgent
+} = require('../services/notifyAgent');
 
-const { parsePostbackData } =
-  require('../quickreply/router');
+const {
+  parsePostbackData
+} = require('../quickreply/router');
 
-const { backToAIPreset } =
-  require('../quickreply/presets');
+const {
+  backToAIPreset
+} = require('../quickreply/presets');
 
 async function handlePostback(event) {
 
-  const replyToken =
-    event.replyToken;
+  const replyToken = event.replyToken;
 
   const userId =
     event.source.userId ||
@@ -36,9 +38,9 @@ async function handlePostback(event) {
 
   touch(userId);
 
-  /* ======================================
-   * Confirm Human
-   * ====================================== */
+  /* =====================================
+   * ผู้ใช้ยืนยันติดต่อเจ้าหน้าที่
+   * ===================================== */
 
   if (
     params.action ===
@@ -56,7 +58,7 @@ async function handlePostback(event) {
 
       await notifyAgent(event, {
         lastUserText:
-          '[ผู้ใช้เลือกติดต่อเจ้าหน้าที่]'
+          '[ผู้ใช้ร้องขอเจ้าหน้าที่]'
       });
 
       setState(userId, {
@@ -64,17 +66,20 @@ async function handlePostback(event) {
       });
     }
 
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
-        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
-    });
+    return reply(replyToken, [
+      {
+        type: 'text',
+        text:
+          '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
+      },
+      backToAIPreset()
+    ]);
   }
 
-  /* ======================================
-   * Cancel Human
-   * ====================================== */
+  /* =====================================
+   * ผู้ใช้เลือกถามต่อ
+   * ===================================== */
 
   if (
     params.action ===
@@ -82,24 +87,39 @@ async function handlePostback(event) {
   ) {
 
     setState(userId, {
-      mode: 'ai'
+      mode: 'ai',
+      lastTopic: null
     });
 
     return reply(replyToken, {
       type: 'text',
       text:
-        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊'
+        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊',
+      quickReply: {
+        items: [
+          {
+            type: 'action',
+            action: {
+              type: 'postback',
+              label: '👨‍💼 ติดต่อเจ้าหน้าที่',
+              data: 'mode=human',
+              displayText: 'ติดต่อเจ้าหน้าที่'
+            }
+          }
+        ]
+      }
     });
   }
 
-  /* ======================================
-   * Switch AI Mode
-   * ====================================== */
+  /* =====================================
+   * กลับ D6 Assistant
+   * ===================================== */
 
   if (params.mode === 'ai') {
 
     setState(userId, {
-      mode: 'ai'
+      mode: 'ai',
+      lastTopic: null
     });
 
     return reply(replyToken, {
@@ -109,9 +129,9 @@ async function handlePostback(event) {
     });
   }
 
-  /* ======================================
-   * Switch Human Mode
-   * ====================================== */
+  /* =====================================
+   * ขอเจ้าหน้าที่โดยตรง
+   * ===================================== */
 
   if (params.mode === 'human') {
 
@@ -134,22 +154,22 @@ async function handlePostback(event) {
       });
     }
 
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
-        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
-    });
+    return reply(replyToken, [
+      {
+        type: 'text',
+        text:
+          '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
+      },
+      backToAIPreset()
+    ]);
   }
 
-  /* ======================================
+  /* =====================================
    * Continue Conversation
-   * ====================================== */
+   * ===================================== */
 
-  if (
-    params.conv ===
-    'continue'
-  ) {
+  if (params.conv === 'continue') {
 
     setState(userId, {
       promptedAfterInactive: false
@@ -158,14 +178,14 @@ async function handlePostback(event) {
     return reply(
       replyToken,
       backToAIPreset(
-        'สามารถสอบถามเพิ่มเติมได้เลยครับ 😊'
+        'สามารถกลับไปใช้ D6 Assistant ได้เลยครับ'
       )
     );
   }
 
-  /* ======================================
+  /* =====================================
    * End Conversation
-   * ====================================== */
+   * ===================================== */
 
   if (params.conv === 'end') {
 
@@ -174,8 +194,8 @@ async function handlePostback(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ขอบคุณครับ 😊\n' +
-        'หากต้องการสอบถามเพิ่มเติมสามารถติดต่อมาได้ทุกเมื่อครับ'
+        'ขอบคุณครับ 😊\n\n' +
+        'หากต้องการสอบถามเพิ่มเติมสามารถกลับมาติดต่อได้เสมอครับ'
     });
   }
 }
