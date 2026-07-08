@@ -10,13 +10,9 @@ const {
   touch
 } = require('../services/stateStore');
 
-const {
-  notifyAgent
-} = require('../services/notifyAgent');
+const { notifyAgent } = require('../services/notifyAgent');
 
-const {
-  parsePostbackData
-} = require('../quickreply/router');
+const { parsePostbackData } = require('../quickreply/router');
 
 const {
   backToAIPreset
@@ -39,17 +35,14 @@ async function handlePostback(event) {
   touch(userId);
 
   console.log(
-  '[POSTBACK]',
-  event.postback?.data,
-  params
-);
-  /* =====================================
-   * ผู้ใช้ยืนยันติดต่อเจ้าหน้าที่
-   * ===================================== */
+    '[POSTBACK]',
+    event.postback?.data,
+    params
+  );
 
   if (
-    params.action ===
-    'confirm_human'
+    params.action === 'confirm_human' ||
+    params.mode === 'human'
   ) {
 
     const prev =
@@ -82,13 +75,8 @@ async function handlePostback(event) {
     ]);
   }
 
-  /* =====================================
-   * ผู้ใช้เลือกถามต่อ
-   * ===================================== */
-
   if (
-    params.action ===
-    'cancel_human'
+    params.action === 'cancel_human'
   ) {
 
     setState(userId, {
@@ -99,26 +87,9 @@ async function handlePostback(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊',
-      quickReply: {
-        items: [
-          {
-            type: 'action',
-            action: {
-              type: 'postback',
-              label: '👨‍💼 ติดต่อเจ้าหน้าที่',
-              data: 'mode=human',
-              displayText: 'ติดต่อเจ้าหน้าที่'
-            }
-          }
-        ]
-      }
+        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊'
     });
   }
-
-  /* =====================================
-   * กลับ D6 Assistant
-   * ===================================== */
 
   if (params.mode === 'ai') {
 
@@ -134,64 +105,6 @@ async function handlePostback(event) {
     });
   }
 
-  /* =====================================
-   * ขอเจ้าหน้าที่โดยตรง
-   * ===================================== */
-
-  if (params.mode === 'human') {
-
-    const prev =
-      getState(userId);
-
-    setState(userId, {
-      mode: 'human'
-    });
-
-    if (shouldNotify(prev)) {
-
-      await notifyAgent(event, {
-        lastUserText:
-          '[เลือกติดต่อเจ้าหน้าที่]'
-      });
-
-      setState(userId, {
-        notifiedAt: Date.now()
-      });
-    }
-
-    return reply(replyToken, [
-      {
-        type: 'text',
-        text:
-          '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
-      },
-      backToAIPreset()
-    ]);
-  }
-
-  /* =====================================
-   * Continue Conversation
-   * ===================================== */
-
-  if (params.conv === 'continue') {
-
-    setState(userId, {
-      promptedAfterInactive: false
-    });
-
-    return reply(
-      replyToken,
-      backToAIPreset(
-        'สามารถกลับไปใช้ D6 Assistant ได้เลยครับ'
-      )
-    );
-  }
-
-  /* =====================================
-   * End Conversation
-   * ===================================== */
-
   if (params.conv === 'end') {
 
     clearConversation(userId);
@@ -199,8 +112,7 @@ async function handlePostback(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ขอบคุณครับ 😊\n\n' +
-        'หากต้องการสอบถามเพิ่มเติมสามารถกลับมาติดต่อได้เสมอครับ'
+        'ขอบคุณครับ 😊'
     });
   }
 }
