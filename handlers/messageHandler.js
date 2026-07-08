@@ -38,6 +38,8 @@ const THANK_WORDS = [
 const HUMAN_KEYWORDS = [
   'เจ้าหน้าที่',
   'ติดต่อเจ้าหน้าที่',
+  'ติดต่อ จนท',
+  'จนท',
   'คุยกับเจ้าหน้าที่',
   'ขอเจ้าหน้าที่',
   'ขอคุยกับเจ้าหน้าที่',
@@ -88,41 +90,64 @@ async function handleTextMessage(event) {
   );
 
   /* ============================================
-   * กลับ D6 Assistant
-   * ============================================ */
-
-  if (lowerText === '#bot') {
-
-    setState(userId, {
-      mode: 'ai',
-      lastTopic: null
-    });
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊',
-      quickReply:
-        getQuickReplyByMode('ai')
-    });
-  }
-
-  /* ============================================
    * ติดต่อเจ้าหน้าที่
    * รองรับทุกสถานะ
    * ============================================ */
   
-if (wantsHuman(lowerText)) {
+    if (wantsHuman(lowerText)) {
+    
+      setState(userId, {
+        ...state,
+        mode: 'human'
+      });
+    
+      return reply(replyToken, {
+        type: 'text',
+        text:
+          '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
+        quickReply: {
+          items: [
+            {
+              type: 'action',
+              action: {
+                type: 'postback',
+                label: '🤖 กลับไปใช้ D6 Assistant',
+                data: 'mode=ai',
+                displayText: 'กลับไปใช้ D6 Assistant'
+              }
+            }
+          ]
+        }
+      });
+    }
 
-  setState(userId, {
-    mode: 'human'
-  });
+  /* ============================================
+   * waiting_human_confirm
+   * ============================================ */
+
+     if (
+      state.mode === 'waiting_human_confirm'
+    ) {
+    
+      setState(userId, {
+        ...state,
+        mode: 'ai'
+      });
+    }
+
+  /* ============================================
+   * Human Mode
+   * ============================================ */
+
+if (state.mode === 'human') {
 
   return reply(replyToken, {
     type: 'text',
     text:
-      '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-      'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
+      '👨‍💼 ขณะนี้อยู่ในโหมดเจ้าหน้าที่\n\n' +
+      'กรุณารอเจ้าหน้าที่ตอบกลับ\n\n' +
+      'หากต้องการกลับมาสอบถามระบบ สามารถกดปุ่มด้านล่างได้ครับ',
     quickReply: {
       items: [
         {
@@ -138,27 +163,6 @@ if (wantsHuman(lowerText)) {
     }
   });
 }
-
-  /* ============================================
-   * waiting_human_confirm
-   * ============================================ */
-
-  if (
-    state.mode === 'waiting_human_confirm'
-  ) {
-
-    setState(userId, {
-      mode: 'ai'
-    });
-  }
-
-  /* ============================================
-   * Human Mode
-   * ============================================ */
-
-  if (state.mode === 'human') {
-    return;
-  }
 
   /* ============================================
    * Greeting
@@ -268,6 +272,7 @@ if (wantsHuman(lowerText)) {
    * ============================================ */
 
   setState(userId, {
+    ...state,
     mode: 'waiting_human_confirm'
   });
 
