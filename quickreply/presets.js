@@ -1,8 +1,5 @@
 // quickreply/presets.js
 
-/**
- * โหมด D6 Assistant
- */
 function quickReplyForAI() {
   return {
     items: [
@@ -19,9 +16,6 @@ function quickReplyForAI() {
   };
 }
 
-/**
- * โหมดเจ้าหน้าที่
- */
 function quickReplyForHuman() {
   return {
     items: [
@@ -38,9 +32,6 @@ function quickReplyForHuman() {
   };
 }
 
-/**
- * AI ตอบไม่ได้
- */
 function quickReplyConfirmHuman() {
   return {
     items: [
@@ -66,9 +57,6 @@ function quickReplyConfirmHuman() {
   };
 }
 
-/**
- * ใช้ตอนอยู่ Human Mode
- */
 function backToAIPreset(
   text = 'หากต้องการกลับไปใช้ D6 Assistant กดปุ่มด้านล่าง'
 ) {
