@@ -14,9 +14,9 @@ const {
   quickReplyConfirmHuman
 } = require('../quickreply/presets');
 
-/* =================================================
+/* ============================================
  * Conversation Intents
- * ================================================= */
+ * ============================================ */
 
 const GREETING_WORDS = [
   'สวัสดี',
@@ -35,18 +35,14 @@ const THANK_WORDS = [
   'thank you'
 ];
 
-const GOODBYE_WORDS = [
-  'บาย',
-  'ลาก่อน',
-  'ขอบคุณมาก',
-  'ไว้คุยใหม่'
-];
-
-const SMALL_TALK = [
-  'เป็นไง',
-  'เป็นยังไง',
-  'สบายดีไหม',
-  'เหนื่อยไหม'
+const HUMAN_KEYWORDS = [
+  'เจ้าหน้าที่',
+  'ติดต่อเจ้าหน้าที่',
+  'คุยกับเจ้าหน้าที่',
+  'ขอเจ้าหน้าที่',
+  'ขอคุยกับเจ้าหน้าที่',
+  'agent',
+  'admin'
 ];
 
 function isGreeting(text = '') {
@@ -57,25 +53,15 @@ function isThank(text = '') {
   return THANK_WORDS.includes(text);
 }
 
-function isGoodbye(text = '') {
-  return GOODBYE_WORDS.includes(text);
+function wantsHuman(text = '') {
+  return HUMAN_KEYWORDS.some(
+    keyword => text.includes(keyword)
+  );
 }
 
-function isSmallTalk(text = '') {
-  return SMALL_TALK.includes(text);
-}
-
-function summarizeFromRag(hits) {
-  return hits
-    .map(
-      h => `• ${h.title}\n${h.content}`
-    )
-    .join('\n\n');
-}
-
-/* =================================================
+/* ============================================
  * Main
- * ================================================= */
+ * ============================================ */
 
 async function handleTextMessage(event) {
 
@@ -95,8 +81,14 @@ async function handleTextMessage(event) {
   const state =
     getState(userId) || {};
 
+  console.log(
+    '[TEXT]',
+    lowerText,
+    state
+  );
+
   /* ============================================
-   * Force Back To AI
+   * กลับ D6 Assistant
    * ============================================ */
 
   if (lowerText === '#bot') {
@@ -116,8 +108,33 @@ async function handleTextMessage(event) {
   }
 
   /* ============================================
+   * ติดต่อเจ้าหน้าที่
+   * รองรับทุกสถานะ
+   * ============================================ */
+
+  if (wantsHuman(lowerText)) {
+
+    console.log(
+      '[MANUAL HUMAN MODE]',
+      userId
+    );
+
+    setState(userId, {
+      mode: 'human'
+    });
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
+      quickReply:
+        getQuickReplyByMode('human')
+    });
+  }
+
+  /* ============================================
    * waiting_human_confirm
-   * ถ้าผู้ใช้ถามใหม่ = กลับ AI
    * ============================================ */
 
   if (
@@ -148,7 +165,7 @@ async function handleTextMessage(event) {
       text:
         'สวัสดีครับ 😊\n\n' +
         'วันนี้มีเรื่องไหนให้ช่วยไหมครับ\n' +
-        'สามารถสอบถามเกี่ยวกับการใช้งานระบบ DPIS6 ได้เลยครับ'
+        'สามารถสอบถามเกี่ยวกับการใช้งานระบบได้เลยครับ'
     });
   }
 
@@ -162,76 +179,18 @@ async function handleTextMessage(event) {
       type: 'text',
       text:
         'ยินดีครับ 😊\n\n' +
-        'หากมีคำถามเพิ่มเติมสามารถสอบถามได้เสมอครับ'
+        'หากมีคำถามเพิ่มเติมสามารถสอบถามได้เลยครับ'
     });
   }
 
   /* ============================================
-   * Goodbye
-   * ============================================ */
-
-  if (isGoodbye(lowerText)) {
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        'ยินดีที่ได้ช่วยเหลือครับ 😊\n\n' +
-        'หากต้องการสอบถามเพิ่มเติมสามารถติดต่อมาได้ทุกเมื่อครับ'
-    });
-  }
-
-  /* ============================================
-   * Small Talk
-   * ============================================ */
-
-  if (isSmallTalk(lowerText)) {
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        'ผมพร้อมช่วยเหลือเรื่องการใช้งานระบบ DPIS6 ครับ 😊\n\n' +
-        'กำลังพบปัญหาหรือต้องการสอบถามเรื่องไหนเป็นพิเศษไหมครับ'
-    });
-  }
-
-  /* ============================================
-   * Explicit Human Request
-   * ============================================ */
-
-  if (
-    lowerText === 'เจ้าหน้าที่' ||
-    lowerText === 'ติดต่อเจ้าหน้าที่' ||
-    lowerText === 'คุยกับเจ้าหน้าที่'
-  ) {
-
-    setState(userId, {
-      mode: 'human'
-    });
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
-      quickReply:
-        getQuickReplyByMode('human')
-    });
-  }
-
-  /* ============================================
-   * Search RAG
+   * RAG Search
    * ============================================ */
 
   const hits =
     await retrieve(userText, state);
 
   if (hits.length > 0) {
-
-    setState(userId, {
-      mode: 'ai',
-      lastTopic:
-        hits[0].category || null
-    });
 
     try {
 
@@ -255,28 +214,12 @@ async function handleTextMessage(event) {
         });
       }
 
-      return reply(replyToken, {
-        type: 'text',
-        text:
-          summarizeFromRag(hits),
-        quickReply:
-          getQuickReplyByMode('ai')
-      });
-
     } catch (err) {
 
       console.error(
         '[Gemini Error]',
         err.message
       );
-
-      return reply(replyToken, {
-        type: 'text',
-        text:
-          summarizeFromRag(hits),
-        quickReply:
-          getQuickReplyByMode('ai')
-      });
     }
   }
 
@@ -315,7 +258,7 @@ async function handleTextMessage(event) {
   }
 
   /* ============================================
-   * Ask Before Human
+   * Ask Human First
    * ============================================ */
 
   setState(userId, {
@@ -326,7 +269,7 @@ async function handleTextMessage(event) {
     type: 'text',
     text:
       'ขออภัยครับ\n\n' +
-      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้ในขณะนี้\n\n' +
+      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้\n\n' +
       'หากต้องการให้ช่วยตรวจสอบเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ',
     quickReply:
       quickReplyConfirmHuman()
