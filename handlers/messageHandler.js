@@ -8,6 +8,7 @@ const {
 
 const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
+const {notifyAgent} = require('../services/notifyAgent');
 
 const {
   getQuickReplyByMode,
@@ -96,46 +97,29 @@ async function handleTextMessage(event) {
    * รองรับทุกสถานะ
    * ============================================ */
   
-    if (wantsHuman(lowerText)) {
-    
-      setState(userId, {
-        ...state,
-        mode: 'human'
-      });
-    
-      return reply(replyToken, {
-        type: 'text',
-        text:
-          '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
-        quickReply: {
-          items: [
-            {
-              type: 'action',
-              action: {
-                type: 'postback',
-                label: '🤖 กลับไปใช้ D6 Assistant',
-                data: 'mode=ai',
-                displayText: 'กลับไปใช้ D6 Assistant'
-              }
-            }
-          ]
-        }
-      });
-    }
+if (wantsHuman(lowerText)) {
 
-  /* ============================================
-   * Human Mode
-   * ============================================ */
+  setState(userId, {
+    ...state,
+    mode: 'human'
+  });
 
-if (state.mode === 'human') {
+  try {
+    await notifyAgent(event, {
+      lastUserText: userText
+    });
+  } catch (err) {
+    console.error(
+      '[NOTIFY AGENT]',
+      err.message
+    );
+  }
 
   return reply(replyToken, {
     type: 'text',
     text:
-      '👨‍💼 ขณะนี้อยู่ในโหมดเจ้าหน้าที่\n\n' +
-      'กรุณารอเจ้าหน้าที่ตอบกลับ\n\n' +
-      'หากต้องการกลับมาสอบถามระบบ สามารถกดปุ่มด้านล่างได้ครับ',
+      '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+      'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
     quickReply: {
       items: [
         {
@@ -150,6 +134,15 @@ if (state.mode === 'human') {
       ]
     }
   });
+}
+
+  /* ============================================
+   * Human Mode
+   * ============================================ */
+
+  
+if (state.mode === 'human') {
+  return;
 }
 
 /* waiting_human_confirm */
