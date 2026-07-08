@@ -40,6 +40,8 @@ async function handlePostback(event) {
     params
   );
 
+
+  
   if (
     params.action === 'confirm_human' ||
     params.mode === 'human'
@@ -63,16 +65,26 @@ async function handlePostback(event) {
         notifiedAt: Date.now()
       });
     }
-
-    return reply(replyToken, [
-      {
-        type: 'text',
-        text:
-          '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-          'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
-      },
-      backToAIPreset()
-    ]);
+    
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
+      quickReply: {
+        items: [
+          {
+            type: 'action',
+            action: {
+              type: 'postback',
+              label: '🤖 กลับไปใช้ D6 Assistant',
+              data: 'mode=ai',
+              displayText: 'กลับไปใช้ D6 Assistant'
+            }
+          }
+        ]
+      }
+    });
   }
 
   if (
