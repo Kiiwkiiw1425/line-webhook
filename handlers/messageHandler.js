@@ -42,6 +42,13 @@ const GOODBYE_WORDS = [
   'ไว้คุยใหม่'
 ];
 
+const SMALL_TALK = [
+  'เป็นไง',
+  'เป็นยังไง',
+  'สบายดีไหม',
+  'เหนื่อยไหม'
+];
+
 function isGreeting(text = '') {
   return GREETING_WORDS.includes(text);
 }
@@ -52,6 +59,18 @@ function isThank(text = '') {
 
 function isGoodbye(text = '') {
   return GOODBYE_WORDS.includes(text);
+}
+
+function isSmallTalk(text = '') {
+  return SMALL_TALK.includes(text);
+}
+
+function summarizeFromRag(hits) {
+  return hits
+    .map(
+      h => `• ${h.title}\n${h.content}`
+    )
+    .join('\n\n');
 }
 
 /* =================================================
@@ -77,6 +96,40 @@ async function handleTextMessage(event) {
     getState(userId) || {};
 
   /* ============================================
+   * Force Back To AI
+   * ============================================ */
+
+  if (lowerText === '#bot') {
+
+    setState(userId, {
+      mode: 'ai',
+      lastTopic: null
+    });
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'สามารถสอบถามคำถามอื่นได้เลยครับ 😊',
+      quickReply:
+        getQuickReplyByMode('ai')
+    });
+  }
+
+  /* ============================================
+   * waiting_human_confirm
+   * ถ้าผู้ใช้ถามใหม่ = กลับ AI
+   * ============================================ */
+
+  if (
+    state.mode === 'waiting_human_confirm'
+  ) {
+
+    setState(userId, {
+      mode: 'ai'
+    });
+  }
+
+  /* ============================================
    * Human Mode
    * ============================================ */
 
@@ -93,8 +146,8 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'สวัสดีครับ 😊\n' +
-        'มีอะไรให้ช่วยไหมครับ\n' +
+        'สวัสดีครับ 😊\n\n' +
+        'วันนี้มีเรื่องไหนให้ช่วยไหมครับ\n' +
         'สามารถสอบถามเกี่ยวกับการใช้งานระบบ DPIS6 ได้เลยครับ'
     });
   }
@@ -108,7 +161,7 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ยินดีครับ 😊\n' +
+        'ยินดีครับ 😊\n\n' +
         'หากมีคำถามเพิ่มเติมสามารถสอบถามได้เสมอครับ'
     });
   }
@@ -122,8 +175,22 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ยินดีที่ได้ช่วยเหลือครับ 😊\n' +
+        'ยินดีที่ได้ช่วยเหลือครับ 😊\n\n' +
         'หากต้องการสอบถามเพิ่มเติมสามารถติดต่อมาได้ทุกเมื่อครับ'
+    });
+  }
+
+  /* ============================================
+   * Small Talk
+   * ============================================ */
+
+  if (isSmallTalk(lowerText)) {
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'ผมพร้อมช่วยเหลือเรื่องการใช้งานระบบ DPIS6 ครับ 😊\n\n' +
+        'กำลังพบปัญหาหรือต้องการสอบถามเรื่องไหนเป็นพิเศษไหมครับ'
     });
   }
 
@@ -144,9 +211,10 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
         'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
-      quickReply: getQuickReplyByMode('human')
+      quickReply:
+        getQuickReplyByMode('human')
     });
   }
 
@@ -158,6 +226,12 @@ async function handleTextMessage(event) {
     await retrieve(userText, state);
 
   if (hits.length > 0) {
+
+    setState(userId, {
+      mode: 'ai',
+      lastTopic:
+        hits[0].category || null
+    });
 
     try {
 
@@ -181,12 +255,28 @@ async function handleTextMessage(event) {
         });
       }
 
+      return reply(replyToken, {
+        type: 'text',
+        text:
+          summarizeFromRag(hits),
+        quickReply:
+          getQuickReplyByMode('ai')
+      });
+
     } catch (err) {
 
       console.error(
         '[Gemini Error]',
         err.message
       );
+
+      return reply(replyToken, {
+        type: 'text',
+        text:
+          summarizeFromRag(hits),
+        quickReply:
+          getQuickReplyByMode('ai')
+      });
     }
   }
 
@@ -235,8 +325,8 @@ async function handleTextMessage(event) {
   return reply(replyToken, {
     type: 'text',
     text:
-      'ขออภัยครับ\n' +
-      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้ในขณะนี้\n' +
+      'ขออภัยครับ\n\n' +
+      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้ในขณะนี้\n\n' +
       'หากต้องการให้ช่วยตรวจสอบเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ',
     quickReply:
       quickReplyConfirmHuman()
