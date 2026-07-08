@@ -3,61 +3,60 @@
 const { reply } = require('../services/lineClient');
 const {
   getState,
-  setState,
-  shouldNotify
+  setState
 } = require('../services/stateStore');
 
 const { retrieve } = require('../services/ragStore');
 const { askAI } = require('../services/aiService.gemini');
-const { notifyAgent } = require('../services/notifyAgent');
 
 const {
   getQuickReplyByMode,
   quickReplyConfirmHuman
 } = require('../quickreply/presets');
 
-/* =====================================
- * Utils
- * ===================================== */
+/* =================================================
+ * Conversation Intents
+ * ================================================= */
 
-const ACK_WORDS = [
-  'ครับ',
-  'ค่ะ',
-  'โอเค',
-  'ok',
-  'เข้าใจแล้ว',
-  'ได้ครับ',
-  'ขอบคุณ',
-  'ขอบคุณครับ',
-  'thanks'
+const GREETING_WORDS = [
+  'สวัสดี',
+  'สวัสดีครับ',
+  'สวัสดีค่ะ',
+  'hello',
+  'hi',
+  'hey'
 ];
 
-function isAckOnly(text = '') {
-  return ACK_WORDS.includes(
-    text.trim().toLowerCase()
-  );
+const THANK_WORDS = [
+  'ขอบคุณ',
+  'ขอบคุณครับ',
+  'ขอบคุณค่ะ',
+  'thanks',
+  'thank you'
+];
+
+const GOODBYE_WORDS = [
+  'บาย',
+  'ลาก่อน',
+  'ขอบคุณมาก',
+  'ไว้คุยใหม่'
+];
+
+function isGreeting(text = '') {
+  return GREETING_WORDS.includes(text);
 }
 
-function summarizeFromRag(hits) {
-  return hits
-    .map(
-      h =>
-        `• ${h.title}\n${h.content}`
-    )
-    .join('\n\n');
+function isThank(text = '') {
+  return THANK_WORDS.includes(text);
 }
 
-function aiPrefix(text) {
-  return `🤖 AI Assistant\n\n${text}`;
+function isGoodbye(text = '') {
+  return GOODBYE_WORDS.includes(text);
 }
 
-function humanPrefix(text) {
-  return `👨‍💼 โหมดเจ้าหน้าที่\n\n${text}`;
-}
-
-/* =====================================
- * Main Handler
- * ===================================== */
+/* =================================================
+ * Main
+ * ================================================= */
 
 async function handleTextMessage(event) {
 
@@ -77,12 +76,62 @@ async function handleTextMessage(event) {
   const state =
     getState(userId) || {};
 
-  /* =========================
-   * Manual Switch to Human
-   * ========================= */
+  /* ============================================
+   * Human Mode
+   * ============================================ */
+
+  if (state.mode === 'human') {
+    return;
+  }
+
+  /* ============================================
+   * Greeting
+   * ============================================ */
+
+  if (isGreeting(lowerText)) {
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'สวัสดีครับ 😊\n\n' +
+        'มีอะไรให้ช่วยไหมครับ\n' +
+        'สามารถสอบถามเกี่ยวกับการใช้งานระบบ DPIS6 ได้เลยครับ'
+    });
+  }
+
+  /* ============================================
+   * Thank You
+   * ============================================ */
+
+  if (isThank(lowerText)) {
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'ยินดีครับ 😊\n\n' +
+        'หากมีคำถามเพิ่มเติมสามารถสอบถามได้เสมอครับ'
+    });
+  }
+
+  /* ============================================
+   * Goodbye
+   * ============================================ */
+
+  if (isGoodbye(lowerText)) {
+
+    return reply(replyToken, {
+      type: 'text',
+      text:
+        'ยินดีที่ได้ช่วยเหลือครับ 😊\n\n' +
+        'หากต้องการสอบถามเพิ่มเติมสามารถติดต่อมาได้ทุกเมื่อครับ'
+    });
+  }
+
+  /* ============================================
+   * Explicit Human Request
+   * ============================================ */
 
   if (
-    lowerText === '#admin' ||
     lowerText === 'เจ้าหน้าที่' ||
     lowerText === 'ติดต่อเจ้าหน้าที่' ||
     lowerText === 'คุยกับเจ้าหน้าที่'
@@ -92,134 +141,23 @@ async function handleTextMessage(event) {
       mode: 'human'
     });
 
-    if (shouldNotify(state)) {
-
-      await notifyAgent(event, {
-        lastUserText: userText
-      });
-
-      setState(userId, {
-        notifiedAt: Date.now()
-      });
-    }
-
     return reply(replyToken, {
       type: 'text',
-      text: humanPrefix(
-        'เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\nกรุณารอเจ้าหน้าที่ตอบกลับ'
-      ),
+      text:
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
       quickReply: getQuickReplyByMode('human')
     });
   }
 
-  /* =========================
-   * Manual Switch to AI
-   * ========================= */
-
-  if (lowerText === '#bot') {
-
-    setState(userId, {
-      mode: 'ai'
-    });
-
-    return reply(replyToken, {
-      type: 'text',
-      text: aiPrefix(
-        'กลับเข้าสู่โหมด AI แล้วครับ\n\nสามารถสอบถามข้อมูลได้เลย'
-      ),
-      quickReply: getQuickReplyByMode('ai')
-    });
-  }
-
-  /* =========================
-   * Human Mode
-   * ========================= */
-
-  if (state.mode === 'human') {
-    return;
-  }
-
-  /* =========================
-   * Waiting Confirm Mode
-   * ========================= */
-
-  if (
-    state.mode === 'waiting_human_confirm'
-  ) {
-
-    setState(userId, {
-      mode: 'ai'
-    });
-  }
-
-  /* =========================
-   * ACK
-   * ========================= */
-
-  if (isAckOnly(lowerText)) {
-
-    return reply(replyToken, {
-      type: 'text',
-      text: aiPrefix(
-        'ยินดีให้บริการครับ 😊'
-      ),
-      quickReply: getQuickReplyByMode('ai')
-    });
-  }
-
-const GREETING_WORDS = [
-  'สวัสดี',
-  'สวัสดีครับ',
-  'สวัสดีค่ะ',
-  'ดีครับ',
-  'ดีค่ะ',
-  'hello',
-  'hi',
-  'hey'
-];
-
-const THANK_WORDS = [
-  'ขอบคุณ',
-  'ขอบคุณครับ',
-  'ขอบคุณค่ะ',
-  'thank you',
-  'thanks'
-];
-
-const GOODBYE_WORDS = [
-  'บาย',
-  'ลาก่อน',
-  'ขอบคุณมาก',
-  'โอเคครับ ขอบคุณ',
-  'โอเค ขอบคุณ'
-];
-
-function isGreeting(text = '') {
-  return GREETING_WORDS.includes(text.trim().toLowerCase());
-}
-
-function isThank(text = '') {
-  return THANK_WORDS.includes(text.trim().toLowerCase());
-}
-
-function isGoodbye(text = '') {
-  return GOODBYE_WORDS.includes(text.trim().toLowerCase());
-}
-  
-  /* =========================
-   * RAG Search
-   * ========================= */
+  /* ============================================
+   * Search RAG
+   * ============================================ */
 
   const hits =
     await retrieve(userText, state);
 
   if (hits.length > 0) {
-
-    setState(userId, {
-      mode: 'ai',
-      lastTopic:
-        hits[0].category || null
-    });
 
     try {
 
@@ -237,22 +175,11 @@ function isGoodbye(text = '') {
 
         return reply(replyToken, {
           type: 'text',
-          text: aiPrefix(
-            result.answer
-          ),
+          text: result.answer,
           quickReply:
             getQuickReplyByMode('ai')
         });
       }
-
-      return reply(replyToken, {
-        type: 'text',
-        text: aiPrefix(
-          summarizeFromRag(hits)
-        ),
-        quickReply:
-          getQuickReplyByMode('ai')
-      });
 
     } catch (err) {
 
@@ -260,21 +187,12 @@ function isGoodbye(text = '') {
         '[Gemini Error]',
         err.message
       );
-
-      return reply(replyToken, {
-        type: 'text',
-        text: aiPrefix(
-          summarizeFromRag(hits)
-        ),
-        quickReply:
-          getQuickReplyByMode('ai')
-      });
     }
   }
 
-  /* =========================
+  /* ============================================
    * Gemini Fallback
-   * ========================= */
+   * ============================================ */
 
   try {
 
@@ -292,9 +210,7 @@ function isGoodbye(text = '') {
 
       return reply(replyToken, {
         type: 'text',
-        text: aiPrefix(
-          result.answer
-        ),
+        text: result.answer,
         quickReply:
           getQuickReplyByMode('ai')
       });
@@ -308,9 +224,9 @@ function isGoodbye(text = '') {
     );
   }
 
-  /* =========================
+  /* ============================================
    * Ask Before Human
-   * ========================= */
+   * ============================================ */
 
   setState(userId, {
     mode: 'waiting_human_confirm'
@@ -319,9 +235,9 @@ function isGoodbye(text = '') {
   return reply(replyToken, {
     type: 'text',
     text:
-      '🤖 AI Assistant\n\n' +
-      'ขออภัยครับ ผมยังไม่พบข้อมูลในหัวข้อนี้\n\n' +
-      'ต้องการติดต่อเจ้าหน้าที่เพื่อช่วยตรวจสอบเพิ่มเติมหรือไม่ครับ',
+      'ขออภัยครับ\n\n' +
+      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้ในขณะนี้\n\n' +
+      'หากต้องการให้ช่วยตรวจสอบเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ',
     quickReply:
       quickReplyConfirmHuman()
   });
