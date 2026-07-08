@@ -67,7 +67,7 @@ async function handlePostback(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
         'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
     });
   }
@@ -137,7 +137,7 @@ async function handlePostback(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
         'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ'
     });
   }
@@ -174,7 +174,7 @@ async function handlePostback(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ขอบคุณครับ 😊\n\n' +
+        'ขอบคุณครับ 😊\n' +
         'หากต้องการสอบถามเพิ่มเติมสามารถติดต่อมาได้ทุกเมื่อครับ'
     });
   }
