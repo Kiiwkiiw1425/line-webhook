@@ -38,6 +38,11 @@ async function handlePostback(event) {
 
   touch(userId);
 
+  console.log(
+  '[POSTBACK]',
+  event.postback?.data,
+  params
+);
   /* =====================================
    * ผู้ใช้ยืนยันติดต่อเจ้าหน้าที่
    * ===================================== */
