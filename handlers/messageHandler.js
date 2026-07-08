@@ -78,7 +78,9 @@ async function handleTextMessage(event) {
     (event.message.text || '').trim();
 
   const lowerText =
-    userText.toLowerCase();
+    userText
+      .trim()
+      .toLowerCase();
 
   const state =
     getState(userId) || {};
@@ -123,20 +125,6 @@ async function handleTextMessage(event) {
     }
 
   /* ============================================
-   * waiting_human_confirm
-   * ============================================ */
-
-     if (
-      state.mode === 'waiting_human_confirm'
-    ) {
-    
-      setState(userId, {
-        ...state,
-        mode: 'ai'
-      });
-    }
-
-  /* ============================================
    * Human Mode
    * ============================================ */
 
@@ -164,6 +152,17 @@ if (state.mode === 'human') {
   });
 }
 
+/* waiting_human_confirm */
+
+if (
+  state.mode === 'waiting_human_confirm'
+) {
+
+  setState(userId, {
+    ...state,
+    mode: 'ai'
+  });
+}
   /* ============================================
    * Greeting
    * ============================================ */
