@@ -93,7 +93,7 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'สวัสดีครับ 😊\n\n' +
+        'สวัสดีครับ 😊\n' +
         'มีอะไรให้ช่วยไหมครับ\n' +
         'สามารถสอบถามเกี่ยวกับการใช้งานระบบ DPIS6 ได้เลยครับ'
     });
@@ -108,7 +108,7 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ยินดีครับ 😊\n\n' +
+        'ยินดีครับ 😊\n' +
         'หากมีคำถามเพิ่มเติมสามารถสอบถามได้เสมอครับ'
     });
   }
@@ -122,7 +122,7 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        'ยินดีที่ได้ช่วยเหลือครับ 😊\n\n' +
+        'ยินดีที่ได้ช่วยเหลือครับ 😊\n' +
         'หากต้องการสอบถามเพิ่มเติมสามารถติดต่อมาได้ทุกเมื่อครับ'
     });
   }
@@ -144,7 +144,7 @@ async function handleTextMessage(event) {
     return reply(replyToken, {
       type: 'text',
       text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n' +
         'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
       quickReply: getQuickReplyByMode('human')
     });
@@ -235,8 +235,8 @@ async function handleTextMessage(event) {
   return reply(replyToken, {
     type: 'text',
     text:
-      'ขออภัยครับ\n\n' +
-      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้ในขณะนี้\n\n' +
+      'ขออภัยครับ\n' +
+      'ผมยังไม่พบข้อมูลที่ตรงกับคำถามนี้ในขณะนี้\n' +
       'หากต้องการให้ช่วยตรวจสอบเพิ่มเติม สามารถติดต่อเจ้าหน้าที่ได้ครับ',
     quickReply:
       quickReplyConfirmHuman()
