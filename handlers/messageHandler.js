@@ -111,27 +111,33 @@ async function handleTextMessage(event) {
    * ติดต่อเจ้าหน้าที่
    * รองรับทุกสถานะ
    * ============================================ */
+  
+if (wantsHuman(lowerText)) {
 
-  if (wantsHuman(lowerText)) {
+  setState(userId, {
+    mode: 'human'
+  });
 
-    console.log(
-      '[MANUAL HUMAN MODE]',
-      userId
-    );
-
-    setState(userId, {
-      mode: 'human'
-    });
-
-    return reply(replyToken, {
-      type: 'text',
-      text:
-        '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
-        'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
-      quickReply:
-        getQuickReplyByMode('human')
-    });
-  }
+  return reply(replyToken, {
+    type: 'text',
+    text:
+      '👨‍💼 เชื่อมต่อเจ้าหน้าที่เรียบร้อยแล้ว\n\n' +
+      'กรุณาพิมพ์รายละเอียดเพิ่มเติมได้เลยครับ',
+    quickReply: {
+      items: [
+        {
+          type: 'action',
+          action: {
+            type: 'postback',
+            label: '🤖 กลับไปใช้ D6 Assistant',
+            data: 'mode=ai',
+            displayText: 'กลับไปใช้ D6 Assistant'
+          }
+        }
+      ]
+    }
+  });
+}
 
   /* ============================================
    * waiting_human_confirm
