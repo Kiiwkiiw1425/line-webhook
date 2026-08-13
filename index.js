@@ -8,6 +8,10 @@ const { mainMenu } = require('./flexMessages');
 const categoryMenus = require('./manual');
 const matchCategory = require('./utils/matchCategory');
 
+console.log("Loaded:", matchCategory);
+console.log("Type:", typeof matchCategory);
+
+
 const app = express();
 app.use(bodyParser.json());
 
